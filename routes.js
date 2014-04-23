@@ -41,6 +41,7 @@ exports.kenya = function(req, res, next) {
                     "active": true,
                     "coordinates": [geo[1], geo[2]],
                     "properties" : {
+                        "type": "health",
                         // "type": data.type,
                         "checkins": Math.floor(Math.random() * 10)
                     }
@@ -51,7 +52,6 @@ exports.kenya = function(req, res, next) {
         }
     });
 };
-
 
 exports.geowithin = function(req, res, next) {
     // console.log(req.query); return;
