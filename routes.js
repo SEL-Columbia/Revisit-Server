@@ -1,5 +1,6 @@
-var FacilityModel = require('./facility').FacilityModel,
-    csv = require('ya-csv');
+var FacilityModel = require('./models/facility').FacilityModel,
+    csv = require('ya-csv'),
+    uuid = require('node-uuid');
 
 exports.populate = function(req, res, next) {
     var facs = [];
@@ -30,20 +31,48 @@ exports.kenya = function(req, res, next) {
         if (data.name !== '' && data.geolocation !== '') {
         	var geoRegex = /\(([0-9.-]+),\s+([0-9.-]+)\)/;
         	var geo = data.geolocation.match(geoRegex);
-        	console.log(geo, data.geolocation);
+        	console.log(geo, data.type);
 
         	if (geo) {
         		// console.log(geo[1], geo[2]);
 	        	var fac = new FacilityModel({
 		            "name": data.name,
-		            "type": data.type,
-		            "location": {
-		                "lat": geo[1],
-		                "lng": geo[2]
-		            },
-		            "checkins": Math.floor(Math.random() * 10)
-		        }).save();
+                    "uuid": uuid.v1(),
+                    "active": true,
+                    "coordinates": [geo[1], geo[2]],
+                    "properties" : {
+                        // "type": data.type,
+                        "checkins": Math.floor(Math.random() * 10)
+                    }
+		        }).save(function(err) {
+                    console.log(err);
+                });
         	}
         }
+    });
+};
+
+
+exports.geowithin = function(req, res, next) {
+    // console.log(req.query); return;
+    var lat = req.query['lat'],
+        lng = req.query['lng'],
+        rad = req.query['rad'] || 10,
+        units = req.query['units'] || 'mi',
+        earthRad = 3959; // miles
+
+    if (units === 'km') {
+        earthRad = 6371;
+    }
+
+    FacilityModel.find({
+        "coordinates": {
+            "$geoWithin": {
+                "$centerSphere": [[ lat, lng], rad / earthRad]
+            }
+        }
+    }).exec(function(err, facs) {
+        if (err) console.log(err);
+        res.send(facs);
     });
 };

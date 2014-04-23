@@ -4,7 +4,7 @@ var http = require('http'),
     restify = require('express-restify-mongoose'),
     // Schema = mongoose.Schema,
     routes = require('./routes'),
-    FacilityModel = require('./facility').FacilityModel;
+    FacilityModel = require('./models/facility').FacilityModel;
 
 mongoose.connect('mongodb://localhost/sel');
 
@@ -20,6 +20,7 @@ function cors(req, res, next) {
 app.configure(function() {
     app.use(express.bodyParser());
     app.use(express.methodOverride());
+    // app.use(restify.CORS());
     restify.serve(app, FacilityModel, {middleware: cors});
 });
 
@@ -27,6 +28,8 @@ app.configure(function() {
 app.get('/populate', routes.populate);
 
 app.get('/kenya', routes.kenya);
+
+app.get('/api/test/facilities/geowithin', routes.geowithin);
 
 http.createServer(app).listen(3000, function() {
     console.log("Express server listening on port 3000");
