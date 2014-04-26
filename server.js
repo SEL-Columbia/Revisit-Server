@@ -25,9 +25,9 @@ app.configure(function() {
 });
 
 
-app.get('/populate', routes.populate);
+// app.get('/populate', routes.populate);
 
-app.get('/kenya', routes.kenya);
+// app.get('/kenya', routes.kenya);
 
 app.get('/api/test/facilities/geowithin', routes.geowithin);
 
