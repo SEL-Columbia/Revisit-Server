@@ -31,5 +31,5 @@ At the moment, this is purely for testing purposes, hence the blatant lack of st
 By default the server uses a mongo database called *sel*. You can load in the sample kenya data via mongoimport:
 
 ```
-> mongoimport -d sel -c facilities data/kenya.json
+> mongoimport -d sel -c facilities data/nyc.json
 ```
