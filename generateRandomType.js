@@ -11,4 +11,18 @@ db.facilities.update(
     }},
     {multi: true});
 
-db.facilities.find({"properties.type": "health"});
+db.facilities.update(
+    {"properties.type": "education"}, 
+    { '$set': {
+        "properties.type": schoolTypes[Math.floor(Math.random()*6)]
+    }},
+    {multi: true});
+
+db.facilities.update(
+    {"properties.type": "power"}, 
+    { '$set': {
+        "properties.type": powerTypes[Math.floor(Math.random()*3)]
+    }},
+    {multi: true});
+
+//db.facilities.find({"properties.type": "health"});
