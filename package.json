@@ -7,8 +7,9 @@
     "express": "~3.5.1",
     "express-restify-mongoose": "~0.6.7",
     "mongoose": "~3.8.8",
-    "ya-csv": "~0.9.3",
-    "node-uuid": "^1.4.1"
+    "node-uuid": "^1.4.1",
+    "restify": "^2.7.0",
+    "ya-csv": "~0.9.3"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

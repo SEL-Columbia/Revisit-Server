@@ -2,56 +2,28 @@ var FacilityModel = require('./models/facility').FacilityModel,
     csv = require('ya-csv'),
     uuid = require('node-uuid');
 
-exports.populate = function(req, res, next) {
-    var facs = [];
-    for (var i = 0; i < 100; i++) {
-        // 40.809, -73.9597
-        var lat = 40.8 + 0.1 * (Math.random() - Math.random()),
-            lng = -73.9 + 0.1 * (Math.random() - Math.random());
-        facs[i] = new FacilityModel({
-            "name": "Facility " + i,
-            "type": "Health",
-            "location": {
-                "lat": lat,
-                "lng": lng
-            },
-            "checkins": Math.floor(Math.random() * 100)
-        }).save();
-    };
-    res.send("Populated.");
-};
+exports.facilities = function(req, res, next) {
+    var facs = FacilityModel.find(function(err, facs) {
+        if (err) console.log(err);
+        res.send(facs);
+    });
+    // res.send(facs);
+}
 
-exports.kenya = function(req, res, next) {
-    var reader = csv.createCsvFileReader('data/Health_Facilities.csv');
-    reader.setColumnNames(['facility_number', 'name', 'hmis', 'province', 'district', 'division', 'location', 'sub_location', 'spatial_reference_method', 'type', 'agency', 'geolocation']);
-    reader.addListener('data', function(data) {
-        // supposing there are so named columns in the source file
-        // console.log(data);
+exports.facility = function(req, res, next) {
+    var uuid = req.params.uuid;
+    FacilityModel.find({
+        uuid: uuid
+    }, function(error, facility) {
+        if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)))
 
-        if (data.name !== '' && data.geolocation !== '') {
-        	var geoRegex = /\(([0-9.-]+),\s+([0-9.-]+)\)/;
-        	var geo = data.geolocation.match(geoRegex);
-        	console.log(geo, data.type);
-
-        	if (geo) {
-        		// console.log(geo[1], geo[2]);
-	        	var fac = new FacilityModel({
-		            "name": data.name,
-                    "uuid": uuid.v1(),
-                    "active": true,
-                    "coordinates": [geo[1], geo[2]],
-                    "properties" : {
-                        "type": "health",
-                        // "type": data.type,
-                        "checkins": Math.floor(Math.random() * 10)
-                    }
-		        }).save(function(err) {
-                    console.log(err);
-                });
-        	}
+        if (facility) {
+            res.send(facility)
+        } else {
+            res.send(404)
         }
     });
-};
+}
 
 exports.geowithin = function(req, res, next) {
     // console.log(req.query); return;
@@ -68,7 +40,9 @@ exports.geowithin = function(req, res, next) {
     FacilityModel.find({
         "coordinates": {
             "$geoWithin": {
-                "$centerSphere": [[ lat, lng], rad / earthRad]
+                "$centerSphere": [
+                    [lng, lat], rad / earthRad
+                ]
             }
         }
     }).exec(function(err, facs) {
