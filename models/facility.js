@@ -28,6 +28,9 @@ var Facility = new Schema({
         type: {
             type: String
         },
+        sector: {
+            type: String
+        },
         checkins: Number
     }
 });
