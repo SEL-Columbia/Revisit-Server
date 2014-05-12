@@ -60,21 +60,17 @@ exports.near = function(req, res, next) {
 
 exports.within = function(req, res, next) {
     // console.log(req.query); return;
-    var lat = req.query['lat'],
-        lng = req.query['lng'],
-        rad = req.query['rad'] || 10,
-        units = req.query['units'] || 'mi',
-        earthRad = 3959; // miles
-
-    if (units === 'km') {
-        earthRad = 6371;
-    }
+    var swlat = req.params['swlat'],
+        swlng = req.params['swlng'],
+        nelat = req.params['nelat'],
+        nelng = req.params['nelng'];
 
     FacilityModel.find({
         "coordinates": {
             "$geoWithin": {
-                "$centerSphere": [
-                    [lng, lat], rad / earthRad
+                "$box": [
+                    [swlng, swlat],
+                    [nelng, nelat]
                 ]
             }
         }
