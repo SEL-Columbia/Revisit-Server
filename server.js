@@ -43,9 +43,3 @@ server.put(prePath+'/facilities/flag/:id', routes.flagFacility);
 server.listen(3000, function() {
     console.log('%s listening at %s', server.name, server.url);
 });
-
-/**
-
-curl -X POST -H "Content-Type: application/json" -d '{"name":"Facility 1","type":"Health"}' http://localhost:3000/api/v1/Facilities
-
-*/
