@@ -1,40 +1,22 @@
-var http = require('http'),
-    express = require('express'),
-    mongoose = require('mongoose'),
-    restify = require('express-restify-mongoose'),
-    // Schema = mongoose.Schema,
+var restify = require('restify'),
     routes = require('./routes'),
-    FacilityModel = require('./models/facility').FacilityModel;
+    server = restify.createServer({
+        name: 'Facilitator',
+        version: '0.1.1'
+    });
 
-mongoose.connect('mongodb://localhost/sel');
+server
+    .use(restify.CORS())
+    .use(restify.fullResponse())
+    .use(restify.bodyParser());
 
-var app = express();
+server.get('/facilities', routes.facilities);
 
+server.get('/facilities/:uuid', routes.facility);
 
-function cors(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    next();
-};
-
-app.configure(function() {
-    app.use(express.bodyParser());
-    app.use(express.methodOverride());
-    // app.use(restify.CORS());
-    restify.serve(app, FacilityModel, {middleware: cors});
+server.listen(3000, function() {
+    console.log('%s listening at %s', server.name, server.url);
 });
-
-
-// app.get('/populate', routes.populate);
-
-// app.get('/kenya', routes.kenya);
-
-app.get('/api/test/facilities/geowithin', routes.geowithin);
-
-http.createServer(app).listen(3000, function() {
-    console.log("Express server listening on port 3000");
-});
-
 
 /**
 
