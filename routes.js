@@ -85,8 +85,14 @@ exports.newFacility = function (req, res, next) {
     console.log(req);
     var fac = new FacilityModel(JSON.parse(req.body));
     fac.save(function(err, fac) {
-        if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)))
-        res.send(fac);
+        if (err) {
+            console.log(err);
+            return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
+        } else {
+            res.send(fac);
+            console.log(res);
+            next();            
+        }
     });
 }
 
