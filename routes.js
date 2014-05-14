@@ -82,9 +82,10 @@ exports.within = function(req, res, next) {
 
 exports.newFacility = function (req, res, next) {
     // TODO: validity checks
-    console.log(req.body);
-    var fac = new FacilityModel(JSON.parse(req.body));
+    // console.log(req.body);
+    var fac = new FacilityModel(req.body);
     fac.save(function(err, fac) {
+        console.log('save callback...', err, fac);
         if (err) {
             console.log('!!!!!!!!! ERROR !!!!!!!!!!', err);
             return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
