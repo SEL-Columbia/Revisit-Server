@@ -12,7 +12,8 @@ mongoose.connect('mongodb://localhost/sel');
 server
     .use(restify.CORS())
     .use(restify.fullResponse())
-    .use(restify.bodyParser());
+    .use(restify.bodyParser())
+    .use(restify.queryParser());
 
 // get a list of all facilities
 server.get(prePath+'/facilities', routes.facilities);
