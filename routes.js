@@ -59,12 +59,12 @@ exports.near = function(req, res, next) {
 };
 
 exports.within = function(req, res, next) {
-    // console.log(req.query); return;
+    console.log(req.query.sector);
     var swlat = req.params['swlat'],
         swlng = req.params['swlng'],
         nelat = req.params['nelat'],
         nelng = req.params['nelng'],
-        sector = req.params['sector'] || null,
+        sector = req.query['sector'] || null,
         coordinatesQuery = {
             "coordinates": {
                 "$geoWithin": {
