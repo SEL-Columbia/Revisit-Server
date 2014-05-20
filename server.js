@@ -21,7 +21,9 @@ server.get(prePath+'/facilities', routes.facilities);
 server.get(prePath+'/facilities/near/:lat/:lng/:rad', routes.near);
 
 // get a list of all facilities within box
-server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng', routes.within);
+server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', routes.within);
+
+server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', routes.within);
 
 // get a single facility by id
 server.get(prePath+'/facilities/:id', routes.facility);

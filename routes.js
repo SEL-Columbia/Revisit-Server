@@ -63,18 +63,35 @@ exports.within = function(req, res, next) {
     var swlat = req.params['swlat'],
         swlng = req.params['swlng'],
         nelat = req.params['nelat'],
-        nelng = req.params['nelng'];
-
-    FacilityModel.find({
-        "coordinates": {
-            "$geoWithin": {
-                "$box": [
-                    [swlng, swlat],
-                    [nelng, nelat]
-                ]
+        nelng = req.params['nelng'],
+        sector = req.params['sector'] || null,
+        coordinatesQuery = {
+            "coordinates": {
+                "$geoWithin": {
+                    "$box": [
+                        [swlng, swlat],
+                        [nelng, nelat]
+                    ]
+                }
             }
-        }
-    }).exec(function(err, facs) {
+        },
+        query = {};
+
+    if (sector) {
+        var properties = {
+            "properties.sector": sector
+        };
+        query = {
+            "$and": [
+                coordinatesQuery,
+                properties
+            ]
+        };
+    } else {
+        query = coordinatesQuery;
+    }
+
+    FacilityModel.find(query).exec(function(err, facs) {
         if (err) console.log(err);
         res.send(facs);
     });
