@@ -120,8 +120,9 @@ exports.updateFacility = function (req, res, next) {
         query = {};
 
     // At the moment, we require an _id here, not uuid since mongoose expects this for the findByIdAndUpdate method
+    fac.updatedAt = Date();
 
-    FacilityModel.findByIdAndUpdate(id, { $set: fac}, function (err, facility) {
+    FacilityModel.findByIdAndUpdate(id, {$set: fac}, function (err, facility) {
       if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
       res.send(facility);
     });
