@@ -115,18 +115,39 @@ exports.newFacility = function (req, res, next) {
 }
 
 exports.updateFacility = function (req, res, next) {
-    var fac = new FacilityModel(req.body);
-    fac.save(function(err, fac) {
-        console.log('save callback...', err, fac);
-        if (err) {
-            console.log('!!!!!!!!! ERROR UPDATING !!!!!!!!!!', err);
-            return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
-        } else {
-            res.send(fac);
-            console.log(':):):):):) Success Updating :):):):):)', res);
-            next();            
-        }
+    var fac = JSON.parse(req.body),
+        id = fac._id,
+        query = {};
+
+    // At the moment, we require an _id here, not uuid since mongoose expects this for the findByIdAndUpdate method
+
+    FacilityModel.findByIdAndUpdate(id, { $set: fac}, function (err, facility) {
+      if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
+      res.send(facility);
     });
+
+    // FacilityModel.findOne(query, function(err, facility) {
+    //     console.log(err);
+    //     if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
+
+    //     if (facility) {
+    //         facility = fac;
+    //         fac.save(function(err, fac) {
+    //             console.log('save callback...', err, fac);
+    //             if (err) {
+    //                 console.log('!!!!!!!!! ERROR UPDATING !!!!!!!!!!', err);
+    //                 return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
+    //             } else {
+    //                 res.send(fac);
+    //                 console.log(':):):):):) Success Updating :):):):):)', res);
+    //                 next();            
+    //             }
+    //         });
+    //         // res.send(facility)
+    //     } else {
+    //         res.send(404)
+    //     }
+    // });
     // return next(new restify.RestError({statusCode: 400, restCode: "Not Implemented", message: "Update method not yet implemented."}));
 }
 
