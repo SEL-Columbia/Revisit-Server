@@ -115,9 +115,19 @@ exports.newFacility = function (req, res, next) {
 }
 
 exports.updateFacility = function (req, res, next) {
-    // res.send("yup");
-    // next();
-    return next(new restify.RestError({statusCode: 400, restCode: "Not Implemented", message: "Update method not yet implemented."}));
+    var fac = new FacilityModel(req.body);
+    fac.save(function(err, fac) {
+        console.log('save callback...', err, fac);
+        if (err) {
+            console.log('!!!!!!!!! ERROR UPDATING !!!!!!!!!!', err);
+            return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
+        } else {
+            res.send(fac);
+            console.log(':):):):):) Success Updating :):):):):)', res);
+            next();            
+        }
+    });
+    // return next(new restify.RestError({statusCode: 400, restCode: "Not Implemented", message: "Update method not yet implemented."}));
 }
 
 exports.deleteFacility = function (req, res, next) {
