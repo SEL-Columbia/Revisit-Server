@@ -115,8 +115,8 @@ exports.newFacility = function (req, res, next) {
 }
 
 exports.updateFacility = function (req, res, next) {
-    var fac = JSON.parse(req.body),
-        id = fac._id,
+    var fac = req.body,
+        id = fac['_id'],
         query = {};
 
     // At the moment, we require an _id here, not uuid since mongoose expects this for the findByIdAndUpdate method
