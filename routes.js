@@ -37,7 +37,7 @@ exports.near = function(req, res, next) {
     var lat = req.params['lat'],
         lng = req.params['lng'],
         rad = req.params['rad'] || 10,
-        units = req.params['units'] || 'mi',
+        units = req.query['units'] || 'mi',
         earthRad = 3959; // miles
 
     if (units === 'km') {
