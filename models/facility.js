@@ -31,7 +31,7 @@ var Facility = new Schema({
         sector: {
             type: String
         },
-        checkins: Number
+        visits: Number
     }
 });
 
