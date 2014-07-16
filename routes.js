@@ -126,30 +126,6 @@ exports.updateFacility = function (req, res, next) {
       if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
       res.send(facility);
     });
-
-    // FacilityModel.findOne(query, function(err, facility) {
-    //     console.log(err);
-    //     if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
-
-    //     if (facility) {
-    //         facility = fac;
-    //         fac.save(function(err, fac) {
-    //             console.log('save callback...', err, fac);
-    //             if (err) {
-    //                 console.log('!!!!!!!!! ERROR UPDATING !!!!!!!!!!', err);
-    //                 return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
-    //             } else {
-    //                 res.send(fac);
-    //                 console.log(':):):):):) Success Updating :):):):):)', res);
-    //                 next();            
-    //             }
-    //         });
-    //         // res.send(facility)
-    //     } else {
-    //         res.send(404)
-    //     }
-    // });
-    // return next(new restify.RestError({statusCode: 400, restCode: "Not Implemented", message: "Update method not yet implemented."}));
 }
 
 exports.deleteFacility = function (req, res, next) {
