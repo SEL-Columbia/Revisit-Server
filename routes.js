@@ -166,7 +166,7 @@ exports.uploadPhoto = function (req, res, next) {
             site.save(function (err, site, numberAffected) {
                 if (err) return next(new restify.InternalError(JSON.stringify(err)));
                 // no error, send success
-                res.send({success: true});
+                res.send(site);
             });
         });
     });
