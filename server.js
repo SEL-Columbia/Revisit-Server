@@ -41,6 +41,13 @@ server.del(prePath+'/facilities/:id', routes.deleteFacility);
 // flag a facility
 server.put(prePath+'/facilities/flag/:id', routes.flagFacility);
 
+// add a new site photo
+server.post(prePath+'/upload-photo', routes.uploadPhoto);
+
+// serve static images
+server.get(/\/photos\/?.*/, restify.serveStatic({
+  directory: './public/photos'
+}));
 
 // Start the server.
 server.listen(3000, function() {

@@ -31,7 +31,9 @@ var Facility = new Schema({
         sector: {
             type: String
         },
-        visits: Number
+        visits: Number,
+        photoEndpoint: String,
+        photoUrls: [String]
     }
 });
 
