@@ -140,55 +140,50 @@ exports.flagFacility = function (req, res, next) {
 
 exports.uploadPhoto = function (req, res, next) {
 
-    var siteId = req.params.id || null,
-        site;
+    var siteId = req.params.id || null;
 
     // if no sideId is included in request, error
     if (!siteId) {
         return next(new restify.MissingParameterError("The required siteId parameter is missing."));
     }
 
-    console.log(siteId);
     // make sure the id is associated with a known Site
-    FacilityModel.findById(siteId, function (err, foundSite) { 
+    FacilityModel.findById(siteId, function (err, site) { 
         if (err) return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
-        site = foundSite;
-	//console.log(site);
-        // move the uploaded photo from the temp location (path property) to it's final location
-        fs.readFile(req.files.photo.path, function (err, data) {
-		if (err) {
-			console.log(err);
-		}
-            var rootPath = "/home/ubuntu/facrest/public/photos";
-            var siteDir = siteId;
-            var filePath = req.files.photo.name;
-            var fullPath = rootPath + '/' + siteDir + '/' + filePath;
 
-		console.log(fullPath);
+        // move the uploaded photo from the temp location (path property) to its final location
+        fs.readFile(req.files.photo.path, function (err, data) {
+    		if (err) {
+    			console.log(err);
+    		}
+            var rootPath = "/home/ubuntu/facrest/public/photos",
+                siteDir = siteId,
+                filePath = req.files.photo.name,
+                fullPath = rootPath + '/' + siteDir + '/' + filePath;
+
             // create the dir for the site
             mkdirp(rootPath + '/' + siteDir, function (err) {
                 if (err) {
                     console.error(err);
+                    return next(new restify.InternalError(JSON.stringify(err)));
                 } else {
                     fs.writeFile(fullPath, data, function (err) {
                         console.log('writeFile callback');
-			if (err) {
-				console.log('write error: ' + err);
-				return next(new restify.InternalError(JSON.stringify(err)));
-			}
+            			if (err) {
+            				console.log('write error: ' + err);
+            				return next(new restify.InternalError(JSON.stringify(err)));
+            			}
 
                         var url = 'http://' + req.header('Host') + '/photos/' + siteDir + '/' +  filePath;
 			
-			console.log(url);
                         site.properties.photoUrls.push(url);
 			
                         site.save(function (err, updatedSite, numberAffected) {
                             if (err) {
-				console.log('save error: ' + err);
-				return next(new restify.InternalError(JSON.stringify(err)));
-				}	
-                            console.log("updated site: " + updatedSite);
-				// no error, send success
+                				console.log('save error: ' + err);
+                				return next(new restify.InternalError(JSON.stringify(err)));
+            				}
+				            // no error, send success
                             res.send(updatedSite);
                         });
                     });
