@@ -3,14 +3,14 @@ var FacilityModel = require('./models/facility').FacilityModel,
     fs = require('fs'),
     mkdirp = require('mkdirp');
 
-exports.facilities = function(req, res, next) {
+exports.sites = function(req, res, next) {
     var facs = FacilityModel.find(function(err, facs) {
         if (err) console.log(err);
         res.send(facs);
     });
 }
 
-exports.facility = function(req, res, next) {
+exports.site = function(req, res, next) {
     var id = req.params.id,
         query = {};
 
@@ -22,12 +22,12 @@ exports.facility = function(req, res, next) {
     }
 
     console.log(query);
-    FacilityModel.find(query, function(err, facility) {
+    FacilityModel.find(query, function(err, site) {
         console.log(err);
         if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
 
-        if (facility) {
-            res.send(facility)
+        if (site) {
+            res.send(site)
         } else {
             res.send(404)
         }
@@ -99,10 +99,10 @@ exports.within = function(req, res, next) {
     });
 };
 
-exports.newFacility = function (req, res, next) {
+exports.newSite = function (req, res, next) {
     // TODO: validity checks
     // console.log(req.body);
-    var fac = new FacilityModel(req.body);
+    var fac = new SiteModel(req.body);
     fac.save(function(err, fac) {
         console.log('save callback...', err, fac);
         if (err) {
@@ -116,7 +116,7 @@ exports.newFacility = function (req, res, next) {
     });
 }
 
-exports.updateFacility = function (req, res, next) {
+exports.updateSite = function (req, res, next) {
     var fac = req.body,
         id = fac['_id'],
         query = {};
@@ -124,17 +124,17 @@ exports.updateFacility = function (req, res, next) {
     // At the moment, we require an _id here, not uuid since mongoose expects this for the findByIdAndUpdate method
     fac.updatedAt = Date();
 
-    FacilityModel.findByIdAndUpdate(id, {$set: fac}, function (err, facility) {
+    FacilityModel.findByIdAndUpdate(id, {$set: fac}, function (err, site) {
       if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
-      res.send(facility);
+      res.send(site);
     });
 }
 
-exports.deleteFacility = function (req, res, next) {
+exports.deleteSite = function (req, res, next) {
     return next(new restify.RestError({statusCode: 400, restCode: "Not Implemented", message: "Delete method not yet implemented."}));
 }
 
-exports.flagFacility = function (req, res, next) {
+exports.flagSite = function (req, res, next) {
     return next(new restify.RestError({statusCode: 400, restCode: "Not Implemented", message: "Flag method not yet implemented."}));
 }
 
@@ -156,7 +156,7 @@ exports.uploadPhoto = function (req, res, next) {
     		if (err) {
     			console.log(err);
     		}
-            var rootPath = "/home/ubuntu/facrest/public/photos",
+            var rootPath = "/home/ubuntu/facrest/public/sites/photos",
                 siteDir = siteId,
                 filePath = req.files.photo.name,
                 fullPath = rootPath + '/' + siteDir + '/' + filePath;
