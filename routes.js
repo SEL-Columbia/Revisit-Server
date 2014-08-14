@@ -138,7 +138,7 @@ exports.flagFacility = function (req, res, next) {
 }
 
 exports.uploadPhoto = function (req, res, next) {
-    console.log(req);
+    // console.log(req);
     
     var siteId = req.param('id') || null,
         site;
@@ -152,24 +152,24 @@ exports.uploadPhoto = function (req, res, next) {
     FacilityModel.findById(siteId, function (err, foundSite) { 
         if (err) return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
         site = foundSite;
-    });
 
-    // move the uploaded photo from the temp location (path property) to it's final location
-    fs.readFile(req.files.photo.path, function (err, data) {
-        var rootPath = "/home/ubuntu/facrest/public/photos/"; 
-        var filePath = siteId + "/" + req.files.photo.name;
-        var fullPath = rootPath + filePath;
-            fs.writeFile(fullPath, data, function (err) {
-            if (err) return next(new restify.InternalError(JSON.stringify(err)));
-
-            var url = req.protocol + '://' + req.get('host') + '/photos/' + filePath;
-
-
-            site.properties.photoUrls.push(url);
-            site.save(function (err, site, numberAffected) {
+        // move the uploaded photo from the temp location (path property) to it's final location
+        fs.readFile(req.files.photo.path, function (err, data) {
+            var rootPath = "/home/ubuntu/facrest/public/photos/"; 
+            var filePath = siteId + "/" + req.files.photo.name;
+            var fullPath = rootPath + filePath;
+                fs.writeFile(fullPath, data, function (err) {
                 if (err) return next(new restify.InternalError(JSON.stringify(err)));
-                // no error, send success
-                res.send(site);
+
+                var url = req.protocol + '://' + req.get('host') + '/photos/' + filePath;
+
+
+                site.properties.photoUrls.push(url);
+                site.save(function (err, site, numberAffected) {
+                    if (err) return next(new restify.InternalError(JSON.stringify(err)));
+                    // no error, send success
+                    res.send(site);
+                });
             });
         });
     });
