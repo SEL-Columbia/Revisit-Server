@@ -1,6 +1,7 @@
 var FacilityModel = require('./models/facility').FacilityModel,
     restify = require('restify'),
-    fs = require('fs');
+    fs = require('fs'),
+    mkdirp = require('mkdirp');
 
 exports.facilities = function(req, res, next) {
     var facs = FacilityModel.find(function(err, facs) {
@@ -139,7 +140,7 @@ exports.flagFacility = function (req, res, next) {
 
 exports.uploadPhoto = function (req, res, next) {
     // console.log(req);
-    
+
     var siteId = req.param('id') || null,
         site;
 
@@ -155,21 +156,29 @@ exports.uploadPhoto = function (req, res, next) {
 
         // move the uploaded photo from the temp location (path property) to it's final location
         fs.readFile(req.files.photo.path, function (err, data) {
-            var rootPath = "/home/ubuntu/facrest/public/photos/"; 
-            var filePath = siteId + "/" + req.files.photo.name;
-            var fullPath = rootPath + filePath;
-                fs.writeFile(fullPath, data, function (err) {
-                if (err) return next(new restify.InternalError(JSON.stringify(err)));
+            var rootPath = "/home/ubuntu/facrest/public/photos";
+            var siteDir = siteId;
+            var filePath = req.files.photo.name;
+            var fullPath = rootPath + '/' + siteDir + '/' + filePath;
 
-                var url = req.protocol + '://' + req.get('host') + '/photos/' + filePath;
+            // create the dir for the site
+            mkdirp(rootPath + '/' + siteDir, function (err) {
+                if (err) {
+                    console.error(err);
+                } else {
+                    fs.writeFile(fullPath, data, function (err) {
+                        if (err) return next(new restify.InternalError(JSON.stringify(err)));
 
+                        var url = req.protocol + '://' + req.get('host') + '/photos/' + filePath;
 
-                site.properties.photoUrls.push(url);
-                site.save(function (err, site, numberAffected) {
-                    if (err) return next(new restify.InternalError(JSON.stringify(err)));
-                    // no error, send success
-                    res.send(site);
-                });
+                        site.properties.photoUrls.push(url);
+                        site.save(function (err, site, numberAffected) {
+                            if (err) return next(new restify.InternalError(JSON.stringify(err)));
+                            // no error, send success
+                            res.send(site);
+                        });
+                    });
+                }
             });
         });
     });
