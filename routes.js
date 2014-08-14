@@ -1,7 +1,8 @@
 var FacilityModel = require('./models/facility').FacilityModel,
     restify = require('restify'),
     fs = require('fs'),
-    mkdirp = require('mkdirp');
+    mkdirp = require('mkdirp'),
+    prePath = '/api/v1';
 
 exports.sites = function(req, res, next) {
     var facs = FacilityModel.find(function(err, facs) {
@@ -174,7 +175,7 @@ exports.uploadPhoto = function (req, res, next) {
             				return next(new restify.InternalError(JSON.stringify(err)));
             			}
 
-                        var url = 'http://' + req.header('Host') + '/photos/' + siteDir + '/' +  filePath;
+                        var url = 'http://' + req.header('Host') + prePath + '/sites/photos/' + siteDir + '/' +  filePath;
 			
                         site.properties.photoUrls.push(url);
 			
