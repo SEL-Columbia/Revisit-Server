@@ -46,7 +46,7 @@ server.post(prePath+'/upload-photo/:id', routes.uploadPhoto);
 
 // serve static images
 server.get(/\/photos\/?.*/, restify.serveStatic({
-  directory: './public/photos'
+  directory: './public'
 }));
 
 // Start the server.
