@@ -2,7 +2,7 @@ var restify = require('restify'),
     routes = require('./routes'),
     mongoose = require('mongoose'),
     server = restify.createServer({
-        name: 'Facilitator',
+        name: 'Revisit',
         version: '0.1.1'
     }),
     prePath = '/api/v1';
@@ -15,37 +15,37 @@ server
     .use(restify.bodyParser())
     .use(restify.queryParser());
 
-// get a list of all facilities
-server.get(prePath+'/facilities', routes.facilities);
+// get a list of all sites
+server.get(prePath+'/sites', routes.sites);
 
-// get a list of all facilities within radius (rad) of lat, lng
-server.get(prePath+'/facilities/near/:lat/:lng/:rad', routes.near);
+// get a list of all sites within radius (rad) of lat, lng
+server.get(prePath+'/sites/near/:lat/:lng/:rad', routes.near);
 
-// get a list of all facilities within box
-server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', routes.within);
+// get a list of all sites within box
+server.get(prePath+'/sites/within/:swlat/:swlng/:nelat/:nelng/', routes.within);
 
-server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', routes.within);
+server.get(prePath+'/sites/within/:swlat/:swlng/:nelat/:nelng/:sector', routes.within);
 
-// get a single facility by id
-server.get(prePath+'/facilities/:id', routes.facility);
+// get a single site by id
+server.get(prePath+'/sites/:id', routes.site);
 
-// add a new facility
-server.post(prePath+'/facilities', routes.newFacility);
+// add a new site
+server.post(prePath+'/sites', routes.newSite);
 
-// update a facility
-server.put(prePath+'/facilities/:id', routes.updateFacility);
+// update a sites
+server.put(prePath+'/sites/:id', routes.updateSite);
 
-// delete a facility
-server.del(prePath+'/facilities/:id', routes.deleteFacility);
+// delete a sites
+server.del(prePath+'/sites/:id', routes.deleteSite);
 
-// flag a facility
-server.put(prePath+'/facilities/flag/:id', routes.flagFacility);
+// flag a sites
+server.put(prePath+'/sites/flag/:id', routes.flagSite);
 
 // add a new site photo
-server.post(prePath+'/upload-photo/:id', routes.uploadPhoto);
+server.post(prePath+'/sites/:id/photos', routes.uploadPhoto);
 
 // serve static images
-server.get(/\/photos\/?.*/, restify.serveStatic({
+server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
   directory: './public'
 }));
 
