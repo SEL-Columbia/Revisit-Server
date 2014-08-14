@@ -45,7 +45,7 @@ server.put(prePath+'/sites/flag/:id', routes.flagSite);
 server.post(prePath+'/sites/:id/photos', routes.uploadPhoto);
 
 // serve static images
-server.get(/\/api\/v1\/sites\/photos\/?.*/, restify.serveStatic({
+server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
   directory: './public'
 }));
 

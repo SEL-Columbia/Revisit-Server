@@ -175,7 +175,7 @@ exports.uploadPhoto = function (req, res, next) {
             				return next(new restify.InternalError(JSON.stringify(err)));
             			}
 
-                        var url = 'http://' + req.header('Host') + prePath + '/sites/photos/' + siteDir + '/' +  filePath;
+                        var url = 'http://' + req.header('Host') + '/sites/photos/' + siteDir + '/' +  filePath;
 			
                         site.properties.photoUrls.push(url);
 			
