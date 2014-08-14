@@ -42,7 +42,7 @@ server.del(prePath+'/facilities/:id', routes.deleteFacility);
 server.put(prePath+'/facilities/flag/:id', routes.flagFacility);
 
 // add a new site photo
-server.post(prePath+'/upload-photo', routes.uploadPhoto);
+server.post(prePath+'/upload-photo/:id', routes.uploadPhoto);
 
 // serve static images
 server.get(/\/photos\/?.*/, restify.serveStatic({

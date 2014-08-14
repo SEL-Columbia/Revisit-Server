@@ -138,6 +138,8 @@ exports.flagFacility = function (req, res, next) {
 }
 
 exports.uploadPhoto = function (req, res, next) {
+    console.log(req);
+    
     var siteId = req.param('id') || null,
         site;
 
@@ -161,6 +163,7 @@ exports.uploadPhoto = function (req, res, next) {
             if (err) return next(new restify.InternalError(JSON.stringify(err)));
 
             var url = req.protocol + '://' + req.get('host') + '/photos/' + filePath;
+
 
             site.properties.photoUrls.push(url);
             site.save(function (err, site, numberAffected) {
