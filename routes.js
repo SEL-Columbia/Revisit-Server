@@ -140,10 +140,9 @@ exports.flagSite = function (req, res, next) {
 }
 
 exports.uploadPhoto = function (req, res, next) {
-
     var siteId = req.params.id || null;
 
-    console.log(site);
+    console.log(req.files.photo);
     
     // if no sideId is included in request, error
     if (!siteId) {
