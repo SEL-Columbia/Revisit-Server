@@ -141,37 +141,17 @@ exports.flagSite = function (req, res, next) {
 
 exports.uploadPhoto = function (req, res, next) {
 
-    var siteId = req.params.id || null,
-        query = {};
+    var siteId = req.params.id || null;
 
-    console.log(siteId);
-
+    console.log(site);
+    
     // if no sideId is included in request, error
     if (!siteId) {
         return next(new restify.MissingParameterError("The required siteId parameter is missing."));
     }
 
-    // check if valid ObjectID
-    if (siteId.match(/^[0-9a-fA-F]{24}$/)) {
-        query._id = id;
-    } else {
-        query.uuid = id;
-    }
-
-    // console.log(query);
-    // SiteModel.find(query, function(err, site) {
-    //     console.log(err);
-    //     if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
-
-    //     if (site) {
-    //         res.send(site)
-    //     } else {
-    //         res.send(404)
-    //     }
-    // });
-
     // make sure the id is associated with a known Site
-    SiteModel.find(query, function (err, site) { 
+    SiteModel.findById(siteId, function (err, site) { 
         if (err) return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
 
         console.log(site);
