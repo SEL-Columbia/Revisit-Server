@@ -1,4 +1,4 @@
-var SiteModel = require('./models/facility').SiteModel,
+var SiteModel = require('./models/site').SiteModel,
     restify = require('restify'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
@@ -178,12 +178,15 @@ exports.uploadPhoto = function (req, res, next) {
                         var url = 'http://' + req.header('Host') + '/sites/photos/' + siteDir + '/' +  filePath;
 			
                         site.properties.photoUrls.push(url);
+
+                        console.log('site photo url: ' + url);
 			
                         site.save(function (err, updatedSite, numberAffected) {
                             if (err) {
                 				console.log('save error: ' + err);
                 				return next(new restify.InternalError(JSON.stringify(err)));
             				}
+                            console.log('site saved, sending response');
 				            // no error, send success
                             res.send(updatedSite);
                         });
