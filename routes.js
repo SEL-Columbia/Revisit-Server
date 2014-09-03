@@ -152,6 +152,8 @@ exports.uploadPhoto = function (req, res, next) {
     SiteModel.findById(siteId, function (err, site) { 
         if (err) return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
 
+        console.log(site);
+        
         // move the uploaded photo from the temp location (path property) to its final location
         fs.readFile(req.files.photo.path, function (err, data) {
     		if (err) {
