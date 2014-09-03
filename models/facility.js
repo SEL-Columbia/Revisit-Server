@@ -1,7 +1,7 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
-var Facility = new Schema({
+var Site = new Schema({
     name: {
         type: String,
         required: true
@@ -37,4 +37,4 @@ var Facility = new Schema({
     }
 });
 
-exports.FacilityModel = mongoose.model('Facility', Facility);
+exports.SiteModel = mongoose.model('Site', Site);

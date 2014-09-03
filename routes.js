@@ -1,13 +1,13 @@
-var FacilityModel = require('./models/facility').FacilityModel,
+var SiteModel = require('./models/facility').SiteModel,
     restify = require('restify'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
     prePath = '/api/v1';
 
 exports.sites = function(req, res, next) {
-    var facs = FacilityModel.find(function(err, facs) {
+    var sites = SiteModel.find(function(err, sites) {
         if (err) console.log(err);
-        res.send(facs);
+        res.send(sites);
     });
 }
 
@@ -23,7 +23,7 @@ exports.site = function(req, res, next) {
     }
 
     console.log(query);
-    FacilityModel.find(query, function(err, site) {
+    SiteModel.find(query, function(err, site) {
         console.log(err);
         if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
 
@@ -47,7 +47,7 @@ exports.near = function(req, res, next) {
         earthRad = 6371;
     }
 
-    FacilityModel.find({
+    SiteModel.find({
         "coordinates": {
             "$geoWithin": {
                 "$centerSphere": [
@@ -55,9 +55,9 @@ exports.near = function(req, res, next) {
                 ]
             }
         }
-    }).exec(function(err, facs) {
+    }).exec(function(err, sites) {
         if (err) console.log(err);
-        res.send(facs);
+        res.send(sites);
     });
 };
 
@@ -94,23 +94,23 @@ exports.within = function(req, res, next) {
         query = coordinatesQuery;
     }
 
-    FacilityModel.find(query).exec(function(err, facs) {
+    SiteModel.find(query).exec(function(err, sites) {
         if (err) console.log(err);
-        res.send(facs);
+        res.send(sites);
     });
 };
 
 exports.newSite = function (req, res, next) {
     // TODO: validity checks
     // console.log(req.body);
-    var fac = new SiteModel(req.body);
-    fac.save(function(err, fac) {
-        console.log('save callback...', err, fac);
+    var site = new SiteModel(req.body);
+    site.save(function(err, site) {
+        console.log('save callback...', err, site);
         if (err) {
             console.log('!!!!!!!!! ERROR !!!!!!!!!!', err);
             return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
         } else {
-            res.send(fac);
+            res.send(site);
             console.log(':):):):):) Success :):):):):)', res);
             next();            
         }
@@ -118,14 +118,14 @@ exports.newSite = function (req, res, next) {
 }
 
 exports.updateSite = function (req, res, next) {
-    var fac = req.body,
-        id = fac['_id'],
+    var site = req.body,
+        id = site['_id'],
         query = {};
 
     // At the moment, we require an _id here, not uuid since mongoose expects this for the findByIdAndUpdate method
-    fac.updatedAt = Date();
+    site.updatedAt = Date();
 
-    FacilityModel.findByIdAndUpdate(id, {$set: fac}, function (err, site) {
+    SiteModel.findByIdAndUpdate(id, {$set: site}, function (err, site) {
       if (err) return next(new restify.InvalidArgumentError(JSON.stringify(err.errors)));
       res.send(site);
     });
@@ -149,7 +149,7 @@ exports.uploadPhoto = function (req, res, next) {
     }
 
     // make sure the id is associated with a known Site
-    FacilityModel.findById(siteId, function (err, site) { 
+    SiteModel.findById(siteId, function (err, site) { 
         if (err) return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
 
         // move the uploaded photo from the temp location (path property) to its final location
