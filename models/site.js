@@ -37,4 +37,4 @@ var Site = new Schema({
     }
 });
 
-exports.SiteModel = mongoose.model('Site', Site);
+exports.SiteModel = mongoose.model('Site', Site, 'facilities');
