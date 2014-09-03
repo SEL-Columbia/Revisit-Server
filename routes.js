@@ -2,6 +2,7 @@ var SiteModel = require('./models/site').SiteModel,
     restify = require('restify'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
+    _ = require('lodash'),
     prePath = '/api/v1';
 
 exports.sites = function(req, res, next) {
@@ -179,8 +180,13 @@ exports.uploadPhoto = function (req, res, next) {
             			}
 
                         var url = 'http://' + req.header('Host') + '/sites/photos/' + siteDir + '/' +  filePath;
-			
-                        site.properties.photoUrls.push(url);
+
+                        // check that this photo is new. we'll replace the tmp path with the url
+                        var index = site.properties.photoUrls.indexOf('tmp/'+req.files.photo.name);
+                        if (index != -1) {
+                            site.properties.photoUrls.splice(index, 1, url);
+                            // site.properties.photoUrls.push(url);
+                        }
 
                         console.log('site photo url: ' + url);
 			
