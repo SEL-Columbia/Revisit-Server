@@ -1,6 +1,5 @@
 // dependancies 
 var restify = require('restify');
-var mongojs = require('mongojs');
 
 // local includes
 var routes = require('./views/routes.js');
@@ -20,7 +19,6 @@ server.listen(8080, function() {
 // paths
 server.get('/hello/:name', routes.respond);
 
-var db = mongojs('productsdb', ['products']);
 
-
+server.get("/names", routes.names);
 

@@ -9,7 +9,7 @@
   "author": "Abdi Dahir",
   "license": "MIT",
   "devDependencies": {
-    "mongojs": "^0.14.1",
+    "mongoose": "^3.8.16",
     "restify": "^2.8.2"
   }
 }
