@@ -1,0 +1,15 @@
+{
+  "name": "faciltyrestapi",
+  "version": "1.0.0",
+  "description": "facility registry api for use with Revisit, Formhub and various services",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Abdi Dahir",
+  "license": "MIT",
+  "devDependencies": {
+    "mongojs": "^0.14.1",
+    "restify": "^2.8.2"
+  }
+}
