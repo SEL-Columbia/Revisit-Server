@@ -11,15 +11,15 @@ The service will conform to http://facilityregistry.org/
 * ???
 
 ## Dependancies
-* Mongojs: Exposes mongoapi directly
 * Restify: Defactor restapi builder
 * Mongo: Document store, alot of node integration options
+* Mongoose: Schema type layer for mongo, enforces facility format
 
 ## Intended dependancies
 * restify-oauth2: auth server https://github.com/domenic/restify-oauth2 
 
 ## Possible alternatives
 * Save: DB interation layer, allows us to swap mongodb without much code change
-* Mongoose: Schema type layer for mongo, enforces facility format
 * Express: More involved stack then restify, has restify extension as well
+* Mongojs: Exposes mongoapi directly
 

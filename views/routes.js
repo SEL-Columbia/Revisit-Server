@@ -14,9 +14,16 @@ var respond = function (req, res, next) {
 }
 
 var names = function (req, res, next) {
-    json_reply(res);
-    console.log((database.names));
-    res.end(JSON.stringify(database.names));
+    database.NamesModel.findAll( function(err, names) {
+        if (err) {
+            return console.error(err)
+        }
+
+        console.log(">>> " + names)
+        json_reply(res)
+        res.write(JSON.stringify(names))
+        res.end()
+    });
     return next();
 }
 

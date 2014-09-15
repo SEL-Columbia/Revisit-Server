@@ -1,8 +1,20 @@
 // dependancies 
 var restify = require('restify');
+var mongoose = require('mongoose');
 
 // local includes
 var routes = require('./views/routes.js');
+
+// db SHOULD BE MOVED 
+var db_name = 'test';
+var db_cols = ['testData'];
+mongoose.connect('mongodb://localhost/' + db_name);
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection err:')); 
+db.once('open', function callback() {
+    console.log('Connected To Mongo Database');
+    });
 
 // server
 var server = restify.createServer();
@@ -18,7 +30,5 @@ server.listen(8080, function() {
 
 // paths
 server.get('/hello/:name', routes.respond);
-
-
 server.get("/names", routes.names);
 
