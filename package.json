@@ -11,5 +11,8 @@
   "devDependencies": {
     "mongoose": "^3.8.16",
     "restify": "^2.8.2"
+  },
+  "dependencies": {
+    "fs": "0.0.2"
   }
 }

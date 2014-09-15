@@ -1,7 +1,8 @@
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
+var mongoose = require('mongoose');
 
-var Site = new Schema({
+var Schema = mongoose.Schema;
+
+var SiteModel = new Schema({
     name: {
         type: String,
         required: true
@@ -37,4 +38,8 @@ var Site = new Schema({
     }
 });
 
-exports.SiteModel = mongoose.model('Site', Site, 'facilities');
+SiteModel.statics.findAll = function(callback) {
+    return this.find({}, callback);
+};
+
+exports.SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');
