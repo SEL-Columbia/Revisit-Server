@@ -38,6 +38,10 @@ var SiteModel = new Schema({
     }
 });
 
+SiteModel.statics.findLimit = function(lim, off, callback) {
+    return this.find({}).skip(off).limit(lim).exec(callback);
+};
+
 SiteModel.statics.findAll = function(callback) {
     return this.find({}, callback);
 };
