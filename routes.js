@@ -2,7 +2,6 @@ var SiteModel = require('./models/site').SiteModel,
     restify = require('restify'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
-    _ = require('lodash'),
     prePath = '/api/v1';
 
 exports.sites = function(req, res, next) {
