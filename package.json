@@ -6,11 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Abdi Dahir",
+  "author": "Abdi Dahir, Jonathan Wohl",
   "license": "MIT",
   "devDependencies": {
     "mongoose": "^3.8.16",
     "restify": "^2.8.2"
+  },
+  "repository": {
+      "type": "git",
+      "url": "git@github.com:SEL-Columbia/Revisit-Server.git"
   },
   "dependencies": {
     "fs": "0.0.2"

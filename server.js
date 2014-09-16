@@ -17,7 +17,8 @@ var server = restify.createServer({
 
 // server modules
 
-//server.pre(restify.pre.sanitizePath());
+server.pre(restify.pre.sanitizePath());
+server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.authorizationParser()); // basic auth
@@ -61,7 +62,6 @@ server.use(function authenticate(req, res, next) {
      });
 });
 
-server.pre(restify.pre.userAgentConnection());
 
 server.listen(8080, function() {
       console.log('%s listening at %s', server.name, server.url);
@@ -74,3 +74,4 @@ server.get(prePath + "/names/", routes.names);
 
 // actually useful paths
 server.get(prePath + "/facilities.json/", routes.sites);
+server.get(prePath + "/facilities.json/:allProperties", routes.sites);

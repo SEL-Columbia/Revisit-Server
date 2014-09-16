@@ -1,5 +1,6 @@
 // local includes
 var database = require('../models/dbcontroller.js')
+var parser = require('../controller/parser.js')
 
 // response_style
 function json_reply(res) {
@@ -33,13 +34,14 @@ var names = function (req, res, next) {
 
 var sites = function (req, res, next) {
     console.log(req.params);
+    console.log(Object.keys(req.params))
     
     // parse query
-    var site = {};
-    site.allProperites = req.params.allProperties; // true or false 
-    site.sortAsc = req.params.sortAsc; // sort asc by property
-    site.sortDesc = req.params.sortDesc; // sort dsc by propery
+    query = parser.parseParams(req.params, database.SiteModel)
 
+
+    //TODO: remove this and stick in parser 
+    var site = {};
     site.limit = req.params.limit; // int default 25 (can also be string off) 
     if (site.limit == null) {
         site.limit = 5; // should be 25
@@ -52,18 +54,13 @@ var sites = function (req, res, next) {
         site.offset = 0;
     } 
 
-    site.fields = req.params.fields; // comma seperate list of fields with : lookup support
+    //console.log(site)
 
-    console.log(site)
-
-    database.SiteModel.findLimit( site.limit, site.offset,
+    query.skip(site.offset).limit(site.limit).exec(
         function(err, sites) {
             if (err) {
                 return console.error(err)
             }
-
-            console.log(">>> " + sites.length)
-            //console.log(">>> " + "not dumping sheeit")
             json_reply(res)
             res.write(JSON.stringify(sites))
             res.end()
