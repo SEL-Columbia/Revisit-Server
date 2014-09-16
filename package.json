@@ -6,6 +6,7 @@
   "dependencies": {
     "express": "~3.5.1",
     "express-restify-mongoose": "~0.6.7",
+    "forever": "^0.11.1",
     "mkdirp": "^0.5.0",
     "mongoose": "~3.8.8",
     "node-uuid": "^1.4.1",
