@@ -23,3 +23,7 @@ The service will conform to http://facilityregistry.org/
 * Express: More involved stack then restify, has restify extension as well
 * Mongojs: Exposes mongoapi directly
 
+
+## Deployment
+* ???
+
