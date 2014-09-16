@@ -39,24 +39,7 @@ var sites = function (req, res, next) {
     // parse query
     query = parser.parseParams(req.params, database.SiteModel)
 
-
-    //TODO: remove this and stick in parser 
-    var site = {};
-    site.limit = req.params.limit; // int default 25 (can also be string off) 
-    if (site.limit == null) {
-        site.limit = 5; // should be 25
-    } else if (site.limit == "off") {
-        site.limit = 0;
-    } 
-
-    site.offset = req.params.offset; // int default 0
-    if (site.offset == null) {
-        site.offset = 0;
-    } 
-
-    //console.log(site)
-
-    query.skip(site.offset).limit(site.limit).exec(
+    query.exec(
         function(err, sites) {
             if (err) {
                 return console.error(err)

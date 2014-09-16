@@ -46,9 +46,4 @@ SiteModel.statics.findAll = function(callback) {
     return this.find({}, callback);
 };
 
-SiteModel.statics.rawQuery = function() {
-    return this;
-};
-
-
 exports.SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');
