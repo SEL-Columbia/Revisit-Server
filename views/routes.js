@@ -36,7 +36,6 @@ var sites = function (req, res, next) {
     
     // parse query
     var site = {};
-
     site.allProperites = req.params.allProperties; // true or false 
     site.sortAsc = req.params.sortAsc; // sort asc by property
     site.sortDesc = req.params.sortDesc; // sort dsc by propery
@@ -45,7 +44,7 @@ var sites = function (req, res, next) {
     if (site.limit == null) {
         site.limit = 5; // should be 25
     } else if (site.limit == "off") {
-        site.limit = -1;
+        site.limit = 0;
     } 
 
     site.offset = req.params.offset; // int default 0
@@ -56,6 +55,7 @@ var sites = function (req, res, next) {
     site.fields = req.params.fields; // comma seperate list of fields with : lookup support
 
     console.log(site)
+
     database.SiteModel.findLimit( site.limit, site.offset,
         function(err, sites) {
             if (err) {
