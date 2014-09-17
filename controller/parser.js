@@ -1,5 +1,4 @@
-// parse param and build query
-// for each param field
+// parse param and build query for each param field
 known_keys =    [   
                     'allProperties',
                     'sortAsc',
@@ -8,7 +7,7 @@ known_keys =    [
                     'limit',
                     'offset',
                     'active',
-                    'updateSince'
+                    'updatedSince'
                 ]
                     
 // consumes params builds query, returns for view to exec
@@ -80,6 +79,10 @@ var parseParams = function(params, query) {
 }
 
 
+
+// Parsing helper functions
+
+
 // Limit the number of tuples to be returned
 var genLimitQuery = function(params, query) {
     if (params.limit == null) {
@@ -124,9 +127,7 @@ var genActiveQuery = function(filters, active) {
 // For date based queries
 var genDateQuery = function(filters, date_str) {
     var date = Date.parse(date_str);
-    console.log(date);
-    console.log(">>> Date in: " + date_str)
-    filters['updatedAt'] = date;
+    filters['updatedAt'] = {'$gte': date}
 }
 
 // For queries specifiying specific fields
