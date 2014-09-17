@@ -25,15 +25,11 @@ require_relative "upstart-config.rb"
 # Default value for linked_dirs is []
 # set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
 
-# Default value for default_env is {}
-# set :default_env, { path: "/opt/ruby/bin:$PATH" }
-
 # Default value for keep_releases is 5
 # set :keep_releases, 5
 
 namespace :setup do
 
-  # check remote server settings
   desc "Check remote server settings"
   task :servercheck do
     on roles(:all) do |h|
@@ -77,7 +73,7 @@ namespace :node do
       end
 
       on roles(:app) do
-        # we upload and then move to the correct location in order to deal with permissions
+        # we upload to tmp and then move to the correct location in order to deal with permissions during upload
         upload! tmp_upstart_config_path, "/tmp/revisit.conf"
         execute :sudo, "cp /tmp/revisit.conf #{fetch(:upstart_conf_file_path)}"
       end
