@@ -4,9 +4,9 @@
 # is considered to be the first unless any hosts have the primary
 # property set.  Don't declare `role :all`, it's a meta role.
 
-role :app, %w{23.21.86.131}
-role :web, %w{23.21.86.131}
-role :db,  %w{23.21.86.131}
+# role :app, %w{23.21.86.131}
+# role :web, %w{23.21.86.131}
+# role :db,  %w{23.21.86.131}
 
 
 # Extended Server Syntax

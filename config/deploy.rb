@@ -5,23 +5,19 @@ lock '3.2.1'
 set :application, "Revisit-Server"
 set :repo_url, 'https://github.com/SEL-Columbia/Revisit-Server.git'
 
-# Default branch is :master
-# ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
+set :server_init_file, 'server.js'
 
-# Default deploy_to directory is /var/www/my_app
-# set :deploy_to, '/var/www/my_app'
+set :upstart_job_name, 'revisit'
+set :upstart_conf_file_path, "/etc/init/#{fetch(:upstart_job_name)}.conf"
+set :upstart_pid_file_path, "/var/run/#{fetch(:upstart_job_name)}.pid"
+set :upstart_log_path, "/var/log/#{fetch(:upstart_job_name)}.sys.log"
 
-# Default value for :scm is :git
-# set :scm, :git
+set :node_bin_path, '/usr/bin/node'
 
-# Default value for :format is :pretty
-# set :format, :pretty
+set :npm_roles, :web
 
-# Default value for :log_level is :debug
-# set :log_level, :debug
-
-# Default value for :pty is false
-# set :pty, true
+# load in upstart config content
+require_relative "upstart-config.rb"
 
 # Default value for :linked_files is []
 # set :linked_files, %w{config/database.yml}
@@ -35,65 +31,108 @@ set :repo_url, 'https://github.com/SEL-Columbia/Revisit-Server.git'
 # Default value for keep_releases is 5
 # set :keep_releases, 5
 
-namespace :node do
-    desc "Check required packages and install if packages are not installed"
-    task :install_packages do
-      run "mkdir -p #{previous_release}/node_modules ; cp -r #{previous_release}/node_modules #{release_path}" if previous_release
-      run "cd #{release_path} && npm install --loglevel warn"
-    end
+namespace :setup do
 
-    task :check_upstart_config do
-      create_upstart_config if remote_file_differs?(upstart_file_path, upstart_file_contents)
-    end
+  # check remote server settings
+  desc "Check remote server settings"
+  task :servercheck do
+    on roles(:all) do |h|
+      info "Checking PHP Version..."
+      execute :php, '-v'
 
-    desc "Create upstart script for this node app"
-    task :create_upstart_config do
-      temp_config_file_path = "#{shared_path}/#{application}.conf"
-
-      # Generate and upload the upstart script
-      put upstart_file_contents, temp_config_file_path
-
-      # Copy the script into place and make executable
-      sudo "cp #{temp_config_file_path} #{upstart_file_path}"
-    end
-
-    desc "Start the node application"
-    task :start do
-      sudo "start #{upstart_job_name}"
-    end
-
-    desc "Stop the node application"
-    task :stop do
-      sudo "stop #{upstart_job_name}"
-    end
-
-    desc "Restart the node application"
-    task :restart do
-      sudo "stop #{upstart_job_name}; true"
-      sudo "start #{upstart_job_name}"
-    end
-  end
-
-
-namespace :deploy do
-
-  desc 'Restart application'
-  task :restart do
-    on roles(:app), in: :sequence, wait: 5 do
-      # Your restart mechanism here, for example:
-      # execute :touch, release_path.join('tmp/restart.txt')
-    end
-  end
-
-  after :publishing, :restart
-
-  after :restart, :clear_cache do
-    on roles(:web), in: :groups, limit: 3, wait: 10 do
-      # Here we can do anything such as:
-      # within release_path do
-      #   execute :rake, 'cache:clear'
-      # end
+      info "Checking write access..."
+      if test("[ -w #{fetch(:deploy_to)} ]")
+        info "#{fetch(:deploy_to)} is writable on #{h}"
+      else
+        error "#{fetch(:deploy_to)} is not writable on #{h}"
+      end
     end
   end
 
 end
+
+
+namespace :node do
+
+    desc "Check if the upstart config is present on the server. If not, generate it."
+    task :check_upstart_config do
+      on roles(:web) do
+        if test("[ -f #{fetch(:upstart_conf_file_path)} ]")
+          info "Upstart configuration exists on server."
+        else
+          error "Upstart configuration not present, attempting to create."
+          invoke 'node:create_upstart_config'
+        end
+      end
+    end
+
+
+    desc "Create and upload upstart script for this node app"
+    task :create_upstart_config do
+      tmp_upstart_config_path = "config/#{fetch(:upstart_job_name)}.conf"
+      run_locally do
+        open(tmp_upstart_config_path, 'w') do |f|
+          f.puts "#{fetch(:upstart_file_contents)}" 
+        end
+      end
+
+      on roles(:app) do
+        # we upload and then move to the correct location in order to deal with permissions
+        upload! tmp_upstart_config_path, "/tmp/revisit.conf"
+        execute :sudo, "cp /tmp/revisit.conf #{fetch(:upstart_conf_file_path)}"
+      end
+    end
+
+
+    desc "Start the node application"
+    task :start do
+      on roles(:app) do
+        if !test("[ -f #{fetch(:upstart_pid_file_path)} ]")
+          execute :sudo, "start #{fetch(:upstart_job_name)}"
+        else
+          info "Node server already running."
+        end
+      end
+    end
+
+
+    desc "Stop the node application"
+    task :stop do
+      on roles(:app) do
+        if test("[ -f #{fetch(:upstart_pid_file_path)} ]")
+          execute :sudo, "stop #{fetch(:upstart_job_name)}"
+        else
+          info "Node server does not appear to be running."
+        end
+      end
+    end
+
+
+    desc "Restart the node application"
+    task :restart do
+      on roles(:app) do
+        invoke 'node:stop'
+        invoke 'node:start'
+      end
+    end
+  end
+
+
+
+
+namespace :deploy do
+
+  # desc 'Restart application server (using upstart job) - this happens for both deployment and rollback.'
+  task :restart do
+    invoke 'node:restart'
+  end
+
+end
+
+
+
+# After the app is published, restart the server
+after :published, :restart
+
+# Before restarting the server, make sure the upstart config is present
+before 'deploy:restart', 'node:check_upstart_config'

@@ -26,3 +26,6 @@ node_modules
 
 # assets
 photos
+
+# deployment things
+config/*.conf

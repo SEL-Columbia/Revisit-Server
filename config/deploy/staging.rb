@@ -4,9 +4,9 @@
 # is considered to be the first unless any hosts have the primary
 # property set.  Don't declare `role :all`, it's a meta role.
 
-role :app, %w{23.21.86.131}
-role :web, %w{23.21.86.131}
-role :db,  %w{23.21.86.131}
+# role :app, %w{23.21.86.131}
+# role :web, %w{23.21.86.131}
+# role :db,  %w{23.21.86.131}
 
 
 # Extended Server Syntax
@@ -15,8 +15,27 @@ role :db,  %w{23.21.86.131}
 # server list. The second argument is a, or duck-types, Hash and is
 # used to set extended properties on the server.
 
-server '23.21.86.131', user: 'web', roles: %w{web app}
+set :user, 'web'
+
+server '23.21.86.131', user: fetch(:user), roles: %w{web app}
+
 set :deploy_to, "/var/www"
+
+# We can use environment vars to specify a revision or branch to deploy to staging.
+# Defaults to 'master' branch.
+#
+# Examples:
+# 
+# REVISION=8b42a3e cap production deploy
+# BRANCH_NAME=some_test_branch cap staging deploy
+#
+#
+#
+set :branch, ENV["REVISION"] || ENV["BRANCH_NAME"] || "master"
+
+# For staging, we DO want devDependencies included, at least for now.
+# set :npm_flags, '--production --silent'
+set :npm_flags, '--silent'
 
 # Custom SSH Options
 # ==================
