@@ -34,16 +34,17 @@ server.use(restify.throttle({
                 '192.168.1.1': {
                     rate: 0,        // unlimited
                     burst: 0
-                },
-
-                'admin' : {
-                    rate: 0,
-                    burst: 0
                 }
+
+                //'admin' : { Cant have both ip and user set for throttling 
+                //    rate: 0,
+                //    burst: 0
+                //}
             }
 }));
 
 server.use(function authenticate(req, res, next) {
+    console.log("\nAttempting Login ...")
     db.lookup(req.username, function (err, password) {
         if (err) {
             console.log(">>> Failed to find user.");
@@ -70,8 +71,6 @@ server.listen(8080, function() {
 // paths
 var prePath = '/api/v0';
 server.get('/hello/:name/', routes.respond);
-server.get(prePath + "/names/", routes.names);
 
 // actually useful paths
-server.get(prePath + "/facilities.json/", routes.sites);
-server.get(prePath + "/facilities.json/:allProperties", routes.sites);
+server.get(prePath + "/facilities.json", routes.sites);

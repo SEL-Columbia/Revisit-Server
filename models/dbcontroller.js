@@ -3,12 +3,10 @@ var mongoose = require('mongoose');
 var fs = require('fs');
 
 // local deps
-var NamesModel = require('./names.js').NamesModel;
 var SiteModel = require('./site.js').SiteModel;
 
 // db 
 var db_name = 'test';
-var db_cols = ['testData'];
 mongoose.connect('mongodb://localhost/' + db_name);
 
 var db = mongoose.connection;
@@ -36,6 +34,5 @@ var lookup = function(username, callback) {
 db.lookup = lookup;
 
 // exports XXX: Intend to list all in use models here and then include this file
-exports.NamesModel = NamesModel
 exports.SiteModel = SiteModel
 exports.db = db;

@@ -17,24 +17,8 @@ var respond = function (req, res, next) {
       return next();
 }
 
-// list testdb
-var names = function (req, res, next) {
-    database.NamesModel.findAll( function(err, names) {
-        if (err) {
-            return console.error(err)
-        }
-
-        console.log(">>> " + names)
-        json_reply(res)
-        res.write(JSON.stringify(names))
-        res.end()
-    });
-    return next();
-}
-
 var sites = function (req, res, next) {
-    console.log(req.params);
-    console.log(Object.keys(req.params))
+    console.log("\n>>> Params", req.params);
     
     // parse query
     query = parser.parseParams(req.params, database.SiteModel)
@@ -54,5 +38,4 @@ var sites = function (req, res, next) {
 
 // exports
 exports.respond = respond
-exports.names = names
 exports.sites = sites
