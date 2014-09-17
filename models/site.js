@@ -62,4 +62,35 @@ SiteModel.statics.findNear = function(lng, lat, rad, earthRad, callback) {
                      }, callback);
 }
 
+SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng, callback) {
+    return this.find({"coordinates": 
+                        {"$geoWithin": 
+                            { "$box": 
+                                [ 
+                                    [swlng, swlat],
+                                    [nelng, nelat]
+                                ]
+                            }
+                        }
+                    }, callback)
+}
+
+SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector, callback) {
+    return this.find(
+             {"$and": 
+                [{"coordinates": 
+                        {"$geoWithin": 
+                            { "$box": 
+                                [ 
+                                    [swlng, swlat],
+                                    [nelng, nelat]
+                                ]
+                            }
+                        }
+                    },
+                 {"properties.sector": sector}]
+             }, callback)
+}
+
+
 exports.SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');

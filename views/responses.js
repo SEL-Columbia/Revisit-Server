@@ -10,7 +10,7 @@ var jsonReply = function(res, json) {
 }    
 
 var mongoErrorReply = function(res, err) {
-    res.send(404, 'Mongo Error', err)
+    res.send(404, 'Mongo Error:', err)
 }
 
 var mongoEmptyReturn = function(res, data) {

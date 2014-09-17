@@ -28,27 +28,29 @@ var sites = function (req, res, next) {
             }
     });
 
+    console.log(">>> Complete!");
     return next();
 }
 
 var site = function (req, res, next) {
 
-    console.log("\n>>> Search for site with id: " + req.params.id);
+    console.log("\n>>> Search for site with id: " + req.params[0]);
 
     //TODO: verify req.params.id 
-    database.SiteModel.findById(req.params.id, function(err, site) {
+    database.SiteModel.findById(req.params[0], function(err, site) {
         if (err) {
             return mongoErrorReply(res, err)
         }
 
         if (site != null && site.length > 0) {
-            replies.json_reply(res, sites)
+            replies.jsonReply(res, sites)
         } else {
             replies.mongoEmptyReturn(res)
         }
 
     });
 
+    console.log(">>> Complete!");
     return next()
 }
 

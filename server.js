@@ -4,6 +4,7 @@ var restify = require('restify');
 
 // local includes
 var routes = require('./views/routes.js');
+var extras = require('./views/extras.js');
 var db = require('./models/dbcontroller.js').db;
 
 // server
@@ -16,8 +17,7 @@ var server = restify.createServer({
 });
 
 // server modules
-
-server.pre(restify.pre.sanitizePath());
+//server.pre(restify.pre.sanitizePath());
 server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));
@@ -74,4 +74,8 @@ server.get('/hello/:name/', routes.respond);
 
 // actually useful paths
 server.get(prePath + "/facilities.json", routes.sites);
-server.get(prePath + "/facilities.json/:id", routes.site);
+server.get(/\/api\/v0\/facilities\/(\d+)\.json/, routes.site);
+server.get(prePath+'/facilities/near/:lat/:lng/:rad', extras.near);
+
+server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', extras.within);
+server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', extras.withinSector);
