@@ -13,7 +13,7 @@ script
     # Store the pid of this startup process so we can check if it's running later
     echo $$ > #{fetch(:upstart_pid_file_path)}
 
-    exec sudo -u #{fetch(:user)} #{fetch(:node_bin_path)} #{fetch(:release_path)}/#{fetch(:server_init_file)} >> #{fetch(:upstart_log_path)} 2>&1
+    exec sudo -u #{fetch(:user)} #{fetch(:node_bin_path)} #{fetch(:deploy_to)}/current/#{fetch(:server_init_file)} >> #{fetch(:upstart_log_path)} 2>&1
 end script
 
 pre-start script
