@@ -6,7 +6,7 @@ var fs = require('fs');
 var SiteModel = require('./site.js').SiteModel;
 
 // db 
-var db_name = 'test';
+var db_name = 'sel';
 mongoose.connect('mongodb://localhost/' + db_name);
 
 var db = mongoose.connection;

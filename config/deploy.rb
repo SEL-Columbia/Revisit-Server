@@ -86,7 +86,7 @@ namespace :node do
         if !test("[ -f #{fetch(:upstart_pid_file_path)} ]")
           execute :sudo, "start #{fetch(:upstart_job_name)}"
         else
-          info "Node server already running."
+          error " -- NOT STARTED -- Node server already appears to be running."
         end
       end
     end
@@ -98,7 +98,7 @@ namespace :node do
         if test("[ -f #{fetch(:upstart_pid_file_path)} ]")
           execute :sudo, "stop #{fetch(:upstart_job_name)}"
         else
-          info "Node server does not appear to be running."
+          error " -- NOT STOPPED -- Node server does not appear to be running."
         end
       end
     end
@@ -122,13 +122,14 @@ namespace :deploy do
   task :restart do
     invoke 'node:restart'
   end
+  
 
 end
 
 
 
 # After the app is published, restart the server
-after :published, :restart
+after 'deploy:published', 'deploy:restart'
 
 # Before restarting the server, make sure the upstart config is present
 before 'deploy:restart', 'node:check_upstart_config'
