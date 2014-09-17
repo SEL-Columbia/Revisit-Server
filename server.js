@@ -43,25 +43,25 @@ server.use(restify.throttle({
             }
 }));
 
-server.use(function authenticate(req, res, next) {
-    console.log("\nAttempting Login ...")
-    db.lookup(req.username, function (err, password) {
-        if (err) {
-            console.log(">>> Failed to find user.");
-            return next(new restify.NotFoundError('user not found'));
-        }
+// server.use(function authenticate(req, res, next) {
+//     console.log("\nAttempting Login ...")
+//     db.lookup(req.username, function (err, password) {
+//         if (err) {
+//             console.log(">>> Failed to find user.");
+//             return next(new restify.NotFoundError('user not found'));
+//         }
 
-        // temp dont intend to keep passwords as plain string
-        if (password !== req.authorization.basic.password) {
-            console.log(">>> Failed to auth user pass.");
-            return next(new restify.NotAuthorizedError());
-        }
+//         // temp dont intend to keep passwords as plain string
+//         if (password !== req.authorization.basic.password) {
+//             console.log(">>> Failed to auth user pass.");
+//             return next(new restify.NotAuthorizedError());
+//         }
       
-        console.log(">>> User success!");
-        return next();
+//         console.log(">>> User success!");
+//         return next();
 
-     });
-});
+//      });
+// });
 
 
 server.listen(8080, function() {
