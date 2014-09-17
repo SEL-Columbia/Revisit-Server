@@ -1,15 +1,10 @@
+var restify = require('restify')
+
 // local includes
 var database = require('../models/dbcontroller.js')
 var parser = require('../controller/parser.js')
+var replies = require('./responses.js');
 
-// response_style
-function json_reply(res) {
-    res.writeHead(200, {
-        'Content-Type': 'application/json; charset=utf-8'});
-}    
-
-
-// views
 
 // echo
 var respond = function (req, res, next) {
@@ -17,8 +12,9 @@ var respond = function (req, res, next) {
       return next();
 }
 
+// views
 var sites = function (req, res, next) {
-    console.log("\n>>> Params", req.params);
+    console.log("\n>>> Finding all sites params", req.params);
     
     // parse query
     query = parser.parseParams(req.params, database.SiteModel)
@@ -26,16 +22,37 @@ var sites = function (req, res, next) {
     query.exec(
         function(err, sites) {
             if (err) {
-                return console.error(err)
+                replies.mongoErrorReply(res, err)
+            } else {
+                replies.jsonReply(res, sites)
             }
-            json_reply(res)
-            res.write(JSON.stringify(sites))
-            res.end()
     });
 
     return next();
 }
 
+var site = function (req, res, next) {
+
+    console.log("\n>>> Search for site with id: " + req.params.id);
+
+    //TODO: verify req.params.id 
+    database.SiteModel.findById(req.params.id, function(err, site) {
+        if (err) {
+            return mongoErrorReply(res, err)
+        }
+
+        if (site != null && site.length > 0) {
+            replies.json_reply(res, sites)
+        } else {
+            replies.mongoEmptyReturn(res)
+        }
+
+    });
+
+    return next()
+}
+
 // exports
 exports.respond = respond
 exports.sites = sites
+exports.site = site

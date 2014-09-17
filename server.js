@@ -74,3 +74,4 @@ server.get('/hello/:name/', routes.respond);
 
 // actually useful paths
 server.get(prePath + "/facilities.json", routes.sites);
+server.get(prePath + "/facilities.json/:id", routes.site);

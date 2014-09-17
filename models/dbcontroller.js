@@ -33,6 +33,5 @@ var lookup = function(username, callback) {
 
 db.lookup = lookup;
 
-// exports XXX: Intend to list all in use models here and then include this file
 exports.SiteModel = SiteModel
 exports.db = db;

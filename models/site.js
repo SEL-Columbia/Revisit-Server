@@ -46,4 +46,20 @@ SiteModel.statics.findAll = function(callback) {
     return this.find({}, callback);
 };
 
+SiteModel.statics.findById = function(id, callback) {
+    return this.find({"identifiers.id" : id}, callback)
+}
+
+SiteModel.statics.findNear = function(lng, lat, rad, earthRad, callback) {
+    return this.find({ "coordinates": 
+                        {"$geoWithin": 
+                            { "$centerSphere": 
+                                [   
+                                    [lng, lat], rad / earthRad 
+                                ]
+                            }
+                        }
+                     }, callback);
+}
+
 exports.SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');
