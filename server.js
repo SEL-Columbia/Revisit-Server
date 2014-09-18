@@ -1,6 +1,6 @@
 // dependancies 
 var restify = require('restify');
-
+//var fs = require('fs');
 
 // local includes
 var routes = require('./views/routes.js');
