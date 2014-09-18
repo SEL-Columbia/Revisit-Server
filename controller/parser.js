@@ -1,14 +1,14 @@
 // parse param and build query for each param field
-known_keys =    [   
-                    'allProperties',
-                    'sortAsc',
-                    'sortDesc',
-                    'fields',
-                    'limit',
-                    'offset',
-                    'active',
-                    'updatedSince'
-                ]
+knownKeys = [  
+                'allProperties',
+                'sortAsc',
+                'sortDesc',
+                'fields',
+                'limit',
+                'offset',
+                'active',
+                'updatedSince'
+            ]
                     
 // consumes params builds query, returns for view to exec
 var parseParams = function(params, query) {
@@ -72,13 +72,35 @@ var parseParams = function(params, query) {
     console.log("\nQuery: Op >>", query.op, 
                 "\nOptions >>", query.options, 
                 "\nProjections  >>", query._fields,
-                "\nFilters >>>", query._conditions)
+                "\nFilters >>>", query._conditions);
 
-    return query
+    return query;
  
 }
 
+var badKeys = [
+                '_id',
+                'uuid',
+                'url',
+                'createdAt',
+                'updatedAt'
+               ];
 
+var parseBody = function(body) {
+
+    // nullifiy body if it contains any of our bad keys
+    if (badKeys.any(function(badKey) {
+        console.log( " >>>", body[badKey], Boolean(body[badKey]) ) 
+        return Boolean(body[badKey]);
+    })) 
+    {
+        body = null;
+        return;
+    }
+
+    body.updatedAt = Date();
+    return;
+}
 
 // Parsing helper functions
 
@@ -134,7 +156,7 @@ var genDateQuery = function(filters, date_str) {
 var genAddOnsQuery = function(params, filters) {
     paramKeys = Object.keys(params);
     paramKeys.forEach(function(pkey) {
-        if (known_keys.indexOf(pkey) < 0) {
+        if (knownKeys.indexOf(pkey) < 0) {
             console.log(">>> Unknown: " + pkey)
             // Determine if mult options passed, restify packages it as an array
             if (typeof params[pkey] === "string") {
@@ -149,3 +171,4 @@ var genAddOnsQuery = function(params, filters) {
 }
 
 exports.parseParams = parseParams;
+exports.parseBody = parseBody;
