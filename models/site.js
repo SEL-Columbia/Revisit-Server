@@ -47,7 +47,7 @@ SiteModel.statics.findAll = function(callback) {
 };
 
 SiteModel.statics.findById = function(id, callback) {
-    return this.find({"identifiers.id" : id}, callback)
+    return this.find({"uuid" : id}, callback);
 }
 
 SiteModel.statics.findNear = function(lng, lat, rad, earthRad, callback) {
@@ -72,7 +72,7 @@ SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng, callback) {
                                 ]
                             }
                         }
-                    }, callback)
+                    }, callback);
 }
 
 SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector, callback) {
@@ -89,8 +89,11 @@ SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector
                         }
                     },
                  {"properties.sector": sector}]
-             }, callback)
+             }, callback);
 }
 
+SiteModel.statics.updateById = function(id, site, callback) {
+    return this.findByIdAndUpdate(id, {"$set": site }, callback);
+}
 
 exports.SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');

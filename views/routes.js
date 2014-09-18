@@ -36,14 +36,13 @@ var site = function (req, res, next) {
 
     console.log("\n>>> Search for site with id: " + req.params[0]);
 
-    //TODO: verify req.params.id 
     database.SiteModel.findById(req.params[0], function(err, site) {
         if (err) {
             return mongoErrorReply(res, err)
         }
 
         if (site != null && site.length > 0) {
-            replies.jsonReply(res, sites)
+            replies.jsonReply(res, site)
         } else {
             replies.mongoEmptyReturn(res)
         }
@@ -54,6 +53,28 @@ var site = function (req, res, next) {
     return next()
 }
 
+var update = function (req, res, next) {
+    console.log("\n>>> Updating site with id: " + req.params[0]);
+
+    parser.parseBody(req.body);
+    if (!body) {
+        replies.apiBadRequest();
+        return next();
+    }
+    
+    database.SiteModel.updateById(req.params[0], req.body, function(err, site) {
+        if (err) {
+            return mongoErrorReply(res, err)
+        }
+        if (site != null && site.length > 0) {
+            // TODO: both the url and the object should be returned
+            replies.jsonReply(res, site)
+        } else {
+            replies.mongoEmptyReturn(res)
+        }
+
+    });
+}
 // exports
 exports.respond = respond
 exports.sites = sites
