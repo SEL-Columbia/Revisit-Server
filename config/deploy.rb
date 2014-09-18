@@ -5,7 +5,7 @@ lock '3.2.1'
 set :application, "Revisit-Server"
 set :repo_url, 'https://github.com/SEL-Columbia/Revisit-Server.git'
 
-set :server_init_file, 'server.js'
+set :server_init_file, 'revisit-daemon.js'
 
 set :upstart_job_name, 'revisit'
 set :upstart_conf_file_path, "/etc/init/#{fetch(:upstart_job_name)}.conf"
