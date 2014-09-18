@@ -31,7 +31,7 @@ set :deploy_to, "/var/www"
 #
 #
 #
-set :branch, ENV["REVISION"] || ENV["BRANCH_NAME"] || "master"
+set :branch, ENV["REVISION"] || ENV["BRANCH"] || "master"
 
 # For staging, we DO want devDependencies included, at least for now.
 # set :npm_flags, '--production --silent'
