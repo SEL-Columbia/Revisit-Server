@@ -1,6 +1,10 @@
+// start the server as a daemon
+// eveything above this will be exectued twice
+require('daemon')();
+
 // dependancies 
 var restify = require('restify');
-//var fs = require('fs');
+
 
 // local includes
 var routes = require('./views/routes.js');

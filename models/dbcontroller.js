@@ -16,9 +16,9 @@ db.once('open', function callback() {
     });
 
 // users XXX: TEMP soloution, will put in db if neccassary
-var user_conf = "./users.conf" 
-var users = JSON.parse(fs.readFileSync(user_conf, "utf8"))
-console.log(users);
+// var user_conf = "./users.conf" 
+// var users = JSON.parse(fs.readFileSync(user_conf, "utf8"))
+// console.log(users);
 
 var lookup = function(username, callback) {
     var err = false;

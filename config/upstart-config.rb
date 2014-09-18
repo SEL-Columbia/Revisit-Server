@@ -7,6 +7,10 @@ author      "Sustainable Engineering Lab - Columbia University"
 start on startup
 stop on shutdown
 
+respawn
+kill timeout 10
+expect daemon
+
 script
     export HOME="/root"
 

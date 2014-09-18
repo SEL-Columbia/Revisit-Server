@@ -13,10 +13,11 @@
     "restify": "^2.8.2"
   },
   "repository": {
-      "type": "git",
-      "url": "git@github.com:SEL-Columbia/Revisit-Server.git"
+    "type": "git",
+    "url": "git@github.com:SEL-Columbia/Revisit-Server.git"
   },
   "dependencies": {
+    "daemon": "^1.1.0",
     "fs": "0.0.2"
   }
 }
