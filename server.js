@@ -23,8 +23,8 @@ server.pre(restify.pre.userAgentConnection());
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.authorizationParser()); // basic auth
 server.use(restify.queryParser());         // gets
+server.use(restify.bodyParser());          // sets up body field
 server.use(restify.gzipResponse());        // compressed response
-server.use(restify.bodyParser());          // ??? magically does content-type stuff 
 server.use(restify.throttle({
             burst: 100,
             rate: 50,
@@ -72,10 +72,12 @@ server.listen(3000, function() {
 var prePath = '/api/v0';
 server.get('/hello/:name/', routes.respond);
 
-// actually useful paths
-server.get(prePath + "/facilities.json", routes.sites);
-server.get(/\/api\/v0\/facilities\/(\d+)\.json/, routes.site);
-server.get(prePath+'/facilities/near/:lat/:lng/:rad', extras.near);
+// main
+server.get(prePath + "/facilities.json", routes.sites); // all sites
+server.get(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.site); // site by id
+server.put(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.update); // update site by id
 
-server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', extras.within);
-server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', extras.withinSector);
+// extras
+server.get(prePath+'/facilities/near/:lat/:lng/:rad', extras.near); // search near coord
+server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', extras.within); // search within box
+server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', extras.withinSector); // search within box and sector
