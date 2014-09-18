@@ -3,7 +3,7 @@
 A restful api that will serve facility information + a few more details that 
 will server both formhub and revisit (and w/e other services we see fit)
 
-The service will conform to http://facilityregistry.org/ 
+The service will conform to http://facilityregistry.org/ as best as possible
 
 ## Extra Properties
 * Number of times visited
