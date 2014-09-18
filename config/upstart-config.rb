@@ -7,9 +7,9 @@ author      "Sustainable Engineering Lab - Columbia University"
 start on startup
 stop on shutdown
 
-respawn
-respawn limit 20 5
-kill timeout 10
+# respawn
+# respawn limit 20 5
+# kill timeout 10
 
 script
     export HOME="/root"
