@@ -13,7 +13,7 @@ knownKeys = [
 // consumes params builds query, returns for view to exec
 var parseParams = function(params, query) {
 
-    var projections = {"_id":0};
+    var projections = {};
     var filters = {};
     var sorts = {};
 
