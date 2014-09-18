@@ -9,7 +9,7 @@ implement clusters.
 
 */
 
-// Everything above this line will be executed twice
+// If using daemon, everything above this line will be executed twice.
 // require('daemon')();
 
 // Run the HTTP server
