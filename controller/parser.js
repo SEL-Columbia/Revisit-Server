@@ -88,18 +88,19 @@ var badKeys = [
 
 var parseBody = function(body) {
 
+    if (!body || Object.keys(body).length == 0) {
+        return false;
+    }
     // nullifiy body if it contains any of our bad keys
-    if (badKeys.any(function(badKey) {
-        console.log( " >>>", body[badKey], Boolean(body[badKey]) ) 
+    if (badKeys.some(function(badKey) {
         return Boolean(body[badKey]);
     })) 
     {
-        body = null;
-        return;
+        return false;
     }
 
     body.updatedAt = Date();
-    return;
+    return true;
 }
 
 // Parsing helper functions

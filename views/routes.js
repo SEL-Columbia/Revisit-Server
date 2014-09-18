@@ -50,32 +50,34 @@ var site = function (req, res, next) {
     });
 
     console.log(">>> Complete!");
-    return next()
+    return next();
 }
 
 var update = function (req, res, next) {
-    console.log("\n>>> Updating site with id: " + req.params[0]);
+    var id = req.params[0];
+    console.log("\n>>> Updating site with id: " + id);
+    delete req.params[0];
+    console.log(req.params);
 
-    parser.parseBody(req.body);
-    if (!body) {
-        replies.apiBadRequest();
+    var success = parser.parseBody(req.params);
+    console.log(">>> parsed:", req.params)
+    if (!success) {
+        replies.apiBadRequest(res, success);
         return next();
     }
     
-    database.SiteModel.updateById(req.params[0], req.body, function(err, site) {
+    database.SiteModel.updateById(id, req.params, function(err, site) {
         if (err) {
-            return mongoErrorReply(res, err)
+            return replies.mongoEmptyReturn(res, site)
         }
-        if (site != null && site.length > 0) {
-            // TODO: both the url and the object should be returned
-            replies.jsonReply(res, site)
-        } else {
-            replies.mongoEmptyReturn(res)
-        }
-
+        replies.jsonReply(res, site)
     });
+
+    console.log(">>> Complete!");
+    return next();
 }
 // exports
 exports.respond = respond
 exports.sites = sites
 exports.site = site
+exports.update = update 
