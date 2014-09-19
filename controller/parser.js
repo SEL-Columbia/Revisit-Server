@@ -44,6 +44,10 @@ var parseParams = function(params, query) {
         genPropQuery(projections, params.allProperties)
     }
 
+    // project out the _id field if any projections are set
+    if (projections != {}) {
+        projections["_id"] = 0;
+    }
 
     // find op is set in stone by this point
     query = query.find(filters, projections)
@@ -63,13 +67,15 @@ var parseParams = function(params, query) {
     query = genLimitQuery(params, query);
 
     // Print what I think I sent
+    console.log(" <<<< MY INPUTS ");
     console.log(">>> Filters " + JSON.stringify(filters));
     console.log(">>> Projections " + JSON.stringify(projections));
     console.log(">>> Sorts " + JSON.stringify(sorts));
 
 
     // Print what I actually sent
-    console.log("\nQuery: Op >>", query.op, 
+    console.log("\n <<<< MONGO INPUTS ");
+    console.log("Query: Op >>", query.op, 
                 "\nOptions >>", query.options, 
                 "\nProjections  >>", query._fields,
                 "\nFilters >>>", query._conditions);
@@ -105,7 +111,6 @@ var parseBody = function(body) {
 
 // Parsing helper functions
 
-
 // Limit the number of tuples to be returned
 var genLimitQuery = function(params, query) {
     // XXX: Bad input defaults to off for now (eg. limit = "garbage") 
@@ -124,7 +129,9 @@ var genLimitQuery = function(params, query) {
 
 // Include or not include properties
 var genPropQuery = function(projections, prop) {
-    if (prop == 'false') {
+    // Some weird bug in mongo doesnt allow properties to be set to 0 
+    // with other fields set to 1???
+    if (prop == 'false' && projections == {}) {
         projections["properties"] = 0;
     } 
     // Setting to true is the default case
@@ -140,7 +147,7 @@ var genDescQuery = function(sorts, desc) {
 }
 
 // For active queries (require boolean values)
-var genActiveQuery = function(filters, active_str) {
+var genActiveQuery = function(filters, active) {
 
    //XXX: Mongoose actually enforces the type conversion
    
