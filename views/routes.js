@@ -19,13 +19,17 @@ var sites = function (req, res, next) {
     // parse query
     query = parser.parseParams(req.params, database.SiteModel)
 
-    query.exec(
-        function(err, sites) {
-            if (err) {
-                replies.mongoErrorReply(res, err)
-            } else {
-                replies.jsonReply(res, sites)
-            }
+    query.exec(function(err, sites) {
+        if (err) {
+            return mongoErrorReply(res, err)
+        }
+
+        if (sites != null && sites.length > 0) {
+            replies.jsonReply(res, sites)
+        } else {
+            replies.mongoEmptyReturn(res)
+        }
+
     });
 
     console.log(">>> Complete!");
@@ -36,14 +40,17 @@ var site = function (req, res, next) {
 
     console.log("\n>>> Search for site with id: " + req.params[0]);
 
-    database.SiteModel.findById(req.params[0], function(err, site) {
+    database.SiteModel.findById(req.params[0], function(err, sites) {
         if (err) {
             return mongoErrorReply(res, err)
         }
 
-        if (site != null && site.length > 0) {
-            replies.jsonReply(res, site)
+        if (sites != null && sites.length == 1) {
+            site = sites[0] // should only be one
+            replies.jsonReply(res, sites)
+
         } else {
+            // maybe handle the case where sites.length > 1 seperatly? 
             replies.mongoEmptyReturn(res)
         }
 
@@ -68,6 +75,7 @@ var update = function (req, res, next) {
     
     database.SiteModel.updateById(id, req.params, function(err, site) {
         if (err) {
+            // findbyid raises an error when id is not found, diff then actual err
             return replies.mongoEmptyReturn(res, site)
         }
         replies.jsonReply(res, site)
@@ -76,6 +84,7 @@ var update = function (req, res, next) {
     console.log(">>> Complete!");
     return next();
 }
+
 // exports
 exports.respond = respond
 exports.sites = sites
