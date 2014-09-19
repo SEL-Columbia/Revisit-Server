@@ -72,6 +72,8 @@ server.listen(3000, function() {
 var prePath = '/api/v0';
 server.get('/hello/:name/', routes.respond);
 
+// When I want to get specfic /^[0-9a-fA-F]{24}$/)
+
 // main
 server.get(prePath + "/facilities.json", routes.sites); // all sites
 server.get(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.site); // site by id
