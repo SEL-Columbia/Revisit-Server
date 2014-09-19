@@ -45,7 +45,7 @@ var parseParams = function(params, query) {
     }
 
     // project out the _id field if any projections are set
-    if (projections != {}) {
+    if (Object.keys(projections).length != 0 && projections['uuid'] != 1) {
         projections["_id"] = 0;
     }
 
@@ -134,7 +134,11 @@ var genPropQuery = function(projections, prop) {
     if (prop == 'false' && projections == {}) {
         projections["properties"] = 0;
     } 
-    // Setting to true is the default case
+
+    // Setting to true is the default case, unless fields are set then ..,
+    if (prop == 'true' && projections != {}) {
+        projections["properties"] = 1;
+    } 
 }
 
 // Sorting by a specific field
