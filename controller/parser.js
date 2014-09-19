@@ -108,8 +108,9 @@ var parseBody = function(body) {
 
 // Limit the number of tuples to be returned
 var genLimitQuery = function(params, query) {
-    if (params.limit == null) {
-        params.limit = 5; // should be 25
+    // XXX: Bad input defaults to off for now (eg. limit = "garbage") 
+    if (params.limit == null ) {
+        params.limit = 25; 
     } else if (params.limit == "off") {
         params.limit = 0;
     } 
@@ -139,12 +140,16 @@ var genDescQuery = function(sorts, desc) {
 }
 
 // For active queries (require boolean values)
-var genActiveQuery = function(filters, active) {
-   if (active == 'true') {
-       filters['active']=true;
-   } else if (active == 'false') {
-       filters['active']=false;
-   }
+var genActiveQuery = function(filters, active_str) {
+
+   //XXX: Mongoose actually enforces the type conversion
+   
+   //var active = returnAsBool(active_str);
+   //if (typeof active !== "boolean") {
+   //    return;
+   //}
+
+   filters['active'] = active;
 }
 
 // For date based queries
@@ -161,14 +166,32 @@ var genAddOnsQuery = function(params, filters) {
             console.log(">>> Unknown: " + pkey)
             // Determine if mult options passed, restify packages it as an array
             if (typeof params[pkey] === "string") {
-                filters[pkey.replace(":", ".")] =  params[pkey]
+                // Can only covert to bool if mongoose doesn't know about the field
+                // TODO: other conversions here
+                filters[pkey.replace(":", ".")] =  returnAsBool(params[pkey])
             } else {
+                params[pkey].forEach(function(val, ind) {
+                    // Can only covert to bool if mongoose doesn't know about the field
+                    // TODO: other conversions here
+                    params[pkey][ind] = returnAsBool(val);
+                })
+
                 filters[pkey.replace(":", ".")] = { '$in' : params[pkey] }
             }
         }
     });
+}
 
+var returnAsBool = function(value) {
+    if (value === 'true') {
+        return true;
+    }
 
+    if (value === 'false') {
+        return false;
+    }
+
+    return value;
 }
 
 exports.parseParams = parseParams;

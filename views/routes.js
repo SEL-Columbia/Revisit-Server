@@ -21,7 +21,7 @@ var sites = function (req, res, next) {
 
     query.exec(function(err, sites) {
         if (err) {
-            return mongoErrorReply(res, err)
+            return replies.mongoErrorReply(res, err)
         }
 
         if (sites != null && sites.length > 0) {
@@ -42,7 +42,7 @@ var site = function (req, res, next) {
 
     database.SiteModel.findById(req.params[0], function(err, sites) {
         if (err) {
-            return mongoErrorReply(res, err)
+            return replies.mongoErrorReply(res, err)
         }
 
         if (sites != null && sites.length == 1) {
