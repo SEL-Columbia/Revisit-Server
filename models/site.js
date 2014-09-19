@@ -10,9 +10,13 @@ var SiteModel = new Schema({
     href: String,
     uuid: {
         type: String,
-        required: false
+        //required: true,
+        default: ""
     },
-    active: Boolean,
+    active: {
+        type: Boolean,
+        default: true
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -96,4 +100,7 @@ SiteModel.statics.updateById = function(id, site, callback) {
     return this.findByIdAndUpdate(id, {"$set": site }, callback);
 }
 
+SiteModel.statics.deleteById = function(id, callback) {
+    return this.remove({"_id": id }, true).exec(callback);
+}
 exports.SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');

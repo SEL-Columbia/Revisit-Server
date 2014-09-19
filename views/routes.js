@@ -91,8 +91,56 @@ var update = function (req, res, next) {
     return next();
 }
 
+var add = function ( req, res, next) {
+    console.log("\n >>> Adding new site");
+    console.log(req.params);
+
+    var success = parser.parseBody(req.params);
+    if (!success) {
+        replies.apiBadRequest(res, success);
+        return next();
+    }
+
+    req.params['uuid'] = "_id"; // any filler will do, cant be null though
+    //req.params['href'] = "./api/v0/???.json" // gotta get uuid first ... this is a pain
+    
+    var site = new database.SiteModel(req.params);
+    site.save(function(err, site) {
+        if (err) {
+            return replies.mongoErrorReply(res, err)
+        }
+        replies.editUUID(site);
+        replies.jsonReply(res, site)
+    });
+
+    console.log(">>> Complete!");
+    return next();
+}
+
+var del = function (req, res, next) {
+    var id = req.params[0];
+    console.log("\n>>> Deleting site with id: " + id);
+    database.SiteModel.deleteById(id, function(err, writeSet) {
+        if (err) {
+            // findbyid raises an error when id is not found, diff then actual err
+            return replies.mongoEmptyReturn(res, writeSet)
+        }
+
+        replies.jsonReply(res, {"_id": id, "message": "Resource deleted"})
+    });
+
+    console.log(">>> Complete!");
+    return next();
+}
+
+
+
+
+
 // exports
 exports.respond = respond
 exports.sites = sites
 exports.site = site
 exports.update = update 
+exports.add = add
+exports.del = del
