@@ -25,6 +25,9 @@ var sites = function (req, res, next) {
         }
 
         if (sites != null && sites.length > 0) {
+            sites.forEach(function(site) {
+                replies.editUUID(site)
+            });
             replies.jsonReply(res, sites)
         } else {
             replies.mongoEmptyReturn(res)
@@ -46,8 +49,9 @@ var site = function (req, res, next) {
         }
 
         if (sites != null && sites.length == 1) {
-            site = sites[0] // should only be one
-            replies.jsonReply(res, sites)
+            site = sites[0]; // should only be one
+            replies.editUUID(site);
+            replies.jsonReply(res, sites);
 
         } else {
             // maybe handle the case where sites.length > 1 seperatly? 
@@ -78,6 +82,8 @@ var update = function (req, res, next) {
             // findbyid raises an error when id is not found, diff then actual err
             return replies.mongoEmptyReturn(res, site)
         }
+
+        replies.editUUID(site);
         replies.jsonReply(res, site)
     });
 

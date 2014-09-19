@@ -10,7 +10,7 @@ var SiteModel = new Schema({
     href: String,
     uuid: {
         type: String,
-        required: true
+        required: false
     },
     active: Boolean,
     createdAt: {
@@ -47,7 +47,7 @@ SiteModel.statics.findAll = function(callback) {
 };
 
 SiteModel.statics.findById = function(id, callback) {
-    return this.find({"uuid" : id}, callback);
+    return this.find({"_id" : id}, callback);
 }
 
 SiteModel.statics.findNear = function(lng, lat, rad, earthRad, callback) {

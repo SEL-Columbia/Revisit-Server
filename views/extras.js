@@ -23,6 +23,9 @@ var near = function(req, res, next) {
         }
 
         if (sites != null && sites.length > 0) {
+            sites.forEach(function(site) {
+                replies.editUUID(site)
+            });
             replies.jsonReply(res, sites)
         } else {
             replies.mongoEmptyReturn(res)
@@ -48,6 +51,9 @@ var within = function(req, res, next) {
         }
 
         if (sites != null && sites.length > 0) {
+            sites.forEach(function(site) {
+                replies.editUUID(site)
+            });
             replies.jsonReply(res, sites)
         } else {
             replies.mongoEmptyReturn(res)
@@ -73,6 +79,9 @@ var withinSector = function(req, res, next) {
         }
 
         if (sites != null && sites.length > 0) {
+            sites.forEach(function(site) {
+                replies.editUUID(site)
+            });
             replies.jsonReply(res, sites)
         } else {
             replies.mongoEmptyReturn(res)
