@@ -19,9 +19,16 @@ var near = function(req, res, next) {
 
     database.SiteModel.findNear(lng, lat, rad, earthRad, function(err, sites) {
         if (err) {
-            replies.mongoErrorReply(res, err);
-        } else {
+            return replies.mongoErrorReply(res, err)
+        }
+
+        if (sites != null && sites.length > 0) {
+            sites.forEach(function(site) {
+                replies.editUUID(site)
+            });
             replies.jsonReply(res, sites)
+        } else {
+            replies.mongoEmptyReturn(res)
         }
 
         console.log(">>> Complete!");
@@ -38,12 +45,18 @@ var within = function(req, res, next) {
     var nelat = req.params['nelat']
     var nelng = req.params['nelng']
 
-    database.SiteModel.findWithin(swlat, swlng, nelat, nelng, 
-    function(err, sites) {
+    database.SiteModel.findWithin(swlat, swlng, nelat, nelng, function(err, sites) {
         if (err) {
-            replies.mongoErrorReply(res, err);
-        } else {
+            return replies.mongoErrorReply(res, err)
+        }
+
+        if (sites != null && sites.length > 0) {
+            sites.forEach(function(site) {
+                replies.editUUID(site)
+            });
             replies.jsonReply(res, sites)
+        } else {
+            replies.mongoEmptyReturn(res)
         }
 
         console.log(">>> Complete!");
@@ -60,12 +73,18 @@ var withinSector = function(req, res, next) {
     var nelng = req.params['nelng']
     var sector = req.query['sector']
 
-    database.SiteModel.findWithinSector(swlat, swlng, nelat, nelng, sector, 
-    function(err, sites) {
+    database.SiteModel.findWithinSector(swlat, swlng, nelat, nelng, sector, function(err, sites) {
         if (err) {
-            replies.mongoErrorReply(res, err);
-        } else {
+            return replies.mongoErrorReply(res, err)
+        }
+
+        if (sites != null && sites.length > 0) {
+            sites.forEach(function(site) {
+                replies.editUUID(site)
+            });
             replies.jsonReply(res, sites)
+        } else {
+            replies.mongoEmptyReturn(res)
         }
 
         console.log(">>> Complete!");

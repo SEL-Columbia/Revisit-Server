@@ -1,6 +1,6 @@
 // dependancies 
 var restify = require('restify');
-
+//var fs = require('fs');
 
 // local includes
 var routes = require('./views/routes.js');
@@ -72,9 +72,13 @@ server.listen(3000, function() {
 var prePath = '/api/v0';
 server.get('/hello/:name/', routes.respond);
 
+// When I want to get specfic /^[0-9a-fA-F]{24}$/)
+
 // main
 server.get(prePath + "/facilities.json", routes.sites); // all sites
+server.post(prePath + "/facilities.json", routes.add); // new site
 server.get(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.site); // site by id
+server.del(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.del); // delete by id
 server.put(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.update); // update site by id
 
 // extras
