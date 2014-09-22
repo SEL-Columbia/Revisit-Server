@@ -5,6 +5,8 @@ var database = require('../models/dbcontroller.js')
 var parser = require('../controller/parser.js')
 var replies = require('./responses.js');
 
+// TODO: Not defined here
+var site_prefix = "localhost:3000/api/v0/facilities/"
 
 // echo
 var respond = function (req, res, next) {
@@ -21,7 +23,7 @@ var sites = function (req, res, next) {
 
     query.exec(function(err, sites) {
         if (err) {
-            return replies.mongoErrorReply(res, err)
+            return replies.dbErrorReply(res, err)
         }
 
         if (sites != null && sites.length > 0) {
@@ -30,7 +32,7 @@ var sites = function (req, res, next) {
             });
             replies.jsonReply(res, sites)
         } else {
-            replies.mongoEmptyReturn(res)
+            replies.dbEmptyReturn(res)
         }
 
     });
@@ -45,7 +47,7 @@ var site = function (req, res, next) {
 
     database.SiteModel.findById(req.params[0], function(err, sites) {
         if (err) {
-            return replies.mongoErrorReply(res, err)
+            return replies.dbErrorReply(res, err)
         }
 
         if (sites != null && sites.length == 1) {
@@ -55,7 +57,7 @@ var site = function (req, res, next) {
 
         } else {
             // maybe handle the case where sites.length > 1 seperatly? 
-            replies.mongoEmptyReturn(res)
+            replies.dbEmptyReturn(res)
         }
 
     });
@@ -74,13 +76,13 @@ var update = function (req, res, next) {
     console.log(">>> parsed:", req.params)
     if (!success) {
         replies.apiBadRequest(res, success);
-        return next();
+        return;
     }
     
     database.SiteModel.updateById(id, req.params, function(err, site) {
         if (err) {
             // findbyid raises an error when id is not found, diff then actual err
-            return replies.mongoEmptyReturn(res, site)
+            return replies.dbEmptyReturn(res, site)
         }
 
         replies.editUUID(site);
@@ -91,6 +93,24 @@ var update = function (req, res, next) {
     return next();
 }
 
+// Not exposed
+// Update without blacklisting certain fields (i.e href can changed)
+var internal_update = function (id, params, res) {
+
+    database.SiteModel.updateById(id, params, function(err, site) {
+        if (err) {
+            // findbyid raises an error when id is not found, diff then actual err
+            console.log(">>> Could not update newly added site?");
+            return replies.dbErrorReply(res, err)
+        }
+
+        site.href = params["href"]
+        replies.editUUID(site);
+        replies.jsonReply(res, site, 201)
+
+    })
+}
+
 var add = function ( req, res, next) {
     console.log("\n >>> Adding new site");
     console.log(req.params);
@@ -98,20 +118,26 @@ var add = function ( req, res, next) {
     var success = parser.parseBody(req.params);
     if (!success) {
         replies.apiBadRequest(res, success);
-        return next();
+        return;
     }
 
-    req.params['uuid'] = "_id"; // any filler will do, cant be null though
-    //req.params['href'] = "./api/v0/???.json" // gotta get uuid first ... this is a pain
+    req.params['uuid'] = "temp"; // any filler will do, cant be null though
     
     var site = new database.SiteModel(req.params);
     site.save(function(err, site) {
         if (err) {
-            return replies.mongoErrorReply(res, err)
+            return replies.dbErrorReply(res, err)
         }
-        replies.editUUID(site);
-        replies.jsonReply(res, site)
-    });
+
+        // record the _id and hide the version number
+        var params = {};
+        params.uuid = site._id;
+        params.href = "http://" + site_prefix + params["uuid"] + ".json"; 
+
+        console.log(">>>", params)
+        internal_update(params["uuid"], params, res);
+
+        });
 
     console.log(">>> Complete!");
     return next();
@@ -123,10 +149,10 @@ var del = function (req, res, next) {
     database.SiteModel.deleteById(id, function(err, writeSet) {
         if (err) {
             // findbyid raises an error when id is not found, diff then actual err
-            return replies.mongoEmptyReturn(res, writeSet)
+            return replies.dbEmptyReturn(res, writeSet)
         }
 
-        replies.jsonReply(res, {"_id": id, "message": "Resource deleted"})
+        replies.jsonReply(res, {"id": id, "message": "Resource deleted"})
     });
 
     console.log(">>> Complete!");
@@ -144,3 +170,4 @@ exports.site = site
 exports.update = update 
 exports.add = add
 exports.del = del
+

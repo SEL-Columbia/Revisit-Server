@@ -1,14 +1,11 @@
 // dependancies
 var restify = require('restify')
 
-// new restify.InvalidArgumentError(JSON.stringify(err.errors));
-// new restify.RestError({statusCode: 400, restCode: "Not Implemented", message: "Flag method not yet implemented."});
-
-
 // response_style
-var jsonReply = function(res, json) {
+var jsonReply = function(res, json, code) {
     // TODO: parse the id fields out in the string?
-    res.writeHead(200, {
+    code = code || 200;
+    res.writeHead(code, {
         'Content-Type': 'application/json; charset=utf-8'});
     res.write(JSON.stringify(json))
     res.end()
@@ -24,17 +21,62 @@ var editUUID = function(site) {
 }
 
 // errors
-var mongoErrorReply = function(res, err) {
-    res.send(404, 'Mongo Error:', JSON.stringify(err))
-}
-
-var mongoEmptyReturn = function(res, data) {
-    res.send(404, 'Resource Not Found')
+var dbErrorReply = function(res, err) {
+    res.send( new restify.RestError({
+        statusCode: 500, 
+        restCode: "Database Error", 
+        message: JSON.stringify(err)
+    }));
 }
 
 var apiBadRequest = function(res, data) {
-    res.send(400, 'Bad Request');
+    // data is unused
+    res.send( new restify.RestError({
+        statusCode: 400, 
+        restCode: "Bad Request", 
+        message: "Requested operation is not valid."
+    }));
 }
+
+var apiUnauthorized = function(res, user) {
+    // data is unused
+    res.send( new restify.RestError({
+        statusCode: 401, 
+        restCode: "Unauthorized", 
+        message: "User: " + user + ", not found or incorrect password."
+    }));
+}
+
+var apiForbidden = function(res, user) {
+    // data is unused
+    res.send( new restify.RestError({
+        statusCode: 403, 
+        restCode: "Forbidden", 
+        message: "User: " + user + ", does not have permissions for this request."
+    }));
+}
+
+var dbEmptyReturn = function(res, data) {
+    // data is unused
+     res.send( new restify.RestError({
+        statusCode: 404, 
+        restCode: "Not Found", 
+        message: "Resource was not found."
+    }));
+}
+
+// 405 Not allowed (ops that can never be done but are somehow exposed?)
+// 409 Conflict (somehow causing collision in db or other conflicts?)
+
+var dbMissingData = function(res, data) {
+    // data is unused
+     res.send( new restify.RestError({
+        statusCode: 410, 
+        restCode: "Gone", 
+        message: "Resource has been removed"
+    }));
+}
+
 
 // exports
 exports.jsonReply = jsonReply
@@ -42,5 +84,8 @@ exports.jsonReply = jsonReply
 exports.editUUID = editUUID
 
 exports.apiBadRequest = apiBadRequest
-exports.mongoErrorReply = mongoErrorReply
-exports.mongoEmptyReturn = mongoEmptyReturn
+exports.dbErrorReply = dbErrorReply
+exports.dbEmptyReturn = dbEmptyReturn
+exports.apiUnauthorized = apiUnauthorized
+exports.apiForbidden = apiForbidden
+exports.dbMissingData = dbMissingData

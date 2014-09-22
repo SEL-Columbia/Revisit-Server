@@ -5,6 +5,7 @@ var restify = require('restify');
 // local includes
 var routes = require('./views/routes.js');
 var extras = require('./views/extras.js');
+var replies = require('./views/responses.js');
 var db = require('./models/dbcontroller.js').db;
 
 // server
@@ -48,13 +49,15 @@ server.use(restify.throttle({
 //     db.lookup(req.username, function (err, password) {
 //         if (err) {
 //             console.log(">>> Failed to find user.");
-//             return next(new restify.NotFoundError('user not found'));
+//             //return next(new restify.NotFoundError('user not found'));
+//             return replies.apiUnauthorized(res, req.username);
 //         }
 
 //         // temp dont intend to keep passwords as plain string
 //         if (password !== req.authorization.basic.password) {
 //             console.log(">>> Failed to auth user pass.");
-//             return next(new restify.NotAuthorizedError());
+//             //return next(new restify.NotAuthorizedError());
+//             return replies.apiUnauthorized(res, req.username);
 //         }
       
 //         console.log(">>> User success!");
