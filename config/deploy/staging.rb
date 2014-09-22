@@ -19,7 +19,7 @@ set :user, 'web'
 
 server '23.21.86.131', user: fetch(:user), roles: %w{web app}
 
-set :deploy_to, "/var/www"
+set :deploy_to, "/var/www/staging.revisit.global/api"
 
 # We can use environment vars to specify a revision or branch to deploy to staging.
 # Defaults to 'master' branch.
