@@ -27,9 +27,9 @@ var sites = function (req, res, next) {
         }
 
         if (sites != null && sites.length > 0) {
-            sites.forEach(function(site) {
-                replies.editUUID(site)
-            });
+            // sites.forEach(function(site) {
+            //     replies.editUUID(site)
+            // });
             replies.jsonReply(res, sites)
         } else {
             replies.dbEmptyReturn(res)
@@ -51,8 +51,8 @@ var site = function (req, res, next) {
         }
 
         if (sites != null && sites.length == 1) {
-            site = sites[0]; // should only be one
-            replies.editUUID(site);
+            // site = sites[0]; // should only be one
+            // replies.editUUID(site);
             replies.jsonReply(res, sites);
 
         } else {
@@ -85,7 +85,7 @@ var update = function (req, res, next) {
             return replies.dbEmptyReturn(res, site)
         }
 
-        replies.editUUID(site);
+        // replies.editUUID(site);
         replies.jsonReply(res, site)
     });
 
@@ -105,7 +105,7 @@ var internal_update = function (id, params, res) {
         }
 
         site.href = params["href"]
-        replies.editUUID(site);
+        // replies.editUUID(site);
         replies.jsonReply(res, site, 201)
 
     })

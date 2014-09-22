@@ -3,42 +3,69 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var SiteModel = new Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    href: String,
-    uuid: {
-        type: String,
-        //required: true,
-        default: ""
-    },
-    active: {
-        type: Boolean,
-        default: true
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    },
-    coordinates: { 
-        type: [Number], 
-        index: '2dsphere'
-    },
-    properties: {
-        type: {
-            type: String
+        name: {
+            type: String,
+            required: true
         },
-        sector: {
-            type: String
+        href: String,
+        
+        // --- 09/22/2014 moved uuid to virtual, outputs _id
+
+        // uuid: {
+        //     type: String,
+        //     //required: true,
+        //     default: ""
+        // },
+        
+        active: {
+            type: Boolean,
+            default: true
         },
-        visits: Number,
-        photoEndpoint: String,
-        photoUrls: [String]
+        createdAt: {
+            type: Date,
+            default: Date.now
+        },
+        updatedAt: {
+            type: Date,
+            default: Date.now
+        },
+        coordinates: { 
+            type: [Number], 
+            index: '2dsphere'
+        },
+        properties: {
+            type: {
+                type: String
+            },
+            sector: {
+                type: String
+            },
+            visits: Number,
+            photoEndpoint: String,
+            photoUrls: [String]
+        }
+    }, 
+
+    // remove the unnecessary 'id' virtual field that mongoose adds
+    { 
+        id: false
+    }
+);
+
+
+// Create virtual for UUID from ID
+SiteModel.virtual('uuid').get(function(){
+    return this._id.toHexString();
+});
+
+// Configure toJSON output
+SiteModel.set('toJSON', {
+    // Include virtuals with json output
+    virtuals: true,
+
+    // remove the _id of every document before returning the result
+    transform: function (doc, ret, options) {
+        delete ret._id;
     }
 });
 
