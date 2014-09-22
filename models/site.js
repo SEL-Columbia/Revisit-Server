@@ -10,9 +10,13 @@ var SiteModel = new Schema({
     href: String,
     uuid: {
         type: String,
-        required: true
+        //required: true,
+        default: ""
     },
-    active: Boolean,
+    active: {
+        type: Boolean,
+        default: true
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -47,7 +51,7 @@ SiteModel.statics.findAll = function(callback) {
 };
 
 SiteModel.statics.findById = function(id, callback) {
-    return this.find({"uuid" : id}, callback);
+    return this.find({"_id" : id}, callback);
 }
 
 SiteModel.statics.findNear = function(lng, lat, rad, earthRad, callback) {
@@ -96,4 +100,7 @@ SiteModel.statics.updateById = function(id, site, callback) {
     return this.findByIdAndUpdate(id, {"$set": site }, callback);
 }
 
+SiteModel.statics.deleteById = function(id, callback) {
+    return this.remove({"_id": id }, true).exec(callback);
+}
 exports.SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');
