@@ -5,6 +5,7 @@ var restify = require('restify');
 // local includes
 var routes = require('./views/routes.js');
 var extras = require('./views/extras.js');
+var auth = require('./views/auth.js');
 var replies = require('./views/responses.js');
 var db = require('./models/dbcontroller.js').db;
 
@@ -44,6 +45,7 @@ server.use(restify.throttle({
             }
 }));
 
+// From conf file
 // server.use(function authenticate(req, res, next) {
 //     console.log("\nAttempting Login ...")
 //     db.lookup(req.username, function (err, password) {
@@ -66,6 +68,17 @@ server.use(restify.throttle({
 //      });
 // });
 
+// From db
+server.use(function authenticate(req, res, next) {
+    console.log("\nAttempting Login ...")
+    db.user.login(req.username, req.authorization.basic.password, function(success) {
+        if (!success)
+            return replies.apiUnauthorized(res, req.username);
+        
+        console.log(">>> User success!");
+        return next();
+    });
+});
 
 server.listen(3000, function() {
       console.log('%s listening at %s', server.name, server.url);
@@ -95,3 +108,6 @@ server.get(prePath+'/facilities/near/:lat/:lng/:rad', extras.near); // search ne
 server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', extras.within); // search within box
 server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', extras.withinSector); // search within box and sector
 
+// users
+server.post(prePath+'/users/add/', auth.addUser); // just for testing, should be in admin
+server.post(prePath+'/users/login/', auth.login); // just for testing, done during basic auth

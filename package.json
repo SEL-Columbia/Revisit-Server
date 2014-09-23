@@ -19,6 +19,7 @@
   "dependencies": {
     "daemon": "^1.1.0",
     "fs": "0.0.2",
+    "jshashes": "^1.0.5",
     "mkdirp": "^0.5.0"
   }
 }
