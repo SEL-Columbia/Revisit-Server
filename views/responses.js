@@ -11,15 +11,6 @@ var jsonReply = function(res, json, code) {
     res.end()
 }    
 
-// var editUUID = function(site) {
-//     if (!site.uuid) {
-//         return;
-//     }
-//     site.uuid = site._id;
-//     site._id = null;
-//     delete site._id; // for w.e reason this doesnt work
-// }
-
 // errors
 var dbErrorReply = function(res, err) {
     res.send( new restify.RestError({
@@ -81,8 +72,7 @@ var dbMissingData = function(res, data) {
 // exports
 exports.jsonReply = jsonReply
 
-// exports.editUUID = editUUID
-
+// errors
 exports.apiBadRequest = apiBadRequest
 exports.dbErrorReply = dbErrorReply
 exports.dbEmptyReturn = dbEmptyReturn

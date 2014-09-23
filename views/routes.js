@@ -5,9 +5,6 @@ var database = require('../models/dbcontroller.js')
 var parser = require('../controller/parser.js')
 var replies = require('./responses.js');
 
-// TODO: Not defined here
-var site_prefix = "localhost:3000/api/v0/facilities/"
-
 // echo
 var respond = function (req, res, next) {
       res.send('hello ' + req.params.name);
@@ -27,9 +24,6 @@ var sites = function (req, res, next) {
         }
 
         if (sites != null && sites.length > 0) {
-            // sites.forEach(function(site) {
-            //     replies.editUUID(site)
-            // });
             replies.jsonReply(res, sites)
         } else {
             replies.dbEmptyReturn(res)
@@ -52,7 +46,6 @@ var site = function (req, res, next) {
 
         if (sites != null && sites.length == 1) {
             // site = sites[0]; // should only be one
-            // replies.editUUID(site);
             replies.jsonReply(res, sites);
 
         } else {
@@ -85,30 +78,11 @@ var update = function (req, res, next) {
             return replies.dbEmptyReturn(res, site)
         }
 
-        // replies.editUUID(site);
         replies.jsonReply(res, site)
     });
 
     console.log(">>> Complete!");
     return next();
-}
-
-// Not exposed
-// Update without blacklisting certain fields (i.e href can changed)
-var internal_update = function (id, params, res) {
-
-    database.SiteModel.updateById(id, params, function(err, site) {
-        if (err) {
-            // findbyid raises an error when id is not found, diff then actual err
-            console.log(">>> Could not update newly added site?");
-            return replies.dbErrorReply(res, err)
-        }
-
-        site.href = params["href"]
-        // replies.editUUID(site);
-        replies.jsonReply(res, site, 201)
-
-    })
 }
 
 var add = function ( req, res, next) {
@@ -121,21 +95,13 @@ var add = function ( req, res, next) {
         return;
     }
 
-    req.params['uuid'] = "temp"; // any filler will do, cant be null though
-    
     var site = new database.SiteModel(req.params);
     site.save(function(err, site) {
         if (err) {
             return replies.dbErrorReply(res, err)
         }
 
-        // record the _id and hide the version number
-        var params = {};
-        params.uuid = site._id;
-        params.href = "http://" + site_prefix + params["uuid"] + ".json"; 
-
-        console.log(">>>", params)
-        internal_update(params["uuid"], params, res);
+        replies.jsonReply(res, site, 201)
 
         });
 
