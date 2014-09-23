@@ -13,7 +13,7 @@ knownKeys = [
 // consumes params builds query, returns for view to exec
 var parseParams = function(params, query) {
 
-    var projections = {};
+    var projections = {};     
     var filters = {};
     var sorts = {};
 
@@ -44,12 +44,17 @@ var parseParams = function(params, query) {
         genPropQuery(projections, params.allProperties)
     }
 
-    // project out the _id field if any projections are set
-    if (Object.keys(projections).length != 0 && projections['uuid'] != 1) {
-        projections["_id"] = 0;
-    }
 
+     //project out the _id field if any projections are set
+     if (Object.keys(projections).length != 0 
+             && (projections['uuid'] != 1 && projections['href'] != 1)) {
+            // hack: uuid/href will not show up at least one or the other is 
+            // specified. Virtual fields ignore filters 
+            projections["_id"] = 0;
+     }
+    
     // find op is set in stone by this point
+    // Note: Cannot exclude and include at the same time in mongo
     query = query.find(filters, projections)
 
     // sort (cannot be seperated)

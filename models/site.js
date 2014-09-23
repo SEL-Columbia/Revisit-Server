@@ -2,21 +2,25 @@ var mongoose = require('mongoose');
 
 var Schema = mongoose.Schema;
 
+// TODO: Not defined here
+var site_prefix = "http://localhost:3000/api/v0/facilities/"
+
 var SiteModel = new Schema({
         name: {
             type: String,
             required: true
         },
-        href: String,
         
-        // --- 09/22/2014 moved uuid to virtual, outputs _id
-
+        // --- 09/22/2014 moved uuid and href to virtual,
         // uuid: {
         //     type: String,
         //     //required: true,
         //     default: ""
         // },
-        
+        // href: {
+        //    type: String,
+        //    required: true,
+        // }, 
         active: {
             type: Boolean,
             default: true
@@ -45,17 +49,28 @@ var SiteModel = new Schema({
             photoUrls: [String]
         }
     }, 
-
     // remove the unnecessary 'id' virtual field that mongoose adds
     { 
-        id: false
+        id: false,
     }
 );
 
 
 // Create virtual for UUID from ID
 SiteModel.virtual('uuid').get(function(){
-    return this._id.toHexString();
+    if (this._id)
+        return this._id.toHexString();
+});
+
+// Create virtual for HREF from ID
+SiteModel.virtual('href').get(function(){
+    if (this._id)
+        return site_prefix + this._id.toHexString() + ".json";
+});
+
+// Configure toObject
+SiteModel.set('toObject', {
+    virtuals: true
 });
 
 // Configure toJSON output
@@ -66,6 +81,7 @@ SiteModel.set('toJSON', {
     // remove the _id of every document before returning the result
     transform: function (doc, ret, options) {
         delete ret._id;
+        delete ret.__v;
     }
 });
 
