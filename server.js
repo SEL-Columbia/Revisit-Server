@@ -84,7 +84,14 @@ server.get(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.site); // site by i
 server.del(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.del); // delete by id
 server.put(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.update); // update site by id
 
+// photos
+server.post(prePath+'/facilities/:id/photos', extras.uploadPhoto);
+server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
+  directory: './public'
+}));
+
 // extras
 server.get(prePath+'/facilities/near/:lat/:lng/:rad', extras.near); // search near coord
 server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', extras.within); // search within box
 server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', extras.withinSector); // search within box and sector
+
