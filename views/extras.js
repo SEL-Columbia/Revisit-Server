@@ -21,7 +21,7 @@ var near = function(req, res, next) {
 
     database.SiteModel.findNear(lng, lat, rad, earthRad, function(err, sites) {
         if (err) {
-            return replies.mongoErrorReply(res, err)
+            return replies.dbErrorReply(res, err)
         }
 
         if (sites != null && sites.length > 0) {
@@ -30,7 +30,7 @@ var near = function(req, res, next) {
             });
             replies.jsonReply(res, sites)
         } else {
-            replies.mongoEmptyReturn(res)
+            replies.dbEmptyReturn(res)
         }
 
         console.log(">>> Complete!");
@@ -49,7 +49,7 @@ var within = function(req, res, next) {
 
     database.SiteModel.findWithin(swlat, swlng, nelat, nelng, function(err, sites) {
         if (err) {
-            return replies.mongoErrorReply(res, err)
+            return replies.dbErrorReply(res, err)
         }
 
         if (sites != null && sites.length > 0) {
@@ -58,7 +58,7 @@ var within = function(req, res, next) {
             });
             replies.jsonReply(res, sites)
         } else {
-            replies.mongoEmptyReturn(res)
+            replies.dbEmptyReturn(res)
         }
 
         console.log(">>> Complete!");
@@ -77,7 +77,7 @@ var withinSector = function(req, res, next) {
 
     database.SiteModel.findWithinSector(swlat, swlng, nelat, nelng, sector, function(err, sites) {
         if (err) {
-            return replies.mongoErrorReply(res, err)
+            return replies.dbErrorReply(res, err)
         }
 
         if (sites != null && sites.length > 0) {
@@ -86,7 +86,7 @@ var withinSector = function(req, res, next) {
             });
             replies.jsonReply(res, sites)
         } else {
-            replies.mongoEmptyReturn(res)
+            replies.dbEmptyReturn(res)
         }
 
         console.log(">>> Complete!");
