@@ -69,16 +69,21 @@ server.use(restify.throttle({
 // });
 
 // From db
-//server.use(function authenticate(req, res, next) {
-//    console.log("\nAttempting Login ...")
-//    db.user.login(req.username, req.authorization.basic.password, function(success) {
-//        if (!success)
-//            return replies.apiUnauthorized(res, req.username);
-//        
-//        console.log(">>> User success!");
-//        return next();
-//    });
-//});
+server.use(function authenticate(req, res, next) {
+    console.log("\nAttempting Login ...")
+    if (req.username == 'anonymous' 
+            || typeof req.authorization.basic == 'undefined') {
+        return replies.apiUnauthorized(res,"No basic auth information provided");
+    }
+
+    db.user.login(req.username, req.authorization.basic.password, function(success) {
+        if (!success)
+            return replies.apiUnauthorized(res, req.username);
+        
+        console.log(">>> User success!");
+        return next();
+    });
+});
 
 server.listen(3000, function() {
       console.log('%s listening at %s', server.name, server.url);
