@@ -94,6 +94,8 @@ var badKeys = [
                 'uuid',
                 'url',
                 'createdAt',
+                'id',
+                '__v',
                 'updatedAt'
                ];
 
