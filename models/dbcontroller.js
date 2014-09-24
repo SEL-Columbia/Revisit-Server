@@ -7,19 +7,24 @@ var SiteModel = require('./site.js').SiteModel;
 var UserModel = require('./user.js').UserModel;
 
 // db 
-var db_name = 'sel';
-mongoose.connect('mongodb://localhost/' + db_name);
+var connect = function(db_loc) {
+    var db_location = 'localhost';
+    mongoose.connect('mongodb://' + db_location);
+    
+    var db = mongoose.connection;
+    db.on('error', console.error.bind(console, 'connection err:')); 
+    db.once('open', function() {
+        console.log('Connected To Mongo Database');
+    });
 
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection err:')); 
-db.once('open', function callback() {
-    console.log('Connected To Mongo Database');
-});
+    db.user = UserModel;
 
+    return db;
+}
 
 // Refer to user.js for new login method
 
-// users XXX: TEMP soloution, will put in db if neccassary
+// login from conf file
 //var user_conf = __dirname + "/../users.conf" 
 //var users = JSON.parse(fs.readFileSync(user_conf, "utf8"))
 //console.log(users);
@@ -37,8 +42,7 @@ db.once('open', function callback() {
 
 //db.lookup = lookup;
 
-db.user = UserModel;
 
 exports.SiteModel = SiteModel;
 exports.UserModel = UserModel;
-exports.db = db;
+exports.connect = connect;

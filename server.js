@@ -7,7 +7,7 @@ var routes = require('./views/routes.js');
 var extras = require('./views/extras.js');
 var auth = require('./views/auth.js');
 var replies = require('./views/responses.js');
-var db = require('./models/dbcontroller.js').db;
+var db = require('./models/dbcontroller.js').connect();
 
 // server
 var server = restify.createServer({
@@ -109,5 +109,5 @@ server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', extras.wit
 server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', extras.withinSector); // search within box and sector
 
 // users
-server.post(prePath+'/users/add/', auth.addUser); // just for testing, should be in admin
+server.post(prePath+'/users/add/', auth.addUser); // just for testing, should be in admin console
 server.post(prePath+'/users/login/', auth.login); // just for testing, done during basic auth
