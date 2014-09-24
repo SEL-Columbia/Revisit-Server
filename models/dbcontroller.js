@@ -8,7 +8,7 @@ var UserModel = require('./user.js').UserModel;
 
 // db 
 var connect = function(db_loc) {
-    var db_location = db_loc || 'localhost';
+    var db_location = db_loc || 'localhost/sel';
     mongoose.connect('mongodb://' + db_location);
     
     var db = mongoose.connection;
