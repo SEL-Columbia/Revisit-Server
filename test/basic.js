@@ -73,7 +73,7 @@ describe('API Routes', function() {
     });
 
     describe('#getFacility', function() {
-        it('should return one facilties', function() {
+        it('should return one facilty', function() {
             assert(false);
         });
         it('should fail to find a facility with this id', function() {
@@ -87,7 +87,7 @@ describe('API Routes', function() {
         function() {
             assert(false);
         });
-        it('should fail to update facilitys createdAt field', function() {
+        it("should fail to update facility's createdAt field", function() {
             assert(false);
         });
         it('should fail to find any facilities with this id', function() {

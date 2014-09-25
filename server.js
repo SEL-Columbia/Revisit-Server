@@ -1,5 +1,7 @@
 // dependancies 
 var restify = require('restify');
+var bunyan = require('bunyan');
+
 //var fs = require('fs');
 
 // local includes
@@ -9,9 +11,35 @@ var auth = require('./views/auth.js');
 var replies = require('./views/responses.js');
 var db = require('./models/dbcontroller.js').connect();
 
+// myapp
+var app_name = "Facility Registry api";
+
+// logger 
+var log = bunyan.createLogger({
+    name: app_name,
+    streams: [
+        {
+            level: 'info',
+            type: 'rotating-file',
+            path: './log/'+app_name+'.log',
+            period: '1d',   // daily rotation
+            count: 7        // keep 7 back copies
+        },
+        {
+            level: 'error',
+            path: './log/'+app_name+'_err.log'  // log ERROR and above to a file
+        },
+        {
+            level: 'debug',
+            stream: process.stdout
+        }
+    ]
+});
+
+
 // server
 var server = restify.createServer({
-    name: 'Facility Registry api',
+    name: app_name,
     //https support (should use proper ssl cert)
     //key: fs.readFileSync('/etc/ssl/self-signed/server.key'),
     //certificate: fs.readFileSync('/etc/ssl/self-signed/server.crt'),
