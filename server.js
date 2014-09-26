@@ -1,6 +1,5 @@
 // dependancies 
 var restify = require('restify');
-var bunyan = require('bunyan');
 
 //var fs = require('fs');
 
@@ -10,44 +9,19 @@ var extras = require('./views/extras.js');
 var auth = require('./views/auth.js');
 var replies = require('./views/responses.js');
 var db = require('./models/dbcontroller.js').connect();
-
-// myapp
-var app_name = "Facility Registry api";
-
-// logger 
-var log = bunyan.createLogger({
-    name: app_name,
-    streams: [
-        {
-            level: 'info',
-            type: 'rotating-file',
-            path: './log/'+app_name+'.log',
-            period: '1d',   // daily rotation
-            count: 7        // keep 7 back copies
-        },
-        {
-            level: 'error',
-            path: './log/'+app_name+'_err.log'  // log ERROR and above to a file
-        },
-        {
-            level: 'debug',
-            stream: process.stdout
-        }
-    ]
-});
-
+var conf = require('./config/config.js');
+var log = require('./log/logger.js').log;
 
 // server
 var server = restify.createServer({
-    name: app_name,
+    name: conf.app_name,
     //https support (should use proper ssl cert)
     //key: fs.readFileSync('/etc/ssl/self-signed/server.key'),
     //certificate: fs.readFileSync('/etc/ssl/self-signed/server.crt'),
-    version: '0.0.1'
+    version: conf.version
 });
 
 // server modules
-//server.pre(restify.pre.sanitizePath());
 server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));
@@ -73,74 +47,58 @@ server.use(restify.throttle({
             }
 }));
 
-// From conf file
-// server.use(function authenticate(req, res, next) {
-//     console.log("\nAttempting Login ...")
-//     db.lookup(req.username, function (err, password) {
-//         if (err) {
-//             console.log(">>> Failed to find user.");
-//             //return next(new restify.NotFoundError('user not found'));
-//             return replies.apiUnauthorized(res, req.username);
-//         }
-
-//         // temp dont intend to keep passwords as plain string
-//         if (password !== req.authorization.basic.password) {
-//             console.log(">>> Failed to auth user pass.");
-//             //return next(new restify.NotAuthorizedError());
-//             return replies.apiUnauthorized(res, req.username);
-//         }
-      
-//         console.log(">>> User success!");
-//         return next();
-
-//      });
-// });
-
 // From db
-//server.use(function authenticate(req, res, next) {
-//    console.log("\nAttempting Login ...")
-//    if (req.username == 'anonymous' 
-//            || typeof req.authorization.basic == 'undefined') {
-//        return replies.apiUnauthorized(res,"No basic auth information provided");
-//    }
-//
-//    db.user.login(req.username, req.authorization.basic.password, function(success) {
-//        if (!success)
-//            return replies.apiUnauthorized(res, req.username);
-//        
-//        console.log(">>> User success!");
-//        return next();
-//    });
-//});
+if (conf.USE_AUTH) {
+    server.use(function authenticate(req, res, next) {
+        log.debug("\nAttempting Login ...")
+        log.info("Basic auth verification", {"user": res.username, "auth": req.authorization});
+        if (req.username == 'anonymous' 
+                || typeof req.authorization.basic == 'undefined') {
+            log.info("Basic auth failed");
+            return replies.apiUnauthorized(res,"No basic auth information provided");
+        }
+    
+        db.user.login(req.username, req.authorization.basic.password, function(success) {
+            if (!success) {
+                log.info("Basic auth failed");
+                return replies.apiUnauthorized(res, req.username);
+            }
+            
+            log.debug(">>> User success!");
+            log.info("Basic auth passed");
+            return next();
+        });
+    });
 
-server.listen(3000, function() {
-      console.log('%s listening at %s', server.name, server.url);
+}
+
+server.listen(conf.port, function() {
+     log.info('%s listening at %s', server.name, server.url);
+     log.debug('%s listening at %s', server.name, server.url);
 });
 
-// paths
-var prePath = '/api/v0';
-server.get('/hello/:name/', routes.respond);
-
-// When I want to get specfic /^[0-9a-fA-F]{24}$/)
 
 // main
-server.get(prePath + "/facilities.json", routes.sites); // all sites
-server.post(prePath + "/facilities.json", routes.add); // new site
-server.get(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.site); // site by id
-server.del(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.del); // delete by id
-server.put(/\/api\/v0\/facilities\/([a-z\d]+)\.json/, routes.update); // update site by id
+server.get(conf.prePath + "/facilities.json", routes.sites); // all sites
+server.post(conf.prePath + "/facilities.json", routes.add); // new site
+server.get(/\/api\/v0\/facilities\/([0-9a-fA-F]{24})\.json/, routes.site); // site by id
+server.del(/\/api\/v0\/facilities\/([0-9a-fA-F]{24})\.json/, routes.del); // delete by id
+server.put(/\/api\/v0\/facilities\/([0-9a-fA-F]{24})\.json/, routes.update); // update site by id
 
 // photos
-server.post(prePath+'/facilities/:id/photos', extras.uploadPhoto);
+server.post(conf.prePath+'/facilities/:id/photos', extras.uploadPhoto);
 server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
   directory: './public'
 }));
 
 // extras
-server.get(prePath+'/facilities/near/:lat/:lng/:rad', extras.near); // search near coord
-server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', extras.within); // search within box
-server.get(prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', extras.withinSector); // search within box and sector
+server.get(conf.prePath+'/facilities/near/:lat/:lng/:rad', extras.near); // search near coord
+server.get(conf.prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', extras.within); // search within box
+server.get(conf.prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', extras.withinSector); // search within box and sector
 
 // users
-server.post(prePath+'/users/add/', auth.addUser); // just for testing, should be in admin console
-server.post(prePath+'/users/login/', auth.login); // just for testing, done during basic auth
+server.post(conf.prePath+'/users/add/', auth.addUser); // just for testing, should be in admin console
+server.post(conf.prePath+'/users/login/', auth.login); // just for testing, done during basic auth
+
+// echo
+server.get('/hello/:name/', routes.respond);

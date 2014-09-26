@@ -1,26 +1,16 @@
+// dependancies
 var mongoose = require('mongoose');
 
+// local deps
+var conf = require('./../config/config.js');
+
 var Schema = mongoose.Schema;
-
-// TODO: Not defined here
-var site_prefix = "http://localhost:3000/api/v0/facilities/"
-
 var SiteModel = new Schema({
         name: {
             type: String,
             required: true
         },
         
-        // --- 09/22/2014 moved uuid and href to virtual,
-        // uuid: {
-        //     type: String,
-        //     //required: true,
-        //     default: ""
-        // },
-        // href: {
-        //    type: String,
-        //    required: true,
-        // }, 
         active: {
             type: Boolean,
             default: true
@@ -65,7 +55,7 @@ SiteModel.virtual('uuid').get(function(){
 // Create virtual for HREF from ID
 SiteModel.virtual('href').get(function(){
     if (this._id)
-        return site_prefix + this._id.toHexString() + ".json";
+        return conf.site + this._id.toHexString() + ".json";
 });
 
 // Configure toObject

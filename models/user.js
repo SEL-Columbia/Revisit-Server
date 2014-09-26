@@ -1,12 +1,8 @@
+// dependancies
 var mongoose = require('mongoose');
-
-var Schema = mongoose.Schema;
-
-// TODO: Not defined here
-var site_prefix = "http://localhost:3000/api/v0/facilities/"
-
 var SHA2 = new (require('jshashes').SHA512)()
 
+var Schema = mongoose.Schema;
 var UserModel = new Schema({
         username: {
             type: String,
