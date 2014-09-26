@@ -6,9 +6,11 @@ var mkdirp = require('mkdirp')
 // local includes
 var database = require('../models/dbcontroller.js')
 var replies = require('./responses.js');
+var log = require('./../log/logger.js').log;
 
 var near = function(req, res, next) {
-    console.log("\nParams >>>", req.query, req.params);
+    log.debug("\nParams >>>", req.query, req.params);
+    log.info("GET near facility REQUEST", {"req": req.params})
 
     var lat = req.params['lat'];
     var lng = req.params['lng'];
@@ -20,7 +22,9 @@ var near = function(req, res, next) {
     }
 
     database.SiteModel.findNear(lng, lat, rad, earthRad, function(err, sites) {
+        log.info("GET near facility REQUEST", {"site":sites, "err": err})
         if (err) {
+            log.error(err);
             return replies.dbErrorReply(res, err)
         }
 
@@ -30,7 +34,7 @@ var near = function(req, res, next) {
             replies.dbEmptyReturn(res)
         }
 
-        console.log(">>> Complete!");
+        log.debug(">>> Complete!");
         return next(); 
 
     });       
@@ -38,14 +42,17 @@ var near = function(req, res, next) {
 
 var within = function(req, res, next) {
 
-    console.log("\nWithin >>>", req.params);
+    log.info("GET within facility REQUEST", {"req": req.params})
+    log.debug("\nWithin >>>", req.params);
     var swlat = req.params['swlat']
     var swlng = req.params['swlng']
     var nelat = req.params['nelat']
     var nelng = req.params['nelng']
 
     database.SiteModel.findWithin(swlat, swlng, nelat, nelng, function(err, sites) {
+    log.info("GET within facility REPLY", {"site":sites, "err": err})
         if (err) {
+            log.error(err);
             return replies.dbErrorReply(res, err)
         }
 
@@ -55,14 +62,15 @@ var within = function(req, res, next) {
             replies.dbEmptyReturn(res)
         }
 
-        console.log(">>> Complete!");
+        log.debug(">>> Complete!");
         return next(); 
     });
 };
 
 var withinSector = function(req, res, next) {
 
-    console.log("\nWithin Sector >>>", req.params);
+    log.info("GET within sector facility REQUEST", {"req": req.params})
+    log.debug("\nWithin Sector >>>", req.params);
     var swlat = req.params['swlat']
     var swlng = req.params['swlng']
     var nelat = req.params['nelat']
@@ -70,7 +78,9 @@ var withinSector = function(req, res, next) {
     var sector = req.query['sector']
 
     database.SiteModel.findWithinSector(swlat, swlng, nelat, nelng, sector, function(err, sites) {
+        log.info("GET within sector facility REPLY", {"site":sites, "err": err})
         if (err) {
+            log.error(err);
             return replies.dbErrorReply(res, err)
         }
 
@@ -80,17 +90,18 @@ var withinSector = function(req, res, next) {
             replies.dbEmptyReturn(res)
         }
 
-        console.log(">>> Complete!");
+        log.debug(">>> Complete!");
         return next(); 
     });
 };
 
 //TODO: Refactor, does too much work 
 exports.uploadPhoto = function (req, res, next) {
-    var siteId = req.params.id || null;
 
-    //console.log(req.files.photo);
-    
+    log.info("POST photo to facility REQUEST", {"req": req.params, "files": req.files})
+    //log.debug(req.files.photo);
+
+    var siteId = req.params.id || null;
     // if no sideId is included in request, error
     if (!siteId) {
         return next(new restify.MissingParameterError("The required siteId parameter is missing."));
@@ -98,15 +109,20 @@ exports.uploadPhoto = function (req, res, next) {
 
     // make sure the id is associated with a known Site
     database.SiteModel.findById(siteId, function (err, site) { 
-        if (err) return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
+        log.info("POST photo to facility FIND SITE STEP", {"site":site, "err": err})
+        if (err) {
+            log.error(err);
+            return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
+        }
 
         // returns as an array
         site = site[0]
 
         // move the uploaded photo from the temp location (path property) to its final location
         fs.readFile(req.files.photo.path, function (err, data) {
+            log.info("POST photo to facility READ FILE STEP", {"data":data, "err": err})
     		if (err) {
-    			console.log(err);
+    			log.debug(err);
     		}
 
             // excuse the dir hack
@@ -118,13 +134,16 @@ exports.uploadPhoto = function (req, res, next) {
             // create the dir for the site
             mkdirp(rootPath + '/' + siteDir, function (err) {
                 if (err) {
-                    console.error(err);
+                    log.debug(err);
+                    log.error(err);
                     return next(new restify.InternalError(JSON.stringify(err)));
                 } else {
                     fs.writeFile(fullPath, data, function (err) {
-                        console.log('writeFile callback');
+                        log.info("POST photo to facility WRITE SITE STEP", {"site":site, "err": err})
+                        log.debug('writeFile callback');
             			if (err) {
-            				console.log('write error: ' + err);
+            				log.debug('write error: ' + err);
+                            log.error(err);
             				return next(new restify.InternalError(JSON.stringify(err)));
             			}
 
@@ -141,7 +160,7 @@ exports.uploadPhoto = function (req, res, next) {
 
                         }
 
-                        console.log(">>> photo ind:", index, site.properties.photoUrls.indexOf(url));
+                        log.debug(">>> photo ind:", index, site.properties.photoUrls.indexOf(url));
                         if (index != -1) { 
                             site.properties.photoUrls.splice(index, 1, url);
                         } else if (site.properties.photoUrls.indexOf(url) == -1) {
@@ -149,14 +168,16 @@ exports.uploadPhoto = function (req, res, next) {
                             site.properties.photoUrls.push(url)
                         }
 
-                        console.log('site photo url: ' + url);
+                        log.debug('site photo url: ' + url);
 			
                         site.save(function (err, updatedSite, numberAffected) {
+                            log.info("POST photo to facility REPLY", {"site": updatedSite, "err": err})
                             if (err) {
-                				console.log('save error: ' + err);
+                                log.error(err);
+                				log.debug('save error: ' + err);
                 				return next(new restify.InternalError(JSON.stringify(err)));
             				}
-                            console.log('site saved, sending response');
+                            log.debug('site saved, sending response');
 				            // no error, send success
                             res.send(updatedSite);
                         });
