@@ -1,3 +1,6 @@
+// local includes
+var log = require('./../log/logger.js').log;
+
 // parse param and build query for each param field
 knownKeys = [  
                 'allProperties',
@@ -34,7 +37,7 @@ var parseParams = function(params, query) {
         field_names = params.fields.split(",");
         field_names.forEach(function(field) {
             field = field.replace(":", ".");
-            console.log(">>> Field: " + field);
+            log.debug(">>> Field: " + field);
             projections[field] = 1;
 
         })
@@ -71,16 +74,20 @@ var parseParams = function(params, query) {
     // Add in limits
     query = genLimitQuery(params, query);
 
+    log.info("Parsed Params", { "filters" : filters, 
+                                "projections": projections, 
+                                "sorts" : sorts });
+
+
     // Print what I think I sent
-    console.log(" <<<< MY INPUTS ");
-    console.log(">>> Filters " + JSON.stringify(filters));
-    console.log(">>> Projections " + JSON.stringify(projections));
-    console.log(">>> Sorts " + JSON.stringify(sorts));
+    log.debug(" <<<< MY INPUTS ");
+    log.debug(">>> Filters " + JSON.stringify(filters));
+    log.debug(">>> Projections " + JSON.stringify(projections));
+    log.debug(">>> Sorts " + JSON.stringify(sorts));
 
-
-    // Print what I actually sent
-    console.log("\n <<<< MONGO INPUTS ");
-    console.log("Query: Op >>", query.op, 
+        // Print what I actually sent
+    log.debug("\n <<<< MONGO INPUTS ");
+    log.debug("Query: Op >>", query.op, 
                 "\nOptions >>", query.options, 
                 "\nProjections  >>", query._fields,
                 "\nFilters >>>", query._conditions);
@@ -174,7 +181,7 @@ var genAddOnsQuery = function(params, filters) {
     paramKeys = Object.keys(params);
     paramKeys.forEach(function(pkey) {
         if (knownKeys.indexOf(pkey) < 0) {
-            console.log(">>> Unknown: " + pkey)
+            log.debug(">>> Unknown: " + pkey)
             // Determine if mult options passed, restify packages it as an array
             if (typeof params[pkey] === "string") {
                 filters[pkey.replace(":", ".")] =  params[pkey]

@@ -12,4 +12,3 @@ exports.site = "http://" + exports.host
 
 exports.photoPath = "http://" + exports.host
                   + "/sites/photos/";
-//var conf = require('./config/config.js');
