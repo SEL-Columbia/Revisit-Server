@@ -22,6 +22,11 @@ node server.js | ./node_modules/bunyan/bin/bunyan -l ERROR
 * Restify: Defactor restapi builder
 * Mongo: Document store, alot of node integration options
 * Mongoose: Schema type layer for mongo, enforces facility format
+* fs: Writing photos to disk
+* jshashes: hashing basic auth passwords
+* mkdirp: simple recursive directory creation for photos
+* bunyan: logger
+* mocha: For testing (note: installed locally but not recored in package.json)
 
 ## Intended dependancies
 * restify-oauth2: auth server https://github.com/domenic/restify-oauth2 
@@ -33,5 +38,4 @@ node server.js | ./node_modules/bunyan/bin/bunyan -l ERROR
 
 
 ## Deployment
-* ???
-
+* Ruby based deployment through Upstart. Documentation coming soon.
