@@ -26,7 +26,9 @@ node server.js | ./node_modules/bunyan/bin/bunyan -l ERROR
 * jshashes: hashing basic auth passwords
 * mkdirp: simple recursive directory creation for photos
 * bunyan: logger
-* mocha: For testing (note: installed locally but not recored in package.json)
+* mocha: For BDD testing
+* supertest: for testing requests
+* should: readable asserts 
 
 ## Intended dependancies
 * restify-oauth2: auth server https://github.com/domenic/restify-oauth2 
