@@ -107,6 +107,10 @@ exports.uploadPhoto = function (req, res, next) {
         return next(new restify.MissingParameterError("The required siteId parameter is missing."));
     }
 
+    if (!req.files || typeof req.files.photo === 'undefined') {
+        return next(new restify.MissingParameterError("The required photo parameter is missing."));
+    }
+
     // make sure the id is associated with a known Site
     database.SiteModel.findById(siteId, function (err, site) { 
         log.info("POST photo to facility FIND SITE STEP", {"site":site, "err": err})
