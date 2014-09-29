@@ -5,6 +5,14 @@ will server both formhub and revisit (and w/e other services we see fit)
 
 The service will conform to http://facilityregistry.org/ as best as possible
 
+Start the server in one of the following ways:
+````
+node server.js
+node server.js | ./node_modules/bunyan/bin/bunyan -l INFO
+node server.js | ./node_modules/bunyan/bin/bunyan -l DEBUG
+node server.js | ./node_modules/bunyan/bin/bunyan -l ERROR
+````
+
 ## Extra Properties
 * Number of times visited
 * Survey info? Maybe? 
@@ -14,6 +22,11 @@ The service will conform to http://facilityregistry.org/ as best as possible
 * Restify: Defactor restapi builder
 * Mongo: Document store, alot of node integration options
 * Mongoose: Schema type layer for mongo, enforces facility format
+* fs: Writing photos to disk
+* jshashes: hashing basic auth passwords
+* mkdirp: simple recursive directory creation for photos
+* bunyan: logger
+* mocha: For testing (note: installed locally but not recored in package.json)
 
 ## Intended dependancies
 * restify-oauth2: auth server https://github.com/domenic/restify-oauth2 
@@ -25,5 +38,4 @@ The service will conform to http://facilityregistry.org/ as best as possible
 
 
 ## Deployment
-* ???
-
+* Ruby based deployment through Upstart. Documentation coming soon.
