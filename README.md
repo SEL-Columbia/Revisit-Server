@@ -5,8 +5,7 @@ will server both formhub and revisit (and w/e other services we see fit)
 
 The service will conform to http://facilityregistry.org/ as best as possible
 
-Start the server 
-
+Start the server in one of the following ways:
 ````
 node server.js
 node server.js | ./node_modules/bunyan/bin/bunyan -l INFO
