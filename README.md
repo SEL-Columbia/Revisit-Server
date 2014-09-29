@@ -5,6 +5,15 @@ will server both formhub and revisit (and w/e other services we see fit)
 
 The service will conform to http://facilityregistry.org/ as best as possible
 
+Start the server 
+
+````
+node server.js
+node server.js | ./node_modules/bunyan/bin/bunyan -l INFO
+node server.js | ./node_modules/bunyan/bin/bunyan -l DEBUG
+node server.js | ./node_modules/bunyan/bin/bunyan -l ERROR
+````
+
 ## Extra Properties
 * Number of times visited
 * Survey info? Maybe? 
