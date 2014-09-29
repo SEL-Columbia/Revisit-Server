@@ -1,14 +1,17 @@
 // dependancies
 var restify = require('restify')
 
+// local includes
+var log = require('./../log/logger.js').log;
+
 // response_style
 var jsonReply = function(res, json, code) {
-    // TODO: parse the id fields out in the string?
     code = code || 200;
     res.writeHead(code, {
         'Content-Type': 'application/json; charset=utf-8'});
     res.write(JSON.stringify(json))
     res.end()
+    log.info("JSON reply sent", {"code": code});
 }    
 
 // errors
@@ -18,6 +21,8 @@ var dbErrorReply = function(res, err) {
         restCode: "Database Error", 
         message: JSON.stringify(err)
     }));
+
+    log.info("DB ERROR reply sent", {"code": 500});
 }
 
 var apiBadRequest = function(res, data) {
@@ -27,6 +32,8 @@ var apiBadRequest = function(res, data) {
         restCode: "Bad Request", 
         message: "Requested operation is not valid."
     }));
+    
+    log.info("API BAD REQ reply sent", {"code": 400});
 }
 
 var apiUnauthorized = function(res, user) {
@@ -36,6 +43,8 @@ var apiUnauthorized = function(res, user) {
         restCode: "Unauthorized", 
         message: "User: " + user + ", not found or incorrect password."
     }));
+    
+    log.info("API UNAUTH reply sent", {"code": 401});
 }
 
 var apiForbidden = function(res, user) {
@@ -45,6 +54,8 @@ var apiForbidden = function(res, user) {
         restCode: "Forbidden", 
         message: "User: " + user + ", does not have permissions for this request."
     }));
+    
+    log.info("API FORBIDDEN reply sent", {"code": 403});
 }
 
 var dbEmptyReturn = function(res, data) {
@@ -54,6 +65,8 @@ var dbEmptyReturn = function(res, data) {
         restCode: "Not Found", 
         message: "Resource was not found."
     }));
+    
+     log.info("DB EMPTY reply sent", {"code": 404});
 }
 
 // 405 Not allowed (ops that can never be done but are somehow exposed?)
@@ -66,6 +79,8 @@ var dbMissingData = function(res, data) {
         restCode: "Gone", 
         message: "Resource has been removed"
     }));
+    
+     log.info("DB MISSING DATA reply sent", {"code": 410});
 }
 
 

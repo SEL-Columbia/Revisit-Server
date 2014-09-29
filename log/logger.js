@@ -1,7 +1,7 @@
 var bunyan = require('bunyan');
 
 // myapp
-var app_name = "Facility Registry api";
+var app_name = "Facility_Registry_api";
 
 // logger 
 var log = bunyan.createLogger({
@@ -16,7 +16,7 @@ var log = bunyan.createLogger({
         },
         {
             level: 'error',
-            path: './'+app_name+'_err.log'  // log ERROR and above to a file
+            path: './log/'+app_name+'_err.log'  // log ERROR and above to a file
         },
         {
             level: 'debug',
