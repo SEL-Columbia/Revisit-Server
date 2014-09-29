@@ -1,4 +1,5 @@
 var assert = require('assert');
+var request = require('supertest');
 var db_controller = require('./../models/dbcontroller.js');
 
 describe('API Routes', function() {
@@ -10,6 +11,7 @@ describe('API Routes', function() {
     
     describe('#getFacilities', function() {
         it('should return 25 facilties', function() {
+            request(url + .".json");
             assert(false);
         });
 
