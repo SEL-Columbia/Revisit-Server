@@ -1,7 +1,8 @@
 // local includes
 var bunyan = require('bunyan');
 
-var app_name = "Facility_Registry_api";
+var app_name = "Facility_Registry_api",
+    root_path = "/var/log";
 
 // logger 
 var init = function() {
@@ -12,13 +13,13 @@ var init = function() {
                 level: 'info',
                 stream: null,
                 type: 'rotating-file',
-                path: './log/'+app_name+'.log',
+                path: root_path + '/log/'+app_name+'.log',
                 period: '1d',   // daily rotation
                 count: 7        // keep 7 back copies
             },
             {
                 level: 'error',
-                path: './log/'+app_name+'_err.log'  // log ERROR and above to a file
+                path: root_path + '/log/'+app_name+'_err.log'  // log ERROR and above to a file
             },
             {
                 level: 'debug',
