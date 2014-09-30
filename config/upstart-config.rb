@@ -17,19 +17,22 @@ script
     # Store the pid so we can check if it's running later
     echo $$ > #{fetch(:upstart_pid_file_path)}
 
-    exec sudo -u #{fetch(:user)} #{fetch(:node_bin_path)} #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)} >> #{fetch(:upstart_log_path)} 2>&1
+    setuid yourapp
+	setgid yourapp
+	env NODE_ENV=#{fetch:stage}
+    exec #{fetch(:user)} #{fetch(:node_bin_path)} #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)} | bunyan >> #{fetch(:log_path)} 2>&1
 end script
 
 pre-start script
     # Date format same as (new Date()).toISOString() for consistency
-    echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Starting" >> #{fetch(:upstart_log_path)}
+    echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Starting" >> #{fetch(:log_path)}
 end script
 
 pre-stop script
 	# Remove the pid of the startup process
     rm #{fetch(:upstart_pid_file_path)}
 
-    echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Stopping" >> #{fetch(:upstart_log_path)}
+    echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Stopping" >> #{fetch(:log_path)}
 end script
 EOD
 }

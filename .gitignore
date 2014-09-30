@@ -2,7 +2,6 @@
 *.swp
 
 # Logs
-logs
 *.log
 
 # Runtime data

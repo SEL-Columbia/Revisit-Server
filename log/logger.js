@@ -1,25 +1,23 @@
 // local includes
-var bunyan = require('bunyan');
-
-var app_name = "Facility_Registry_api",
-    root_path = "/var/log";
+var bunyan = require('bunyan'),
+    conf = require('../config/config');
 
 // logger 
 var init = function() {
     var log = bunyan.createLogger({
-        name: app_name,
+        name: conf.app_name,
         streams: [
             {
                 level: 'info',
                 stream: null,
                 type: 'rotating-file',
-                path: root_path + '/log/'+app_name+'.log',
+                path: conf.log_root + conf.app_name + '-access.log',
                 period: '1d',   // daily rotation
                 count: 7        // keep 7 back copies
             },
             {
                 level: 'error',
-                path: root_path + '/log/'+app_name+'_err.log'  // log ERROR and above to a file
+                path: conf.log_root + conf.app_name + '-error.log'  // log ERROR and above to a file
             },
             {
                 level: 'debug',
@@ -27,7 +25,6 @@ var init = function() {
             }
         ]
     });
-
     return log;
 }
 
