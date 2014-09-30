@@ -17,7 +17,7 @@ script
     # Store the pid so we can check if it's running later
     echo $$ > #{fetch(:upstart_pid_file_path)}
 
-    exec su -c "#{fetch(:node_bin_path)} #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)}" web | bunyan >> #{fetch(:log_path)} 2>&1
+    exec su -c "NODE_ENV=#{fetch:stage} #{fetch(:node_bin_path)} #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)}" web | bunyan >> #{fetch(:log_path)} 2>&1
 end script
 
 pre-start script

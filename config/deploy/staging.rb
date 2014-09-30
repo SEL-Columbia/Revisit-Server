@@ -21,7 +21,7 @@ server 'staging.revisit.global', user: fetch(:user), roles: %w{web app}
 
 set :deploy_to, "/var/www/staging.revisit.global/api"
 
-set :log_path, "/var/log/revisit/staging.revisit.global-debug.log"
+set :log_path, "/var/log/#{fetch:application}/staging.revisit.global-debug.log"
 
 # We can use environment vars to specify a revision or branch to deploy to staging.
 # Defaults to 'master' branch.

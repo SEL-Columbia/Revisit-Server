@@ -2,7 +2,7 @@
 lock '3.2.1'
 
 
-set :application, "revisit"
+set :application, "revisit-server"
 set :repo_url, 'https://github.com/SEL-Columbia/Revisit-Server.git'
 
 set :server_init_file, 'revisit-daemon.js'
@@ -66,6 +66,7 @@ namespace :setup do
         error "Access log not found, attempting to create it..."
         execute :sudo, "mkdir -p /var/log/#{fetch(:application)}"
         execute :sudo, "touch /var/log/#{fetch(:application)}/#{fetch(:application)}-access.log"
+        execute :sudo, "chown web:web /var/log/#{fetch(:application)}/#{fetch(:application)}-access.log"
       end
 
       info "Checking if error log file is present..."
@@ -75,6 +76,7 @@ namespace :setup do
         error "Error log not found, attempting to create it..."
         execute :sudo, "mkdir -p /var/log/#{fetch(:application)}"
         execute :sudo, "touch /var/log/#{fetch(:application)}/#{fetch(:application)}-error.log"
+        execute :sudo, "chown web:web /var/log/#{fetch(:application)}/#{fetch(:application)}-error.log"
       end
     end
   end
