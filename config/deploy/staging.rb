@@ -17,7 +17,7 @@
 
 set :user, 'web'
 
-server '23.21.86.131', user: fetch(:user), roles: %w{web app}
+server 'staging.revisit.global', user: fetch(:user), roles: %w{web app}
 
 set :deploy_to, "/var/www/staging.revisit.global/api"
 

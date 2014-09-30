@@ -33,14 +33,18 @@ namespace :setup do
   desc "Check remote server settings"
   task :servercheck do
     on roles(:all) do |h|
-      info "Checking PHP Version..."
-      execute :php, '-v'
-
       info "Checking write access..."
       if test("[ -w #{fetch(:deploy_to)} ]")
         info "#{fetch(:deploy_to)} is writable on #{h}"
       else
         error "#{fetch(:deploy_to)} is not writable on #{h}"
+      end
+
+      info "Checking if bunyan is installed globally for logging..."
+      if test("bunyan --version")
+        info "bunyan is available on #{h}"
+      else
+        error "bunyan is not available on #{h}"
       end
     end
   end
@@ -127,6 +131,7 @@ namespace :deploy do
 end
 
 
+before 'deploy', 'setup:servercheck'
 
 # After the app is published, restart the server
 after 'deploy:published', 'deploy:restart'
