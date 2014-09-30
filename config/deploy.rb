@@ -1,8 +1,8 @@
-# config valid only for Capistrano 3.1
+# config valid only for Capistrano 3.2.1
 lock '3.2.1'
 
 
-set :application, "Revisit-Server"
+set :application, "revisit"
 set :repo_url, 'https://github.com/SEL-Columbia/Revisit-Server.git'
 
 set :server_init_file, 'revisit-daemon.js'
@@ -10,7 +10,6 @@ set :server_init_file, 'revisit-daemon.js'
 set :upstart_job_name, 'revisit'
 set :upstart_conf_file_path, "/etc/init/#{fetch(:upstart_job_name)}.conf"
 set :upstart_pid_file_path, "/var/run/#{fetch(:upstart_job_name)}.pid"
-set :upstart_log_path, "/var/log/#{fetch(:upstart_job_name)}.sys.log"
 
 set :node_bin_path, '/usr/bin/node'
 
@@ -33,6 +32,11 @@ namespace :setup do
   desc "Check remote server settings"
   task :servercheck do
     on roles(:all) do |h|
+
+      info "-------------------------"
+      info "-- DEPLOY WRITE ACCESS --"
+      info "-------------------------"
+
       info "Checking write access..."
       if test("[ -w #{fetch(:deploy_to)} ]")
         info "#{fetch(:deploy_to)} is writable on #{h}"
@@ -40,11 +44,37 @@ namespace :setup do
         error "#{fetch(:deploy_to)} is not writable on #{h}"
       end
 
+      info "------------------"
+      info "-- DEPENDENCIES --"
+      info "------------------"
+
       info "Checking if bunyan is installed globally for logging..."
       if test("bunyan --version")
         info "bunyan is available on #{h}"
       else
         error "bunyan is not available on #{h}"
+      end
+
+      info "---------------"
+      info "-- LOG FILES --"
+      info "---------------"
+
+      info "Checking if access log file is present..."
+      if test("[ -f /var/log/#{fetch(:application)}/#{fetch(:application)}-access.log ]")
+        info "Access log is present."
+      else
+        error "Access log not found, attempting to create it..."
+        execute :sudo, "mkdir -p /var/log/#{fetch(:application)}"
+        execute :sudo, "touch /var/log/#{fetch(:application)}/#{fetch(:application)}-access.log"
+      end
+
+      info "Checking if error log file is present..."
+      if test("[ -f /var/log/#{fetch(:application)}/#{fetch(:application)}-error.log ]")
+        info "Error log is present."
+      else
+        error "Error log not found, attempting to create it..."
+        execute :sudo, "mkdir -p /var/log/#{fetch(:application)}"
+        execute :sudo, "touch /var/log/#{fetch(:application)}/#{fetch(:application)}-error.log"
       end
     end
   end

@@ -1,6 +1,6 @@
 // myapp
-exports.app_name = "Facility Registry api";
-exports.version = '0.0.1';
+exports.app_name = "revisit-server";
+exports.version = '0.1.0';
 exports.USE_AUTH = false;
 exports.prePath = '/api/v0';
 exports.host = "localhost";
@@ -12,3 +12,8 @@ exports.site = "http://" + exports.host
 
 exports.photoPath = "http://" + exports.host
                   + "/sites/photos/";
+
+exports.NODE_ENV = process.env.NODE_ENV;
+
+// If this is staging or production, log to /var/log/
+exports.log_root = process.env.NODE_ENV === "STAGING" || process.env.NODE_ENV === "PRODUCTION" ? '/var/log/'+exports.app_name : './log/';
