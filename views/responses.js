@@ -1,5 +1,5 @@
 // dependancies
-var restify = require('restify')
+var restify = require('restify');
 
 // local includes
 var log = require('./../log/logger.js').log;
@@ -9,10 +9,10 @@ var jsonReply = function(res, json, code) {
     code = code || 200;
     res.writeHead(code, {
         'Content-Type': 'application/json; charset=utf-8'});
-    res.write(JSON.stringify(json))
-    res.end()
-    log.info("JSON reply sent", {"code": code});
-}    
+    res.write(JSON.stringify(json));
+    res.end();
+    //log.info("JSON reply sent", {"code": code});
+};
 
 // errors
 var dbErrorReply = function(res, err) {
@@ -22,8 +22,8 @@ var dbErrorReply = function(res, err) {
         message: JSON.stringify(err)
     }));
 
-    log.info("DB ERROR reply sent", {"code": 500});
-}
+    //log.info("DB ERROR reply sent", {"code": 500});
+};
 
 var apiBadRequest = function(res, data) {
     // data is unused
@@ -33,8 +33,8 @@ var apiBadRequest = function(res, data) {
         message: "Requested operation is not valid."
     }));
     
-    log.info("API BAD REQ reply sent", {"code": 400});
-}
+    //log.info("API BAD REQ reply sent", {"code": 400});
+};
 
 var apiUnauthorized = function(res, user) {
     // data is unused
@@ -44,8 +44,8 @@ var apiUnauthorized = function(res, user) {
         message: "User: " + user + ", not found or incorrect password."
     }));
     
-    log.info("API UNAUTH reply sent", {"code": 401});
-}
+    //log.info("API UNAUTH reply sent", {"code": 401});
+};
 
 var apiForbidden = function(res, user) {
     // data is unused
@@ -55,8 +55,8 @@ var apiForbidden = function(res, user) {
         message: "User: " + user + ", does not have permissions for this request."
     }));
     
-    log.info("API FORBIDDEN reply sent", {"code": 403});
-}
+    //log.info("API FORBIDDEN reply sent", {"code": 403});
+};
 
 var dbEmptyReturn = function(res, data) {
     // data is unused
@@ -66,8 +66,8 @@ var dbEmptyReturn = function(res, data) {
         message: "Resource was not found."
     }));
     
-     log.info("DB EMPTY reply sent", {"code": 404});
-}
+     //log.info("DB EMPTY reply sent", {"code": 404});
+};
 
 // 405 Not allowed (ops that can never be done but are somehow exposed?)
 // 409 Conflict (somehow causing collision in db or other conflicts?)
@@ -80,17 +80,17 @@ var dbMissingData = function(res, data) {
         message: "Resource has been removed"
     }));
     
-     log.info("DB MISSING DATA reply sent", {"code": 410});
-}
+     //log.info("DB MISSING DATA reply sent", {"code": 410});
+};
 
 
 // exports
-exports.jsonReply = jsonReply
+exports.jsonReply = jsonReply;
 
 // errors
-exports.apiBadRequest = apiBadRequest
-exports.dbErrorReply = dbErrorReply
-exports.dbEmptyReturn = dbEmptyReturn
-exports.apiUnauthorized = apiUnauthorized
-exports.apiForbidden = apiForbidden
-exports.dbMissingData = dbMissingData
+exports.apiBadRequest = apiBadRequest;
+exports.dbErrorReply = dbErrorReply;
+exports.dbEmptyReturn = dbEmptyReturn;
+exports.apiUnauthorized = apiUnauthorized;
+exports.apiForbidden = apiForbidden;
+exports.dbMissingData = dbMissingData;

@@ -1,104 +1,102 @@
 // local includes
-var database = require('../models/dbcontroller.js')
-var parser = require('../controller/parser.js')
+var database = require('../models/dbcontroller.js');
+var parser = require('../controller/parser.js');
 var replies = require('./responses.js');
-var log = require('./../log/logger.js').log;
 
 // echo
 var respond = function (req, res, next) {
       res.send('hello ' + req.params.name);
       return next();
-}
+};
 
 // views
 var sites = function (req, res, next) {
-    log.debug("\n>>> Finding all sites params", req.params);
-    log.info("GET all facilities REQUEST", {"req": req.params})
+    //log.debug("\n>>> Finding all sites params", req.params);
+    req.log.info("GET all facilities REQUEST", {"req": req.params});
     
     // parse query
-    query = parser.parseParams(req.params, database.SiteModel)
+    query = parser.parseParams(req.params, database.SiteModel);
 
     query.exec(function(err, sites) {
-        log.info("GET all facilities REPLY", {"site": sites, "err": err})
+        //log.info("GET all facilities REPLY", {"site": sites, "err": err})
         if (err) {
-            log.error(err);
-            return replies.dbErrorReply(res, err)
+            //log.error(err);
+            return replies.dbErrorReply(res, err);
         }
 
-        if (sites != null && sites.length > 0) {
-            replies.jsonReply(res, sites)
+        if (sites !== null && sites.length > 0) {
+            replies.jsonReply(res, sites);
         } else {
-            replies.dbEmptyReturn(res)
+            replies.dbEmptyReturn(res);
         }
 
     });
 
-    log.debug(">>> Complete!");
+    //log.debug(">>> Complete!");
     return next();
-}
+};
 
 var site = function (req, res, next) {
-
-    log.debug("\n>>> Search for site with id: " + req.params[0]);
-    log.info("GET a facility REQUEST", {"req": req.params})
+    //log.debug("\n>>> Search for site with id: " + req.params[0]);
+    req.log.info("GET a facility REQUEST", {"req": req.params});
 
     database.SiteModel.findById(req.params[0], function(err, sites) {
-        log.info("GET a facility REPLY", {"site": sites, "err": err})
+        //log.info("GET a facility REPLY", {"site": sites, "err": err})
         if (err) {
-            log.error(err);
-            return replies.dbErrorReply(res, err)
+            req.log.error(err);
+            return replies.dbErrorReply(res, err);
         }
 
-        if (sites != null && sites.length == 1) {
+        if (sites !== null && sites.length == 1) {
             // site = sites[0]; // should only be one
             replies.jsonReply(res, sites);
 
         } else {
             // maybe handle the case where sites.length > 1 seperatly? 
-            replies.dbEmptyReturn(res)
+            replies.dbEmptyReturn(res);
         }
 
     });
 
-    log.debug(">>> Complete!");
+    //log.debug(">>> Complete!");
     return next();
-}
+};
 
 var update = function (req, res, next) {
 
-    log.info("PUT update facility REQUEST", {"req": req.params})
+    req.log.info("PUT update facility REQUEST", {"req": req.params});
 
     var id = req.params[0];
-    log.debug("\n>>> Updating site with id: " + id, req.params);
+    //log.debug("\n>>> Updating site with id: " + id, req.params);
     delete req.params[0];
 
     var success = parser.parseBody(req.params);
-    log.debug(">>> parsed:", req.params)
+    //log.debug(">>> parsed:", req.params)
     if (!success) {
         replies.apiBadRequest(res, success);
         return;
     }
     
     database.SiteModel.updateById(id, req.params, function(err, site) {
-        log.info("PUT update facility REPLY", {"site": site, "err": err})
+        //log.info("PUT update facility REPLY", {"site": site, "err": err})
         if (err) {
             // findbyid raises an error when id is not found, diff then actual err
-            log.error(err);
-            return replies.dbEmptyReturn(res, site)
+            req.log.error(err);
+            return replies.dbEmptyReturn(res, site);
         }
 
-        replies.jsonReply(res, site)
+        replies.jsonReply(res, site);
     });
 
-    log.debug(">>> Complete!");
+    //log.debug(">>> Complete!");
     return next();
-}
+};
 
 var add = function ( req, res, next) {
     
-    log.info("POST add facility REQUEST", {"req": req.params})
-    log.debug("\n >>> Adding new site");
-    log.debug(req.params);
+    log.info("POST add facility REQUEST", {"req": req.params});
+    //log.debug("\n >>> Adding new site");
+    //log.debug(req.params);
 
     var success = parser.parseBody(req.params);
     if (!success) {
@@ -108,46 +106,46 @@ var add = function ( req, res, next) {
 
     var site = new database.SiteModel(req.params);
     site.save(function(err, site) {
-        log.info("POST add facility REPLY", {"site": site, "err": err})
+        //log.info("POST add facility REPLY", {"site": site, "err": err})
         if (err) {
-            log.error(err);
-            return replies.dbErrorReply(res, err)
+            req.log.error(err);
+            return replies.dbErrorReply(res, err);
         }
 
-        replies.jsonReply(res, site, 201)
+        replies.jsonReply(res, site, 201);
 
         });
 
-    log.debug(">>> Complete!");
+    //log.debug(">>> Complete!");
     return next();
-}
+};
 
 var del = function (req, res, next) {
 
-    log.info("DEL delete facility REQUEST", {"req": req.params})
+    req.log.info("DEL delete facility REQUEST", {"req": req.params});
     var id = req.params[0];
-    log.debug("\n>>> Deleting site with id: " + id);
+    //log.debug("\n>>> Deleting site with id: " + id);
 
     database.SiteModel.deleteById(id, function(err, writeSet) {
-        log.info("DEL delete facility REPLY", {"site": writeSet, "err": err})
+        //log.info("DEL delete facility REPLY", {"site": writeSet, "err": err})
         if (err) {
             // findbyid raises an error when id is not found, diff then actual err
-            log.error(err);
-            return replies.dbEmptyReturn(res, writeSet)
+            req.log.error(err);
+            return replies.dbEmptyReturn(res, writeSet);
         }
 
-        replies.jsonReply(res, {"id": id, "message": "Resource deleted"})
+        replies.jsonReply(res, {"id": id, "message": "Resource deleted"});
     });
 
-    log.debug(">>> Complete!");
+    //log.debug(">>> Complete!");
     return next();
-}
+};
 
 // exports
-exports.respond = respond
-exports.sites = sites
-exports.site = site
-exports.update = update 
-exports.add = add
-exports.del = del
+exports.respond = respond;
+exports.sites = sites;
+exports.site = site;
+exports.update = update ;
+exports.add = add;
+exports.del = del;
 
