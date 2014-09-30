@@ -16,6 +16,4 @@ exports.photoPath = "http://" + exports.host
 exports.NODE_ENV = process.env.NODE_ENV;
 
 // If this is staging or production, log to /var/log/
-exports.log_root = process.env.NODE_ENV === "staging" || process.env.NODE_ENV === "production" ? '/var/log/' + exports.app_name + '/': __dirname + '/log/';
-
-console.log("log root: " + exports.log_root);
+exports.log_root = process.env.NODE_ENV === "staging" || process.env.NODE_ENV === "production" ? '/var/log/' + exports.app_name + '/' : __dirname + '/log/';
