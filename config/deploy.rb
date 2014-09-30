@@ -33,9 +33,11 @@ namespace :setup do
   task :servercheck do
     on roles(:all) do |h|
 
+      info " "
       info "-------------------------"
       info "-- DEPLOY WRITE ACCESS --"
       info "-------------------------"
+      info " "
 
       info "Checking write access..."
       if test("[ -w #{fetch(:deploy_to)} ]")
@@ -44,9 +46,11 @@ namespace :setup do
         error "#{fetch(:deploy_to)} is not writable on #{h}"
       end
 
+      info " "
       info "------------------"
       info "-- DEPENDENCIES --"
       info "------------------"
+      info " "
 
       info "Checking if bunyan is installed globally for logging..."
       if test("bunyan --version")
@@ -55,9 +59,11 @@ namespace :setup do
         error "bunyan is not available on #{h}"
       end
 
-      info "---------------"
-      info "-- LOG FILES --"
-      info "---------------"
+      info " "
+      info "---------------------"
+      info "-- CHECK LOG FILES --"
+      info "---------------------"
+      info " "
 
       info "Checking if access log file is present..."
       if test("[ -f /var/log/#{fetch(:application)}/#{fetch(:application)}-access.log ]")
