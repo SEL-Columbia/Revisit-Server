@@ -22,6 +22,7 @@ var server = restify.createServer({
 });
 
 // server modules
+server.pre(restify.pre.sanitizePath());
 server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));

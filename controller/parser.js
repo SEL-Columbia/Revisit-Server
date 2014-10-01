@@ -14,7 +14,7 @@ knownKeys = [
             ]
                     
 // consumes params builds query, returns for view to exec
-var parseParams = function(params, query) {
+var parseParams = function(params, query, hidden) {
 
     var projections = {};     
     var filters = {};
@@ -34,13 +34,21 @@ var parseParams = function(params, query) {
 
     // projections
     if (params.fields) {
+        hidden.uuid = 0;
+        hidden.href = 0;
         field_names = params.fields.split(",");
         field_names.forEach(function(field) {
             field = field.replace(":", ".");
             log.debug(">>> Field: " + field);
-            projections[field] = 1;
+            if (field == "uuid") {
+                delete hidden.uuid
+            } else if (field == "href") {
+                delete hidden.href
+            } else {
+                projections[field] = 1;
+            }
 
-        })
+        });
     }
 
     if (params.allProperties) {
@@ -48,14 +56,6 @@ var parseParams = function(params, query) {
     }
 
 
-     //project out the _id field if any projections are set
-     if (Object.keys(projections).length != 0 
-             && (projections['uuid'] != 1 && projections['href'] != 1)) {
-            // hack: uuid/href will not show up at least one or the other is 
-            // specified. Virtual fields ignore filters 
-            projections["_id"] = 0;
-     }
-    
     // find op is set in stone by this point
     // Note: Cannot exclude and include at the same time in mongo
     query = query.find(filters, projections)
@@ -84,6 +84,7 @@ var parseParams = function(params, query) {
     log.debug(">>> Filters " + JSON.stringify(filters));
     log.debug(">>> Projections " + JSON.stringify(projections));
     log.debug(">>> Sorts " + JSON.stringify(sorts));
+    log.debug(">>> Hidden " + JSON.stringify(hidden));
 
         // Print what I actually sent
     log.debug("\n <<<< MONGO INPUTS ");
@@ -102,6 +103,7 @@ var badKeys = [
                 'url',
                 'createdAt',
                 'id',
+                'href',
                 '__v',
                 'updatedAt'
                ];
