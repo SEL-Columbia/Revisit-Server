@@ -58,8 +58,8 @@ var site = function (req, res, next) {
         }
 
         if (sites !== null && sites.length == 1) {
-            // site = sites[0]; // should only be one
-            replies.jsonReply(res, sites);
+            site = sites[0]; // should only be one
+            replies.jsonReply(res, site);
 
         } else {
             // maybe handle the case where sites.length > 1 seperatly? 
