@@ -1,6 +1,7 @@
 var assert = require('assert');
 var request = require('supertest');
 var should = require('should');
+var _ = require('lodash');
 var db_controller = require('./../models/dbcontroller.js');
 
 describe('API Routes', function(done) {
@@ -209,7 +210,7 @@ describe('API Routes', function(done) {
                         throw err;
                     }
                     
-                    var facilities = JSON.parse(JSON.stringify(res.body.facilities));
+                    var facilities = _.cloneDeep(res.body.facilities)
                     facilities.sort(function(a,b){
                        if (a.name < b.name) 
                            return -1;
@@ -227,7 +228,7 @@ describe('API Routes', function(done) {
         it('should return facilties sorted in descending order by name', 
         function(done) {
             request(url)
-                .get("facilities.json?fields=name&sortDesc=name")
+                .get("facilities.json?fields=name&sortAsc=name")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -235,7 +236,8 @@ describe('API Routes', function(done) {
                         throw err;
                     }
                     
-                    var revfac = JSON.parse(JSON.stringify(res.body.facilities));
+                    console.log(res.body.facilities);
+                    var revfac = _.cloneDeep(res.body.facilities)
                     revfac.sort(function(a,b){
                        if (a.name > b.name) 
                            return -1;
@@ -245,6 +247,10 @@ describe('API Routes', function(done) {
                        return 0;
                     });
 
+                    console.log("------");
+                    console.log(res.body.facilities);
+                    console.log("------");
+                    console.log(revfac);
                     res.body.facilities.should.containDeep(revfac);
                     done();
                 });
