@@ -1,12 +1,12 @@
 // dependancies
-var restify = require('restify')
+var restify = require('restify');
 
 // local includes
-var database = require('../models/dbcontroller.js')
+var database = require('../models/dbcontroller.js');
 var replies = require('./responses.js');
 
 
-var addUser = function(req, res, next) {
+function addUser(req, res, next) {
     console.log("New user:", req.params);
     database.UserModel.addUser(req.params.user, req.params.pass, 
             function(success) {
@@ -17,7 +17,7 @@ var addUser = function(req, res, next) {
     return next();
 }
 
-var login = function(req, res, next) {
+function login(req, res, next) {
     console.log("User:", req.params);
     database.UserModel.login(req.params.user, req.params.pass,
             function(success) {
