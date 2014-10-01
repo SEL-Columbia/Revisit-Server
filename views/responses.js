@@ -5,14 +5,33 @@ var restify = require('restify')
 var log = require('./../log/logger.js').log;
 
 // response_style
-var jsonReply = function(res, json, code) {
+var jsonArrayReply = function(res, sites, code, hidden) {
     code = code || 200;
     res.writeHead(code, {
         'Content-Type': 'application/json; charset=utf-8'});
-    res.write(JSON.stringify(json))
+    // Match the facreg representation of facilities 
+    res.write('{"facilities":[');
+    var len = sites.length;
+    sites.forEach(function(site, ind) {
+        res.write(JSON.stringify(site.toJSON({hide: hidden, transform: true})));
+        if (ind != len - 1) {
+            res.write(", ");
+        }
+    });
+    res.write(']}');
+    res.end()
+    log.info("JSON ARRAY reply sent", {"code": code});
+}    
+
+var jsonReply = function(res, site, code) {
+    code = code || 200;
+    res.writeHead(code, {
+        'Content-Type': 'application/json; charset=utf-8'});
+    res.write(JSON.stringify(site.toJSON()));
     res.end()
     log.info("JSON reply sent", {"code": code});
 }    
+
 
 // errors
 var dbErrorReply = function(res, err) {
@@ -86,6 +105,7 @@ var dbMissingData = function(res, data) {
 
 // exports
 exports.jsonReply = jsonReply
+exports.jsonArrayReply = jsonArrayReply
 
 // errors
 exports.apiBadRequest = apiBadRequest
