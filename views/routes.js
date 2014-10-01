@@ -104,7 +104,7 @@ var update = function (req, res, next) {
 
 var add = function ( req, res, next) {
     
-    log.info("POST add facility REQUEST", {"req": req.params});
+    req.log.info("POST add facility REQUEST", {"req": req.params});
     //log.debug("\n >>> Adding new site");
     //log.debug(req.params);
 
