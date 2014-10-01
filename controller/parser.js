@@ -147,14 +147,16 @@ var genLimitQuery = function(params, query) {
 var genPropQuery = function(projections, prop) {
     // Some weird bug in mongo doesnt allow properties to be set to 0 
     // with other fields set to 1???
-    if (prop == 'false' && projections == {}) {
+    if (prop === 'false' && JSON.stringify(projections) === '{}') {
         projections["properties"] = 0;
     } 
 
     // Setting to true is the default case, unless fields are set then ..,
-    if (prop == 'true' && projections != {}) {
+    if (prop === 'true' && JSON.stringify(projections) !== '{}') {
         projections["properties"] = 1;
     } 
+
+    console.log(projections);
 }
 
 // Sorting by a specific field
