@@ -15,6 +15,7 @@ var log = require('./log/logger.js').log;
 // server
 var server = restify.createServer({
     name: conf.app_name,
+    log: log,
     //https support (should use proper ssl cert)
     //key: fs.readFileSync('/etc/ssl/self-signed/server.key'),
     //certificate: fs.readFileSync('/etc/ssl/self-signed/server.crt'),
@@ -22,6 +23,7 @@ var server = restify.createServer({
 });
 
 // server modules
+server.pre(restify.pre.sanitizePath());
 server.pre(restify.pre.userAgentConnection());
 
 server.use(restify.acceptParser(server.acceptable));
@@ -47,13 +49,16 @@ server.use(restify.throttle({
             }
 }));
 
+// adds child logger to each request in order to track requests
+server.use(restify.requestLogger({
+    // properties: {}
+}));
+
 // From db
 if (conf.USE_AUTH) {
     server.use(function authenticate(req, res, next) {
-        log.debug("\nAttempting Login ...")
         log.info("Basic auth verification", {"user": res.username, "auth": req.authorization});
-        if (req.username == 'anonymous' 
-                || typeof req.authorization.basic == 'undefined') {
+        if (req.username === 'anonymous' || typeof req.authorization.basic === 'undefined') {
             log.info("Basic auth failed");
             return replies.apiUnauthorized(res,"No basic auth information provided");
         }
@@ -71,6 +76,10 @@ if (conf.USE_AUTH) {
     });
 
 }
+
+server.on('after', restify.auditLogger({
+  log: log
+}));
 
 server.listen(conf.port, function() {
      log.info('%s listening at %s', server.name, server.url);
