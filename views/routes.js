@@ -15,7 +15,11 @@ var sites = function (req, res, next) {
     req.log.info("GET all facilities REQUEST", {"req": req.params});
     
     // parse query
-    query = parser.parseParams(req.params, database.SiteModel);
+
+    // virt fields must be handled seperatly 
+    var hidden = {};
+    query = parser.parseParams(req.params, database.SiteModel, hidden);
+    var hidden_str = Object.keys(hidden).join(',');
 
     query.exec(function(err, sites) {
         //log.info("GET all facilities REPLY", {"site": sites, "err": err})
@@ -25,7 +29,13 @@ var sites = function (req, res, next) {
         }
 
         if (sites !== null && sites.length > 0) {
-            replies.jsonReply(res, sites);
+            // check if a site is empty in JSON form (it can never be empty otherwise
+            var a_site = JSON.stringify(sites[0].toJSON({ hide: hidden_str, transform: true}));
+            if (a_site !== "{}") { 
+                replies.jsonArrayReply(res, sites, 200, hidden_str)
+            } else {
+                replies.dbEmptyReturn(res)
+            }
         } else {
             replies.dbEmptyReturn(res);
         }

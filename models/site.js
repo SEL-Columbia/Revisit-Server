@@ -65,13 +65,19 @@ SiteModel.set('toObject', {
 
 // Configure toJSON output
 SiteModel.set('toJSON', {
-    // Include virtuals with json output
-    virtuals: true,
-
-    // remove the _id of every document before returning the result
     transform: function (doc, ret, options) {
-        delete ret._id;
-        delete ret.__v;
+        var obj = doc.toObject(); 
+        
+        // if hide field is currently the only way to remove virtual fields
+        if (options.hide) {
+            options.hide.split(',').forEach(function(prop) {
+                delete obj[prop];
+            });
+        }
+
+        delete obj._id;
+        delete obj.__v;
+        return obj
     }
 });
 
