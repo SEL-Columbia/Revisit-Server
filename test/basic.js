@@ -86,12 +86,12 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                   res.body.facilities.forEach(
+                    res.body.facilities.forEach(
                         function(facility) {
                             facility.should.have.property('name', 
                                     'Brooklyn Hospital Center');
                         });
-                   done();
+                    done();
                 });
         });
         
@@ -107,8 +107,8 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                   // Not very readable ...
-                   res.body.facilities.forEach(
+                    //TODO: Not very readable ...
+                    res.body.facilities.forEach(
                         function(facility) {
                             fac_keys = Object.keys(facility);
                             prop_keys = Object.keys(facility.properties);
@@ -117,7 +117,7 @@ describe('API Routes', function(done) {
                             prop_keys.should.be.equal = ['sector'];
 
                         });
-                   done();
+                    done();
                 });
         });
 
@@ -131,11 +131,11 @@ describe('API Routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                   res.body.facilities.forEach(
+                    res.body.facilities.forEach(
                         function(facility) {
                             facility.properties.should.have.property('sector', 'health');
                         });
-                   done();
+                    done();
                 });
         });
 
@@ -148,13 +148,14 @@ describe('API Routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                   var minDate = new Date(2013, 0, 1);
-                   res.body.facilities.forEach(
+                    
+                    var minDate = new Date(2013, 0, 1);
+                    res.body.facilities.forEach(
                         function(facility) {
                             (new Date(facility.updatedAt)).should.be.above(minDate);
                             //fac_date.should.be.above(minDate);
                         });
-                   done();
+                    done();
                 });
         });
 
@@ -210,6 +211,7 @@ describe('API Routes', function(done) {
                         throw err;
                     }
                     
+                    //TODO: not very readable 
                     var facilities = _.cloneDeep(res.body.facilities)
                     facilities.sort(function(a,b){
                        if (a.name < b.name) 
@@ -220,7 +222,10 @@ describe('API Routes', function(done) {
                        return 0;
                     });
 
-                    res.body.facilities.should.containDeep(facilities);
+                    for (i = 0; i < 25; i++) {
+                        res.body.facilities[i].should.match(facilities[i])
+                    }
+
                     done();
                 });
         });
@@ -228,7 +233,7 @@ describe('API Routes', function(done) {
         it('should return facilties sorted in descending order by name', 
         function(done) {
             request(url)
-                .get("facilities.json?fields=name&sortAsc=name")
+                .get("facilities.json?fields=name&sortDesc=name")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -236,9 +241,9 @@ describe('API Routes', function(done) {
                         throw err;
                     }
                     
-                    console.log(res.body.facilities);
-                    var revfac = _.cloneDeep(res.body.facilities)
-                    revfac.sort(function(a,b){
+                    //TODO: not very readable 
+                    var facilities = _.cloneDeep(res.body.facilities)
+                    facilities.sort(function(a,b){
                        if (a.name > b.name) 
                            return -1;
                        if (a.name < b.name) 
@@ -247,38 +252,79 @@ describe('API Routes', function(done) {
                        return 0;
                     });
 
-                    console.log("------");
-                    console.log(res.body.facilities);
-                    console.log("------");
-                    console.log(revfac);
-                    res.body.facilities.should.containDeep(revfac);
+                    for (i = 0; i < 25; i++) {
+                        res.body.facilities[i].should.be.match(facilities[i])
+                    }
+
                     done();
                 });
         });
 
-//        it('should return facilties with name = "New York" OR name = "Toronto"',
-//        function(done) {
-//            assert(false);
-//        });
-//
-//        // combo a few of them
-//        it('should return facilties sorted in descending order by uuid filtered'
-//                + ' by properties:sector = "health" and updatedAt > Jan 1 2013' 
-//                + ' with only  active,uuid,name,properties:sector fields', 
-//        function(done) {
-//            assert(false);
-//        });
+        it('should return facilties with name = "Brooklyn Hospital Center" OR name = "Public School 34"',
+        function(done) {
+            request(url)
+                .get("facilities.json?name=Public School 34&name=Brooklyn Hospital Center&fields=name")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    
+                    //TODO: This is disgusting 
+                    var seen = [0, 0]
+                    res.body.facilities.forEach(
+                        function(facility) {
+                            var name = facility.name;
+                            if (name === 'Public School 34') {
+                                seen[0] = 1;
+                            } else if (name === 'Brooklyn Hospital Center') {
+                                seen[1] = 1;
+                            } else {
+                                assert(false, "Name: " + name + " not expected.");
+                            }
+                        });
+
+                    assert(seen[0] + seen[1] == 2, "Did not see both facility names.");
+                    done();
+                });
+
+        });
   });
 
-//    describe('#getFacility', function(done) {
-//        it('should return one facilty', function(done) {
-//            assert(false);
-//        });
-//        it('should fail to find a facility with this id', function(done) {
-//            assert(false);
-//        });
-//
-//    });
+    describe('#getFacility', function(done) {
+        it('should return one facilty', function(done) {
+            request(url)
+                .get("facilities/535823222b7a61adb4ed67c7.json")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.should.be.ok;
+                    res.body.uuid.should.match("535823222b7a61adb4ed67c7");
+                    done();
+                });
+
+        });
+        it('should fail to find a facility with this id', function(done) {
+            request(url)
+                .get("facilities/111111111111111111111111.json")
+                .expect('Content-Type', /json/)
+                .expect(404) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.code.should.match("Not Found");
+                    done();
+                });
+        });
+
+    });
 //
 //    describe('#updateFacility', function(done) {
 //        it('should update facility from name="New York" to name="Toronto"', 
