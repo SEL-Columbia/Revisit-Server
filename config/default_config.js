@@ -1,3 +1,7 @@
+/**
+ * This file defines the default settings used on local development environments.
+ */
+
 var _ = require('lodash-node'),
 
 	// the default config, populated below

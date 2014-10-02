@@ -1,4 +1,11 @@
-console.log('LOADING STAGING CONFIG');
+/**
+ * This file defines the settings used on the production environment.
+ *
+ * The defaults are pulled in and combined with the env specific settings -- only the necessary settings
+ * should be overridden here.
+ */
+
+console.log('LOADING PRODUCTION CONFIG');
 
 var _ = require('lodash-node'),
 	def_config = require('./default_config');
