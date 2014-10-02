@@ -32,9 +32,9 @@ var sites = function (req, res, next) {
             // check if a site is empty in JSON form (it can never be empty otherwise
             var a_site = JSON.stringify(sites[0].toJSON({ hide: hidden_str, transform: true}));
             if (a_site !== "{}") { 
-                replies.jsonArrayReply(res, sites, 200, hidden_str)
+                replies.jsonArrayReply(res, sites, 200, hidden_str);
             } else {
-                replies.dbEmptyReturn(res)
+                replies.dbEmptyReturn(res);
             }
         } else {
             replies.dbEmptyReturn(res);

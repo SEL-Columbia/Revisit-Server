@@ -8,7 +8,8 @@ var Schema = mongoose.Schema;
 var SiteModel = new Schema({
         name: {
             type: String,
-            required: true
+            required: true,
+            index: true
         },
         
         active: {
@@ -21,20 +22,24 @@ var SiteModel = new Schema({
         },
         updatedAt: {
             type: Date,
-            default: Date.now
+            default: Date.now,
+            index: true
         },
         coordinates: { 
-            type: [Number], 
-            index: '2dsphere'
+            type: [Number]
         },
         properties: {
             type: {
                 type: String
             },
             sector: {
-                type: String
+                type: String,
+                index: true
             },
-            visits: Number,
+            visits: {
+                type: Number,
+                index: true
+            },
             photoEndpoint: String,
             photoUrls: [String]
         }
@@ -45,6 +50,7 @@ var SiteModel = new Schema({
     }
 );
 
+SiteModel.index({ coordinates: "2dsphere", 'properties.sector': 1 });
 
 // Create virtual for UUID from ID
 SiteModel.virtual('uuid').get(function(){
