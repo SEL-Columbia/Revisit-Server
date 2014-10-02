@@ -104,7 +104,7 @@ var update = function (req, res, next) {
 
 var add = function ( req, res, next) {
     
-    log.info("POST add facility REQUEST", {"req": req.params});
+    req.log.info("POST add facility REQUEST", {"req": req.params});
     //log.debug("\n >>> Adding new site");
     //log.debug(req.params);
 
@@ -136,15 +136,20 @@ var del = function (req, res, next) {
     var id = req.params[0];
     //log.debug("\n>>> Deleting site with id: " + id);
 
-    database.SiteModel.deleteById(id, function(err, writeSet) {
+    database.SiteModel.deleteById(id, function(err, nRemoved, writeStatus) {
         //log.info("DEL delete facility REPLY", {"site": writeSet, "err": err})
         if (err) {
-            // findbyid raises an error when id is not found, diff then actual err
             req.log.error(err);
-            return replies.dbEmptyReturn(res, writeSet);
+            return replies.dbErrorReply(res, err);
         }
 
+
+        if (nRemoved === 0) {
+            return replies.dbEmptyReturn(res);
+        }
+        
         replies.jsonReply(res, {"id": id, "message": "Resource deleted"});
+
     });
 
     //log.debug(">>> Complete!");
