@@ -3,6 +3,7 @@
 
 # Logs
 *.log
+*.DS_Store
 
 # Runtime data
 pids
@@ -31,3 +32,6 @@ photos
 
 # deployment things
 config/*.conf
+
+# ignore data
+data/
