@@ -40,6 +40,11 @@ server.use(restify.throttle({
                 '127.0.0.1': {
                     rate: 0,        // unlimited
                     burst: 0
+                },
+                // SEL IP
+                '128.59.46.168': {
+                    rate: 0,        // unlimited
+                    burst: 0
                 }
 
                 //'admin' : { Cant have both ip and user set for throttling 
