@@ -27,7 +27,7 @@ var jsonReply = function(res, site, code) {
     code = code || 200;
     res.writeHead(code, {
         'Content-Type': 'application/json; charset=utf-8'});
-    res.write(JSON.stringify(site.toJSON()));
+    res.write(JSON.stringify(site));
     res.end()
     log.info("JSON reply sent", {"code": code});
 }    
