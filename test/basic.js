@@ -101,7 +101,7 @@ describe('API Routes', function(done) {
                 + ' fields', function(done) {
 
             request(url)
-                .get("facilities.json?fields=uuid,active,properties:sector")
+                .get("facilities.json?fields=uuid,active,properties:photoUrls")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -116,7 +116,7 @@ describe('API Routes', function(done) {
                             var prop_keys = Object.keys(facility.properties);
 
                             fac_keys.should.be.equal = ['uuid', 'active', 'properties'];
-                            //prop_keys.should.be.equal = ['sector'];
+                            prop_keys.should.be.equal = ['photoUrls'];
 
                         });
                     done();
