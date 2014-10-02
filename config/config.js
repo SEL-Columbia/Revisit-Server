@@ -4,7 +4,7 @@ var _ = require('lodash-node'),
 	env = process.env.NODE_ENV,
 	
 	// if we have an environment specified, pull in its config
-	env_config = env ? require(env) : {},
+	env_config = env ? require('./'+env) : {},
 
 	// the default config, populated below
 	def_config = {};
