@@ -9,6 +9,8 @@ describe('API Routes', function(done) {
 
     before(function(done) {
         //var db = db_controller.connect();
+
+        var deletion_uuid = null;
         done();
     });
     
@@ -110,11 +112,11 @@ describe('API Routes', function(done) {
                     //TODO: Not very readable ...
                     res.body.facilities.forEach(
                         function(facility) {
-                            fac_keys = Object.keys(facility);
-                            prop_keys = Object.keys(facility.properties);
+                            var fac_keys = Object.keys(facility);
+                            var prop_keys = Object.keys(facility.properties);
 
                             fac_keys.should.be.equal = ['uuid', 'active', 'properties'];
-                            prop_keys.should.be.equal = ['sector'];
+                            //prop_keys.should.be.equal = ['sector'];
 
                         });
                     done();
@@ -325,43 +327,148 @@ describe('API Routes', function(done) {
         });
 
     });
-//
-//    describe('#updateFacility', function(done) {
-//        it('should update facility from name="New York" to name="Toronto"', 
-//        function(done) {
-//            assert(false);
-//        });
-//        it("should fail to update facility's createdAt field", function(done) {
-//            assert(false);
-//        });
-//        it('should fail to find any facilities with this id', function(done) {
-//            assert(false);
-//        });
-//        it('should fail to update facility with empty post', function(done) {
-//            assert(false);
-//        });
-//    });
-//
-//    describe('#createFacility', function(done) {
-//        it('should create a facility with name="Toronto"', 
-//        function(done) {
-//            assert(false);
-//        });
-//        it('should fail to create a facility with createdAt field passed in', 
-//        function(done) {
-//            assert(false);
-//        });
-//        it('should fail to create empty facility', function(done) {
-//            assert(false);
-//        });
-//    });
-//
-//    describe('#deleteFacility', function(done) {
-//        it('should delete the facility"', function(done) {
-//            assert(false);
-//        });
-//        it('should fail to delete the facility', function(done) {
-//            assert(false);
-//        });
-//    });
+
+    describe('#updateFacility', function(done) {
+        it('should update facility to a random number string', 
+        function(done) {
+            var new_name = "" + Math.random();
+            request(url)
+                .put("facilities/53e38721e1df2b796e76b7bd.json")
+                .send({"name": new_name})
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.should.be.ok;
+                    res.body.uuid.should.match("53e38721e1df2b796e76b7bd");
+                    res.body.name.should.match(new_name);
+                    done();
+                });
+        });
+    
+        it("should fail to update facility's createdAt field", function(done) {
+            request(url)
+                .put("facilities/53e38721e1df2b796e76b7bd.json")
+                .send({"createdAt": new Date(2000, 0, 1)})
+                .expect('Content-Type', /json/)
+                .expect(400) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.code.should.match("Bad Request");
+                    done();
+                });
+
+        });
+
+        it('should fail to update facility with empty post', function(done) {
+            request(url)
+                .put("facilities/53e38721e1df2b796e76b7bd.json")
+                .send()
+                .expect('Content-Type', /json/)
+                .expect(400) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("Bad Request");
+                    done();
+                });
+        });
+    });
+
+    describe('#createFacility', function(done) {
+        it('should create a facility with name="Toronto"', function(done) {
+            request(url)
+                .post("facilities.json")
+                .send({"name": "Toronto"})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.name.should.match("Toronto");
+                    deletion_uuid = res.body.uuid; // for deletion
+                    done();
+                });
+        });
+
+        it('should fail to create a facility with createdAt field passed in', 
+        function(done) {
+            request(url)
+                .post("facilities.json")
+                .send({"name": "Toronto", "createdAt": new Date(1999, 11, 30)})
+                .expect('Content-Type', /json/)
+                .expect(400) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("Bad Request");
+                    done();
+                });
+        });
+
+        it('should fail to create empty facility', function(done) {
+            request(url)
+                .post("facilities.json")
+                .send()
+                .expect('Content-Type', /json/)
+                .expect(400) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("Bad Request");
+                    done();
+                });
+
+        });
+    });
+
+    describe('#deleteFacility', function(done) {
+        it('should delete the facility"', function(done) {
+            if (!deletion_uuid) {
+                assert(false, "Creation request above failed to return uuid");
+            }
+
+            request(url)
+                .del("facilities/" + deletion_uuid + ".json")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.id.should.match(deletion_uuid);
+                    res.body.message.should.match("Resource deleted");
+                    done();
+                });
+        });
+
+        it('should fail to delete the facility', function(done) {
+            if (!deletion_uuid) {
+                assert(false, "Creation request above failed to return uuid");
+            }
+
+            request(url)
+                .del("facilities/" + deletion_uuid + ".json")
+                .expect('Content-Type', /json/)
+                .expect(404) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("Not Found");
+                    //console.log(res.body)
+                    done();
+                });
+        });
+    });
 });

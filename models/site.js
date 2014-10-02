@@ -140,6 +140,6 @@ SiteModel.statics.updateById = function(id, site, callback) {
 }
 
 SiteModel.statics.deleteById = function(id, callback) {
-    return this.remove({"_id": id }, true).exec(callback);
+    return this.remove({"_id": id }).exec(callback);
 }
 exports.SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');
