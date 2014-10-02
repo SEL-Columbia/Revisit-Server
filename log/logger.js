@@ -2,8 +2,10 @@
 var bunyan = require('bunyan'),
     conf = require('../config/config');
 
+console.log(conf);
+
 // logger 
-var init = function() {
+function init() {
     var log = bunyan.createLogger({
         name: conf.app_name,
         streams: [
