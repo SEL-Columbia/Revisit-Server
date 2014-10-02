@@ -1,3 +1,10 @@
+/**
+ * This file defines the settings used on the staging environment.
+ *
+ * The defaults are pulled in and combined with the env specific settings -- only the necessary settings
+ * should be overridden here.
+ */
+
 console.log('LOADING STAGING CONFIG');
 
 var _ = require('lodash-node'),
