@@ -28,6 +28,19 @@ var SiteModel = new Schema({
         coordinates: { 
             type: [Number]
         },
+        identifiers: [{
+            agency: {
+                type: String
+            },
+
+            context: {
+                type: String
+            },
+
+            id: {
+                type: String
+            }
+        }], 
         properties: {
             type: {
                 type: String
