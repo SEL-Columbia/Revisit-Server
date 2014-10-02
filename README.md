@@ -1,28 +1,23 @@
-# Facility Registry restful api on Node.js
+# Facility Registry API Server
 
-A restful api that will serve facility information + a few more details that 
-will server both formhub and revisit (and w/e other services we see fit)
+A RESTful API that serves basic facility information, designed for simple integration with other applications that use facilities.
 
-The service will conform to http://facilityregistry.org/ as best as possible
+Although we are not limiting the data to health sector facilities, the service will conform to the [FRED API specification](http://facilityregistry.org/) as closely as possible, with several extensions.
 
-Start the server in one of the following ways:
-````
-node server.js
-node server.js | ./node_modules/bunyan/bin/bunyan -l INFO
-node server.js | ./node_modules/bunyan/bin/bunyan -l DEBUG
-node server.js | ./node_modules/bunyan/bin/bunyan -l ERROR
-````
+For details on setting up a local dev enviroment, [see the wiki](https://github.com/SEL-Columbia/Revisit-Server/wiki/Setting-Up-a-Local-Environment).
+
+# Notes
 
 ## Extra Properties
 * Number of times visited
-* Survey info? Maybe? 
-* ???
+* Sector
+* Type
+* Does the facility have power?
 
-## Dependancies
-* Restify: Defactor restapi builder
-* Mongo: Document store, alot of node integration options
-* Mongoose: Schema type layer for mongo, enforces facility format
-* fs: Writing photos to disk
+## Dependencies
+* Restify: REST API framework for node.js
+* Mongo: Document store, a lot of node integration options
+* Mongoose: ODM for mongo, enforces facility format
 * jshashes: hashing basic auth passwords
 * mkdirp: simple recursive directory creation for photos
 * bunyan: logger
@@ -30,14 +25,11 @@ node server.js | ./node_modules/bunyan/bin/bunyan -l ERROR
 * supertest: for testing requests
 * should: readable asserts 
 
-## Intended dependancies
-* restify-oauth2: auth server https://github.com/domenic/restify-oauth2 
-
-## Possible alternatives
+## Possible Alternatives
 * Save: DB interation layer, allows us to swap mongodb without much code change
 * Express: More involved stack then restify, has restify extension as well
 * Mongojs: Exposes mongoapi directly
 
 
 ## Deployment
-* Ruby based deployment through Upstart. Documentation coming soon.
+* Ruby based deployment vai [Capistrano](http://capistranorb.com). [view documentation](https://github.com/SEL-Columbia/Revisit-Server/wiki/Deployment)
