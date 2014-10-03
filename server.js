@@ -117,3 +117,5 @@ server.post(conf.prePath+'/users/login/', auth.login); // just for testing, done
 
 // echo
 server.get('/hello/:name/', routes.respond);
+
+exports.server = server;

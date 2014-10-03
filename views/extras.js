@@ -9,8 +9,7 @@ var replies = require('./responses.js');
 var log = require('./../log/logger.js').log;
 
 function near(req, res, next) {
-    req.log.debug("\nParams >>>", req.query, req.params);
-    req.log.debug("GET near facility REQUEST", {"req": req.params})
+    req.log.info("GET near facility REQUEST", {"req": req.params})
 
     var lat = req.params.lat;
     var lng = req.params.lng;
@@ -46,9 +45,8 @@ function near(req, res, next) {
 }
 
 function within(req, res, next) {
+    req.log.info("GET within facility REQUEST", {"req": req.params})
 
-    req.log.debug("GET within facility REQUEST", {"req": req.params})
-    req.log.debug("\nWithin >>>", req.params);
     var swlat = req.params.swlat;
     var swlng = req.params.swlng;
     var nelat = req.params.nelat;
@@ -77,9 +75,8 @@ function within(req, res, next) {
 }
 
 function withinSector(req, res, next) {
+    req.log.info("GET within sector facility REQUEST", {"req": req.params})
 
-    req.log.debug("GET within sector facility REQUEST", {"req": req.params})
-    req.log.debug("\nWithin Sector >>>", req.params);
     var swlat = req.params.swlat;
     var swlng = req.params.swlng;
     var nelat = req.params.nelat;
@@ -110,8 +107,7 @@ function withinSector(req, res, next) {
 
 //TODO: Refactor, does too much work 
 exports.uploadPhoto = function (req, res, next) {
-
-    req.log.debug("POST photo to facility REQUEST", {"req": req.params, "files": req.files})
+    req.log.info("POST photo to facility REQUEST", {"req": req.params, "files": req.files})
     var siteId = req.params.id || null;
 
     // if no sideId is included in request, error
