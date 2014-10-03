@@ -34,7 +34,9 @@ server.use(restify.gzipResponse());        // compressed response
 server.use(restify.throttle({
             burst: 100,
             rate: 50,
-            ip: true,
+            // ip: true,
+            // we're using nginx as reverse proxy
+            xff: true,
             //username: true, // can throttle on basic auth username
             overrides: {
                 '127.0.0.1': {
