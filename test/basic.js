@@ -18,7 +18,7 @@ describe('API Routes', function(done) {
     describe('#getFacilities', function(done) {
         it('should return 25 facilties', function(done) {
             request(server)
-                .get("/api/v0/facilities.json")
+                .get(conf.prePath + "/facilities.json")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -33,7 +33,7 @@ describe('API Routes', function(done) {
 
         it('should return 25 facilties starting from an offset',function(done) {
             request(server)
-                .get("/api/v0/facilities.json?offset=0")
+                .get(conf.prePath + "/facilities.json?offset=0")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -44,7 +44,7 @@ describe('API Routes', function(done) {
                     var first_set = res.body;
                     first_set.facilities.should.have.length(25);
                     request(server)
-                        .get("/api/v0/facilities.json?offset=25")
+                        .get(conf.prePath + "/facilities.json?offset=25")
                         .expect('Content-Type', /json/)
                         .expect(200) 
                         .end(function(err, res) {
@@ -65,7 +65,7 @@ describe('API Routes', function(done) {
 
         it('should return max number of facilities', function(done) {
             request(server)
-                .get("/api/v0/facilities.json?limit=off")
+                .get(conf.prePath + "/facilities.json?limit=off")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -81,7 +81,7 @@ describe('API Routes', function(done) {
         
         it('should return facilities with name = Brooklyn Hospital Center', function(done) {
             request(server)
-                .get("/api/v0/facilities.json?name=Brooklyn Hospital Center")
+                .get(conf.prePath + "/facilities.json?name=Brooklyn Hospital Center")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -102,7 +102,7 @@ describe('API Routes', function(done) {
                 + ' fields', function(done) {
 
             request(server)
-                .get("/api/v0/facilities.json?fields=uuid,active,properties:photoUrls")
+                .get(conf.prePath + "/facilities.json?fields=uuid,active,properties:photoUrls")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -127,7 +127,7 @@ describe('API Routes', function(done) {
         it('should return facilities with properties:sector = "health"', 
         function(done) {
             request(server)
-                .get("/api/v0/facilities.json?properties:sector=health")
+                .get(conf.prePath + "/facilities.json?properties:sector=health")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -144,7 +144,7 @@ describe('API Routes', function(done) {
 
         it('should return facilities with updatedAt > Jan 1 2013', function(done) {
             request(server)
-                .get("/api/v0/facilities.json?updatedSince=Jan 1 2013")
+                .get(conf.prePath + "/facilities.json?updatedSince=Jan 1 2013")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -164,7 +164,7 @@ describe('API Routes', function(done) {
 
         it('should return facilities with active=true', function(done) {
             request(server)
-                .get("/api/v0/facilities.json?active=true")
+                .get(conf.prePath + "/facilities.json?active=true")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -186,7 +186,7 @@ describe('API Routes', function(done) {
         it('should return facilities without their properties field', 
         function(done) {
             request(server)
-                .get("/api/v0/facilities.json?allProperties=false")
+                .get(conf.prePath + "/facilities.json?allProperties=false")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -206,7 +206,7 @@ describe('API Routes', function(done) {
         it('should return facilties sorted in ascending order by name', 
         function(done) {
             request(server)
-                .get("/api/v0/facilities.json?fields=name&sortAsc=name")
+                .get(conf.prePath + "/facilities.json?fields=name&sortAsc=name")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -236,7 +236,7 @@ describe('API Routes', function(done) {
         it('should return facilties sorted in descending order by name', 
         function(done) {
             request(server)
-                .get("/api/v0/facilities.json?fields=name&sortDesc=name")
+                .get(conf.prePath + "/facilities.json?fields=name&sortDesc=name")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -266,7 +266,7 @@ describe('API Routes', function(done) {
         it('should return facilties with name = "Brooklyn Hospital Center" OR name = "Public School 34"',
         function(done) {
             request(server)
-                .get("/api/v0/facilities.json?name=Public School 34&name=Brooklyn Hospital Center&fields=name")
+                .get(conf.prePath + "/facilities.json?name=Public School 34&name=Brooklyn Hospital Center&fields=name")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -298,7 +298,7 @@ describe('API Routes', function(done) {
     describe('#getFacility', function(done) {
         it('should return one facilty', function(done) {
             request(server)
-                .get("/api/v0/facilities/535823222b7a61adb4ed67c7.json")
+                .get(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -314,7 +314,7 @@ describe('API Routes', function(done) {
         });
         it('should fail to find a facility with this id', function(done) {
             request(server)
-                .get("/api/v0/facilities/111111111111111111111111.json")
+                .get(conf.prePath + "/facilities/111111111111111111111111.json")
                 .expect('Content-Type', /json/)
                 .expect(404) 
                 .end(function(err, res) {
@@ -334,7 +334,7 @@ describe('API Routes', function(done) {
         function(done) {
             var new_name = "" + Math.random();
             request(server)
-                .put("/api/v0/facilities/53e38721e1df2b796e76b7bd.json")
+                .put(conf.prePath + "/facilities/53e38721e1df2b796e76b7bd.json")
                 .send({"name": new_name})
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -352,7 +352,7 @@ describe('API Routes', function(done) {
     
         it("should fail to update facility's createdAt field", function(done) {
             request(server)
-                .put("/api/v0/facilities/53e38721e1df2b796e76b7bd.json")
+                .put(conf.prePath + "/facilities/53e38721e1df2b796e76b7bd.json")
                 .send({"createdAt": new Date(2000, 0, 1)})
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -369,7 +369,7 @@ describe('API Routes', function(done) {
 
         it('should fail to update facility with empty post', function(done) {
             request(server)
-                .put("/api/v0/facilities/53e38721e1df2b796e76b7bd.json")
+                .put(conf.prePath + "/facilities/53e38721e1df2b796e76b7bd.json")
                 .send()
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -386,7 +386,7 @@ describe('API Routes', function(done) {
     describe('#createFacility', function(done) {
         it('should create a facility with name="Toronto"', function(done) {
             request(server)
-                .post("/api/v0/facilities.json")
+                .post(conf.prePath + "/facilities.json")
                 .send({"name": "Toronto"})
                 .expect('Content-Type', /json/)
                 .expect(201) 
@@ -403,7 +403,7 @@ describe('API Routes', function(done) {
         it('should fail to create a facility with createdAt field passed in', 
         function(done) {
             request(server)
-                .post("/api/v0/facilities.json")
+                .post(conf.prePath + "/facilities.json")
                 .send({"name": "Toronto", "createdAt": new Date(1999, 11, 30)})
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -418,7 +418,7 @@ describe('API Routes', function(done) {
 
         it('should fail to create empty facility', function(done) {
             request(server)
-                .post("/api/v0/facilities.json")
+                .post(conf.prePath + "/facilities.json")
                 .send()
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -440,7 +440,7 @@ describe('API Routes', function(done) {
             }
 
             request(server)
-                .del("/api/v0/facilities/" + deletion_uuid + ".json")
+                .del(conf.prePath + "/facilities/" + deletion_uuid + ".json")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -459,7 +459,7 @@ describe('API Routes', function(done) {
             }
 
             request(server)
-                .del("/api/v0/facilities/" + deletion_uuid + ".json")
+                .del(conf.prePath + "/facilities/" + deletion_uuid + ".json")
                 .expect('Content-Type', /json/)
                 .expect(404) 
                 .end(function(err, res) {

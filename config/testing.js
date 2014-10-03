@@ -12,7 +12,7 @@ var _ = require('lodash-node'),
 
 var config = {};
 
-config.prePath = '/api/v0';
+config.prePath = '/api/testing';
 config.host = 'localhost';
 config.port = '1337';
 
