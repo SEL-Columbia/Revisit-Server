@@ -12,7 +12,7 @@ describe('API Extra Routes', function() {
     before(function(done) {
         done();
     });
-    
+
     describe('#near', function() {
         it('should return facilties with 1km', function(done) {
             request(server)
@@ -71,6 +71,78 @@ describe('API Extra Routes', function() {
         it('should return no facilities', function(done) {
              request(server)
                 .get(conf.prePath + "/facilities/near/0.0/0.0/0/km")
+                .expect('Content-Type', /json/)
+                .expect(404) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.code.should.match("Not Found");
+                    done();
+                });
+        });
+    });
+
+    describe('#nearID', function() {
+        it('should return facilties with 1km', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities/near/1/535823222b7a61adb4ed67cd.json/km")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+
+                    res.body.facilities.should.be.ok;
+                    res.body.facilities.should.have.lengthOf(13);
+                    res.body.facilities.length.should.be.above(1);
+                    done();
+                });
+        });
+
+        it('should return facilities within 1mi', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities/near/1/535823222b7a61adb4ed67cd.json")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.be.ok;
+                    res.body.facilities.should.have.lengthOf(16);
+                    res.body.facilities.length.should.be.above(1);
+                    done();
+                });
+
+        });
+
+        it('should return 1 facilities within 0km', function(done) {
+             request(server)
+                .get(conf.prePath + "/facilities/near/0/535823222b7a61adb4ed67cd.json/km")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+
+                    res.body.facilities.should.be.ok;
+                    res.body.facilities.should.have.lengthOf(1);
+                    res.body.facilities[0].uuid.should.match("535823222b7a61adb4ed67cd");
+                    done();
+                });
+        });
+
+        
+        it('should return no facilities', function(done) {
+             request(server)
+                .get(conf.prePath + "/facilities/near/0/111111111111111111111111.json/km")
                 .expect('Content-Type', /json/)
                 .expect(404) 
                 .end(function(err, res) {

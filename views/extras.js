@@ -38,11 +38,38 @@ function near(req, res, next) {
             replies.dbEmptyReturn(res);
         }
 
-        req.log.debug(">>> Complete!");
         return next(); 
 
     });       
 }
+
+function nearID(req, res, next) {
+    req.log.info("GET near facility with id REQUEST", {"req": req.params})
+
+    database.SiteModel.findById(req.params[1], function(err, sites) {
+        if (err) {
+            req.log.error(err);
+            return replies.dbErrorReply(res, err);
+        }
+
+        if (sites === null || sites.length != 1) {
+            return replies.dbEmptyReturn(res);
+
+        } else {
+            site = sites[0]; // should only be one
+            console.log(site);
+            console.log(req.params.length);
+            console.log(req.params);
+            req.params.rad = req.params[0];
+            req.params.units = req.params[2];
+
+            req.params.lng = site.coordinates[0];
+            req.params.lat = site.coordinates[1];
+            return near(req, res, next);
+        }
+    });
+}
+
 
 function within(req, res, next) {
     req.log.info("GET within facility REQUEST", {"req": req.params})
@@ -197,3 +224,4 @@ exports.uploadPhoto = function (req, res, next) {
 exports.within = within;
 exports.withinSector = withinSector;
 exports.near = near;
+exports.nearID = nearID;
