@@ -11,20 +11,16 @@ var respond = function (req, res, next) {
 
 // views
 var sites = function (req, res, next) {
-    //log.debug("\n>>> Finding all sites params", req.params);
     req.log.info("GET all facilities REQUEST", {"req": req.params});
     
     // parse query
-
-    // virt fields must be handled seperatly 
-    var hidden = {};
+    var hidden = {}; // virt fields must be handled seperatly 
     query = parser.parseParams(req.params, database.SiteModel, hidden);
     var hidden_str = Object.keys(hidden).join(',');
 
     query.exec(function(err, sites) {
-        //log.info("GET all facilities REPLY", {"site": sites, "err": err})
         if (err) {
-            //log.error(err);
+            req.log.error(err);
             return replies.dbErrorReply(res, err);
         }
 
@@ -42,16 +38,13 @@ var sites = function (req, res, next) {
 
     });
 
-    //log.debug(">>> Complete!");
     return next();
 };
 
 var site = function (req, res, next) {
-    //log.debug("\n>>> Search for site with id: " + req.params[0]);
     req.log.info("GET a facility REQUEST", {"req": req.params});
 
     database.SiteModel.findById(req.params[0], function(err, sites) {
-        //log.info("GET a facility REPLY", {"site": sites, "err": err})
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
@@ -62,33 +55,27 @@ var site = function (req, res, next) {
             replies.jsonReply(res, site);
 
         } else {
-            // maybe handle the case where sites.length > 1 seperatly? 
             replies.dbEmptyReturn(res);
         }
 
     });
 
-    //log.debug(">>> Complete!");
     return next();
 };
 
 var update = function (req, res, next) {
-
     req.log.info("PUT update facility REQUEST", {"req": req.params});
 
     var id = req.params[0];
-    //log.debug("\n>>> Updating site with id: " + id, req.params);
     delete req.params[0];
 
     var success = parser.parseBody(req.params);
-    //log.debug(">>> parsed:", req.params)
     if (!success) {
         replies.apiBadRequest(res, success);
         return;
     }
     
     database.SiteModel.updateById(id, req.params, function(err, site) {
-        //log.info("PUT update facility REPLY", {"site": site, "err": err})
         if (err) {
             // findbyid raises an error when id is not found, diff then actual err
             req.log.error(err);
@@ -98,15 +85,11 @@ var update = function (req, res, next) {
         replies.jsonReply(res, site);
     });
 
-    //log.debug(">>> Complete!");
     return next();
 };
 
 var add = function ( req, res, next) {
-    
     req.log.info("POST add facility REQUEST", {"req": req.params});
-    //log.debug("\n >>> Adding new site");
-    //log.debug(req.params);
 
     var success = parser.parseBody(req.params);
     if (!success) {
@@ -116,7 +99,6 @@ var add = function ( req, res, next) {
 
     var site = new database.SiteModel(req.params);
     site.save(function(err, site) {
-        //log.info("POST add facility REPLY", {"site": site, "err": err})
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
@@ -126,23 +108,18 @@ var add = function ( req, res, next) {
 
         });
 
-    //log.debug(">>> Complete!");
     return next();
 };
 
 var del = function (req, res, next) {
-
     req.log.info("DEL delete facility REQUEST", {"req": req.params});
     var id = req.params[0];
-    //log.debug("\n>>> Deleting site with id: " + id);
 
     database.SiteModel.deleteById(id, function(err, nRemoved, writeStatus) {
-        //log.info("DEL delete facility REPLY", {"site": writeSet, "err": err})
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
         }
-
 
         if (nRemoved === 0) {
             return replies.dbEmptyReturn(res);
@@ -152,7 +129,6 @@ var del = function (req, res, next) {
 
     });
 
-    //log.debug(">>> Complete!");
     return next();
 };
 
@@ -160,7 +136,7 @@ var del = function (req, res, next) {
 exports.respond = respond;
 exports.sites = sites;
 exports.site = site;
-exports.update = update ;
+exports.update = update;
 exports.add = add;
 exports.del = del;
 

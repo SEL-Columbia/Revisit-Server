@@ -39,7 +39,6 @@ var parseParams = function(params, query, hidden) {
         field_names = params.fields.split(",");
         field_names.forEach(function(field) {
             field = field.replace(":", ".");
-            log.debug(">>> Field: " + field);
             if (field == "uuid") {
                 delete hidden.uuid
             } else if (field == "href") {
@@ -73,25 +72,11 @@ var parseParams = function(params, query, hidden) {
     // Add in limits
     query = genLimitQuery(params, query);
 
-    // log.info("Parsed Params", { "filters" : filters, 
-    //                             "projections": projections, 
-    //                             "sorts" : sorts });
-
-
     // Print what I think I sent
-
-    log.debug(" <<<< MY INPUTS ");
-    log.debug(">>> Filters " + JSON.stringify(filters));
-    log.debug(">>> Projections " + JSON.stringify(projections));
-    log.debug(">>> Sorts " + JSON.stringify(sorts));
-    log.debug(">>> Hidden " + JSON.stringify(hidden));
-
-        // Print what I actually sent
-    // log.debug("\n <<<< MONGO INPUTS ");
-    // log.debug("Query: Op >>", query.op, 
-    //             "\nOptions >>", query.options, 
-    //             "\nProjections  >>", query._fields,
-    //             "\nFilters >>>", query._conditions);
+    log.debug("Parsed Params", { "filters" : filters, 
+                                "projections": projections, 
+                                "hidden": hidden, 
+                                "sorts" : sorts });
 
     return query;
  
@@ -113,6 +98,7 @@ var parseBody = function(body) {
     if (!body || Object.keys(body).length == 0) {
         return false;
     }
+
     // nullifiy body if it contains any of our bad keys
     if (badKeys.some(function(badKey) {
         return Boolean(body[badKey]);
@@ -125,11 +111,10 @@ var parseBody = function(body) {
     return true;
 }
 
-// Parsing helper functions
+/* Parsing helper functions */
 
 // Limit the number of tuples to be returned
 var genLimitQuery = function(params, query) {
-    // XXX: Bad input defaults to off for now (eg. limit = "garbage") 
     if (params.limit == null ) {
         params.limit = 25; 
     } else if (params.limit == "off") {
@@ -155,8 +140,6 @@ var genPropQuery = function(projections, prop) {
     if (prop === 'true' && JSON.stringify(projections) !== '{}') {
         projections["properties"] = 1;
     } 
-
-    console.log(projections);
 }
 
 // Sorting by a specific field
@@ -170,7 +153,6 @@ var genDescQuery = function(sorts, desc) {
 
 // For active queries (require boolean values)
 var genActiveQuery = function(filters, active) {
-
    filters['active'] = active;
 }
 
@@ -185,7 +167,6 @@ var genAddOnsQuery = function(params, filters) {
     paramKeys = Object.keys(params);
     paramKeys.forEach(function(pkey) {
         if (knownKeys.indexOf(pkey) < 0) {
-            //log.debug(">>> Unknown: " + pkey)
             // Determine if mult options passed, restify packages it as an array
             if (typeof params[pkey] === "string") {
                 filters[pkey.replace(":", ".")] =  params[pkey]

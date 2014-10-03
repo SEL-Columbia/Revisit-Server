@@ -14,7 +14,7 @@ var connect = function(db_loc) {
     var db = mongoose.connection;
     db.on('error', console.error.bind(console, 'connection err:')); 
     db.once('open', function() {
-        //log.debug('Connected To Mongo Database at '+'mongodb://'+db_location);
+        log.info('Connected To Mongo Database at '+'mongodb://'+db_location);
     });
 
     db.user = UserModel;
