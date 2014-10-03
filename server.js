@@ -91,13 +91,15 @@ server.listen(conf.port, function() {
      log.debug('%s listening at %s', server.name, server.url);
 });
 
+// Gotta create an regexp object when working with string variables
+var id_path = new RegExp(conf.prePath + "/facilities/(\\w{24})\.json");
 
 // main
 server.get(conf.prePath + "/facilities.json", routes.sites); // all sites
 server.post(conf.prePath + "/facilities.json", routes.add); // new site
-server.get(/\/api\/v0\/facilities\/([0-9a-fA-F]{24})\.json/, routes.site); // site by id
-server.del(/\/api\/v0\/facilities\/([0-9a-fA-F]{24})\.json/, routes.del); // delete by id
-server.put(/\/api\/v0\/facilities\/([0-9a-fA-F]{24})\.json/, routes.update); // update site by id
+server.get(id_path, routes.site); // site by id
+server.del(id_path, routes.del); // delete by id
+server.put(id_path, routes.update); // update site by id
 
 // photos
 server.post(conf.prePath+'/facilities/:id/photos', extras.uploadPhoto);
