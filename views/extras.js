@@ -9,32 +9,37 @@ var replies = require('./responses.js');
 var log = require('./../log/logger.js').log;
 
 function near(req, res, next) {
-    //log.debug("\nParams >>>", req.query, req.params);
-    //log.info("GET near facility REQUEST", {"req": req.params})
+    req.log.debug("\nParams >>>", req.query, req.params);
+    req.log.debug("GET near facility REQUEST", {"req": req.params})
 
     var lat = req.params.lat;
     var lng = req.params.lng;
-    var rad = req.params.rad || 10;
-    var units = req.query.units || 'mi';
+    var rad = req.params.rad;
+    var units = req.params.units || 'mi';
     var earthRad = 3959; // miles
     if (units === 'km') {
         earthRad = 6371;
     }
 
     database.SiteModel.findNear(lng, lat, rad, earthRad, function(err, sites) {
-        //log.info("GET near facility REQUEST", {"site":sites, "err": err})
         if (err) {
-            //log.error(err);
+            req.log.error(err);
             return replies.dbErrorReply(res, err);
         }
 
         if (sites !== null && sites.length > 0) {
-            replies.jsonReply(res, sites);
+            // check if a site is empty in JSON form (it can never be empty otherwise
+            var a_site = JSON.stringify(sites[0].toJSON());
+            if (a_site !== "{}") { 
+                replies.jsonArrayReply(res, sites, 200);
+            } else {
+                replies.dbEmptyReturn(res);
+            }
         } else {
             replies.dbEmptyReturn(res);
         }
 
-        //log.debug(">>> Complete!");
+        req.log.debug(">>> Complete!");
         return next(); 
 
     });       
@@ -42,55 +47,63 @@ function near(req, res, next) {
 
 function within(req, res, next) {
 
-    //log.info("GET within facility REQUEST", {"req": req.params})
-    //log.debug("\nWithin >>>", req.params);
+    req.log.debug("GET within facility REQUEST", {"req": req.params})
+    req.log.debug("\nWithin >>>", req.params);
     var swlat = req.params.swlat;
     var swlng = req.params.swlng;
     var nelat = req.params.nelat;
     var nelng = req.params.nelng;
 
     database.SiteModel.findWithin(swlat, swlng, nelat, nelng, function(err, sites) {
-    //log.info("GET within facility REPLY", {"site":sites, "err": err})
         if (err) {
-            //log.error(err);
+            req.log.error(err);
             return replies.dbErrorReply(res, err);
         }
 
         if (sites !== null && sites.length > 0) {
-            replies.jsonReply(res, sites);
+            // check if a site is empty in JSON form (it can never be empty otherwise
+            var a_site = JSON.stringify(sites[0].toJSON());
+            if (a_site !== "{}") { 
+                replies.jsonArrayReply(res, sites, 200);
+            } else {
+                replies.dbEmptyReturn(res);
+            }
         } else {
             replies.dbEmptyReturn(res);
         }
 
-        //log.debug(">>> Complete!");
         return next(); 
     });
 }
 
 function withinSector(req, res, next) {
 
-    //log.info("GET within sector facility REQUEST", {"req": req.params})
-    //log.debug("\nWithin Sector >>>", req.params);
+    req.log.debug("GET within sector facility REQUEST", {"req": req.params})
+    req.log.debug("\nWithin Sector >>>", req.params);
     var swlat = req.params.swlat;
     var swlng = req.params.swlng;
     var nelat = req.params.nelat;
     var nelng = req.params.nelng;
-    var sector = req.query.sector;
+    var sector = req.params.sector;
 
     database.SiteModel.findWithinSector(swlat, swlng, nelat, nelng, sector, function(err, sites) {
-        //log.info("GET within sector facility REPLY", {"site":sites, "err": err})
         if (err) {
-            //log.error(err);
+            req.log.error(err);
             return replies.dbErrorReply(res, err);
         }
 
         if (sites !== null && sites.length > 0) {
-            replies.jsonReply(res, sites);
+            // check if a site is empty in JSON form (it can never be empty otherwise
+            var a_site = JSON.stringify(sites[0].toJSON());
+            if (a_site !== "{}") { 
+                replies.jsonArrayReply(res, sites, 200);
+            } else {
+                replies.dbEmptyReturn(res);
+            }
         } else {
             replies.dbEmptyReturn(res);
         }
 
-        //log.debug(">>> Complete!");
         return next(); 
     });
 }
@@ -98,10 +111,9 @@ function withinSector(req, res, next) {
 //TODO: Refactor, does too much work 
 exports.uploadPhoto = function (req, res, next) {
 
-    //log.info("POST photo to facility REQUEST", {"req": req.params, "files": req.files})
-    ////log.debug(req.files.photo);
-
+    req.log.debug("POST photo to facility REQUEST", {"req": req.params, "files": req.files})
     var siteId = req.params.id || null;
+
     // if no sideId is included in request, error
     if (!siteId) {
         return next(new restify.MissingParameterError("The required siteId parameter is missing."));
@@ -113,9 +125,8 @@ exports.uploadPhoto = function (req, res, next) {
 
     // make sure the id is associated with a known Site
     database.SiteModel.findById(siteId, function (err, site) { 
-        //log.info("POST photo to facility FIND SITE STEP", {"site":site, "err": err})
         if (err) {
-            //log.error(err);
+            req.log.error(err);
             return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
         }
 
@@ -124,9 +135,8 @@ exports.uploadPhoto = function (req, res, next) {
 
         // move the uploaded photo from the temp location (path property) to its final location
         fs.readFile(req.files.photo.path, function (err, data) {
-            //log.info("POST photo to facility READ FILE STEP", {"data":data, "err": err})
     		if (err) {
-    			//log.debug(err);
+    			req.log.err(err);
     		}
 
             // excuse the dir hack
@@ -138,16 +148,13 @@ exports.uploadPhoto = function (req, res, next) {
             // create the dir for the site
             mkdirp(rootPath + '/' + siteDir, function (err) {
                 if (err) {
-                    //log.debug(err);
+                    req.log.err(err);
                     //log.error(err);
                     return next(new restify.InternalError(JSON.stringify(err)));
                 } else {
                     fs.writeFile(fullPath, data, function (err) {
-                        //log.info("POST photo to facility WRITE SITE STEP", {"site":site, "err": err})
-                        //log.debug('writeFile callback');
             			if (err) {
-            				//log.debug('write error: ' + err);
-                            //log.error(err);
+                            req.log.error(err);
             				return next(new restify.InternalError(JSON.stringify(err)));
             			}
 
@@ -175,10 +182,8 @@ exports.uploadPhoto = function (req, res, next) {
                         //log.debug('site photo url: ' + url);
 			
                         site.save(function (err, updatedSite, numberAffected) {
-                            //log.info("POST photo to facility REPLY", {"site": updatedSite, "err": err})
                             if (err) {
-                                //log.error(err);
-                				//log.debug('save error: ' + err);
+                                req.log.error(err);
                 				return next(new restify.InternalError(JSON.stringify(err)));
             				}
                             //log.debug('site saved, sending response');
