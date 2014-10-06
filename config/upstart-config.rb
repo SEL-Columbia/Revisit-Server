@@ -8,8 +8,8 @@ start on started network
 stop on stopping network
 
 respawn
-#respawn limit 5 30
-expect daemon
+respawn limit 5 30
+expect fork
 
 # respawn
 # respawn limit 20 5
@@ -22,10 +22,10 @@ script
     echo $$ > #{fetch(:upstart_pid_file_path)}
 
     # using forever
-    # exec su -c "NODE_ENV=#{fetch:stage} forever start -a -f #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)}" web >> #{fetch(:log_path)} 2>&1
+    exec su -c "NODE_ENV=#{fetch:stage} forever start -a -f #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)}" web >> #{fetch(:log_path)} 2>&1
     
     # using daemon
-    exec su -c "NODE_ENV=#{fetch:stage} #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)}" web >> #{fetch(:log_path)} 2>&1
+    # exec su -c "NODE_ENV=#{fetch:stage} #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)}" web >> #{fetch(:log_path)} 2>&1
 end script
 
 pre-start script
