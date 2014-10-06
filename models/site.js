@@ -58,9 +58,7 @@ var SiteModel = new Schema({
         }
     }, 
     // remove the unnecessary 'id' virtual field that mongoose adds
-    { 
-        id: false,
-    }
+    { id: false }
 );
 
 SiteModel.index({ coordinates: "2dsphere", 'properties.sector': 1 });
@@ -161,4 +159,12 @@ SiteModel.statics.updateById = function(id, site, callback) {
 SiteModel.statics.deleteById = function(id, callback) {
     return this.remove({"_id": id }).exec(callback);
 }
-exports.SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');
+
+// Avoid recompilation
+var SiteModel;
+if (mongoose.models.SiteModel) {
+    SiteModel = mongoose.model('SiteModel');
+} else {
+    SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');
+}
+exports.SiteModel = SiteModel

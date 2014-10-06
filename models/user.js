@@ -88,4 +88,11 @@ UserModel.statics.addUser = function(username, pass, callback) {
     return;
 }
 
-exports.UserModel = mongoose.model('UserModel', UserModel, 'authentication');
+// Avoid recompilation
+var UserModel;
+if (mongoose.models.UserModel) {
+    UserModel = mongoose.model('UserModel');
+} else {
+    UserModel = mongoose.model('UserModel', UserModel, 'authentication');
+}
+exports.UserModel = UserModel;
