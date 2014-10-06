@@ -127,3 +127,17 @@ server.post(conf.prePath+'/users/login/', auth.login); // just for testing, done
 server.get('/hello/:name/', routes.respond);
 
 exports.server = server;
+
+
+
+/**
+ * Listen for SIGTERM signal, close the server if it's running.
+ * @return {[type]} [description]
+ */
+process.on('SIGTERM', function() {
+    if (server === undefined) return;
+    server.close(function() {
+        // Disconnect from cluster master
+        process.disconnect && process.disconnect();
+    });
+});
