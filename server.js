@@ -110,8 +110,12 @@ server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
 }));
 
 // extras
-server.get(new RegExp(conf.prePath + "/facilities/near/(\\d)/(\\w{24})\.json/(\\w{2})"), extras.nearID); // near site by id
-server.get(new RegExp(conf.prePath + "/facilities/near/(\\d)/(\\w{24})\.json"), extras.nearID); // near site by id
+server.get(new RegExp(conf.prePath + 
+            "/facilities/near/(\\d*(\.\\d+)?)/(\\w{24})\.json/(\\w{2})"), 
+        extras.nearID); // near site by id with units
+server.get(new RegExp(conf.prePath + 
+            "/facilities/near/(\\d*(\.\\d+)?)/(\\w{24})\.json"), 
+        extras.nearID); // near site by id without units
 
 server.get(conf.prePath+'/facilities/near/:lat/:lng/:rad', extras.near); // search near coord
 server.get(conf.prePath+'/facilities/near/:lat/:lng/:rad/:units', extras.near); // search near coord
