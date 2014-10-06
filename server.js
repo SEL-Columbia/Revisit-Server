@@ -64,6 +64,20 @@ server.use(restify.requestLogger({
 // From db
 if (conf.USE_AUTH) {
     server.use(function authenticate(req, res, next) {
+
+        if (conf.ALLOW_GET && req.method === 'GET') {
+            return next();
+        }
+
+        if (conf.ALLOW_POST && req.method === 'POST') {
+            return next();
+        }
+
+        if (conf.ALLOW_PUT && req.method === 'PUT') {
+            return next();
+        }
+
+        // Delete should always be authenticated 
         log.info("Basic auth verification", {"user": res.username, "auth": req.authorization});
         if (req.username === 'anonymous' || typeof req.authorization.basic === 'undefined') {
             log.info("Basic auth failed");
@@ -117,11 +131,11 @@ server.get(new RegExp(conf.prePath +
             "/facilities/near/(\\d*(\.\\d+)?)/(\\w{24})\.json"), 
         extras.nearID); // near site by id without units
 
-server.get(conf.prePath+'/facilities/near/:lat/:lng/:rad', extras.near); // search near coord
-server.get(conf.prePath+'/facilities/near/:lat/:lng/:rad/:units', extras.near); // search near coord
+server.get(conf.prePath+'/facilities/near/:lat/:lng/:rad/', extras.near); // search near coord
+server.get(conf.prePath+'/facilities/near/:lat/:lng/:rad/:units/', extras.near); // search near coord
 
 server.get(conf.prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', extras.within); // search within box
-server.get(conf.prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector', extras.withinSector); // search within box and sector
+server.get(conf.prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector/', extras.withinSector); // search within box and sector
 
 // users
 server.post(conf.prePath+'/users/add/', auth.addUser); // just for testing, should be in admin console
