@@ -35,7 +35,7 @@ namespace :setup do
 
       info " "
       info "-------------------------"
-      info "-- DEPLOY WRITE ACCESS --"
+      info "-- CHECK WRITE ACCESS --"
       info "-------------------------"
       info " "
 
@@ -48,7 +48,7 @@ namespace :setup do
 
       info " "
       info "------------------"
-      info "-- DEPENDENCIES --"
+      info "-- CHECK DEPENDENCIES --"
       info "------------------"
       info " "
 
@@ -72,7 +72,8 @@ namespace :setup do
         error "Access log not found, attempting to create it..."
         execute :sudo, "mkdir -p /var/log/#{fetch(:application)}"
         execute :sudo, "touch /var/log/#{fetch(:application)}/#{fetch(:application)}-access.log"
-        execute :sudo, "chown web:web /var/log/#{fetch(:application)}/#{fetch(:application)}-access.log"
+        # execute :sudo, "chown web:web /var/log/#{fetch(:application)}/#{fetch(:application)}-access.log"
+        execute :sudo, "chmod 662 /var/log/#{fetch(:application)}/#{fetch(:application)}-access.log"
       end
 
       info "Checking if error log file is present..."
@@ -82,7 +83,8 @@ namespace :setup do
         error "Error log not found, attempting to create it..."
         execute :sudo, "mkdir -p /var/log/#{fetch(:application)}"
         execute :sudo, "touch /var/log/#{fetch(:application)}/#{fetch(:application)}-error.log"
-        execute :sudo, "chown web:web /var/log/#{fetch(:application)}/#{fetch(:application)}-error.log"
+        # execute :sudo, "chown web:web /var/log/#{fetch(:application)}/#{fetch(:application)}-error.log"
+        execute :sudo, "chmod 662 /var/log/#{fetch(:application)}/#{fetch(:application)}-error.log"
       end
     end
   end
@@ -125,11 +127,7 @@ namespace :node do
     desc "Start the node application"
     task :start do
       on roles(:app) do
-        if !test("[ -f #{fetch(:upstart_pid_file_path)} ]")
-          execute :sudo, "start #{fetch(:upstart_job_name)}"
-        else
-          error " -- NOT STARTED -- Node server already appears to be running."
-        end
+        execute :sudo, "start #{fetch(:upstart_job_name)}"
       end
     end
 
@@ -137,11 +135,7 @@ namespace :node do
     desc "Stop the node application"
     task :stop do
       on roles(:app) do
-        if test("[ -f #{fetch(:upstart_pid_file_path)} ]")
-          execute :sudo, "stop #{fetch(:upstart_job_name)}"
-        else
-          error " -- NOT STOPPED -- Node server does not appear to be running."
-        end
+        execute :sudo, "stop #{fetch(:upstart_job_name)}"
       end
     end
 
