@@ -63,6 +63,7 @@ describe('API Routes', function(done) {
                 });
         });
 
+        // TODO - use fixtures / mock data so we can check against known max
         it('should return max number of facilities', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json?limit=off")
@@ -98,6 +99,7 @@ describe('API Routes', function(done) {
                 });
         });
         
+        // TODO - change properties:sector to match test, consider making sector required
         it('should return facilities with only uuid, active, properties:sector' 
                 + ' fields', function(done) {
 
@@ -215,6 +217,7 @@ describe('API Routes', function(done) {
                     }
                     
                     //TODO: not very readable 
+                    // TODO - check string sort order via < >
                     var facilities = _.cloneDeep(res.body.facilities)
                     facilities.sort(function(a,b){
                        if (a.name < b.name) 
@@ -383,7 +386,11 @@ describe('API Routes', function(done) {
         });
     });
 
+    
+    // TODO - tests that ensure all required fields are present
+    
     describe('#createFacility', function(done) {
+    
         it('should create a facility with name="Toronto"', function(done) {
             request(server)
                 .post(conf.prePath + "/facilities.json")
