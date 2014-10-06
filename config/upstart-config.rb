@@ -4,20 +4,24 @@ set :upstart_file_contents, lambda {
 description #{fetch(:application)}
 author      "Sustainable Engineering Lab - Columbia University"
 
-start on startup
-stop on shutdown
+start on started network
+stop on stopping network
+
+respawn
+respawn limit 5 30
+expect fork
 
 # respawn
 # respawn limit 20 5
 # kill timeout 10
 
 script
-    export HOME="/root"
+    
 
     # Store the pid so we can check if it's running later
     echo $$ > #{fetch(:upstart_pid_file_path)}
 
-    exec su -c "NODE_ENV=#{fetch:stage} #{fetch(:node_bin_path)} #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)}" web >> #{fetch(:log_path)} 2>&1
+    exec su -c "NODE_ENV=#{fetch:stage} forever start -a -f #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)}" web >> #{fetch(:log_path)} 2>&1
 end script
 
 pre-start script

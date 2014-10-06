@@ -166,7 +166,7 @@ end
 before 'deploy', 'setup:servercheck'
 
 # After the app is published, restart the server
-after 'deploy:published', 'deploy:restart'
+# after 'deploy:published', 'deploy:restart'
 
 # Before restarting the server, make sure the upstart config is present
 before 'deploy:restart', 'node:check_upstart_config'
