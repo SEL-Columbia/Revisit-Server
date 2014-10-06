@@ -9,8 +9,11 @@ implement clusters.
 
 */
 
+// Daemon wasn't working properly, caused upstart to hang due to wrong PID... not sure where the issue originated.
+// Using 'forever' instead.
+// 
 // If using daemon, everything above this line will be executed twice.
-require('daemon')();
+// require('daemon')();
 
 // Run the HTTP server
 // require('../server');

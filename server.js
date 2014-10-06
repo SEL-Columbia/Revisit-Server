@@ -89,8 +89,13 @@ server.on('after', restify.auditLogger({
 }));
 
 server.listen(conf.port, function() {
-     log.info('%s listening at %s', server.name, server.url);
-     log.debug('%s listening at %s', server.name, server.url);
+    log.info('%s listening at %s', server.name, server.url);
+    log.debug('%s listening at %s', server.name, server.url);
+
+    if (process.getgid() === 0) {
+        process.setgid('nobody');
+        process.setuid('nobody');
+    }
 });
 
 // Gotta create an regexp object when working with string variables
