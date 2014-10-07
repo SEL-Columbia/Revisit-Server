@@ -1,6 +1,6 @@
 // dependancies
 var restify = require('restify');
-var fs = require('fs');
+var _ = require('lodash-node');
 var mkdirp = require('mkdirp');
 
 // local includes
@@ -20,6 +20,12 @@ function near(req, res, next) {
         earthRad = 6371;
     }
 
+    if (isNaN(rad) || parseInt(rad) < 0 || isNaN(lng) || isNaN(lat)) {
+        replies.apiBadRequest(res, "TODO: This message is not used!");
+        return;
+    }
+
+    //(lat < 0) || (lng < 0) 
     database.SiteModel.findNear(lng, lat, rad, earthRad, function(err, sites) {
         if (err) {
             req.log.error(err);
@@ -46,7 +52,7 @@ function near(req, res, next) {
 function nearID(req, res, next) {
     req.log.info("GET near facility with id REQUEST", {"req": req.params})
 
-    database.SiteModel.findById(req.params[1], function(err, sites) {
+    database.SiteModel.findById(req.params[2], function(err, sites) {
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
@@ -61,7 +67,7 @@ function nearID(req, res, next) {
             console.log(req.params.length);
             console.log(req.params);
             req.params.rad = req.params[0];
-            req.params.units = req.params[2];
+            req.params.units = req.params[3];
 
             req.params.lng = site.coordinates[0];
             req.params.lat = site.coordinates[1];
@@ -78,6 +84,11 @@ function within(req, res, next) {
     var swlng = req.params.swlng;
     var nelat = req.params.nelat;
     var nelng = req.params.nelng;
+
+    if (isNaN(swlat) || isNaN(swlng) || isNaN(nelng) || isNaN(nelat)) {
+        replies.apiBadRequest(res, "TODO: This message is not used!");
+        return;
+    }
 
     database.SiteModel.findWithin(swlat, swlng, nelat, nelng, function(err, sites) {
         if (err) {
@@ -109,6 +120,12 @@ function withinSector(req, res, next) {
     var nelat = req.params.nelat;
     var nelng = req.params.nelng;
     var sector = req.params.sector;
+
+    if (isNaN(swlat) || isNaN(swlng) || isNaN(nelng) || isNaN(nelat)) {
+        replies.apiBadRequest(res, "TODO: This message is not used!");
+        return;
+    }
+
 
     database.SiteModel.findWithinSector(swlat, swlng, nelat, nelng, sector, function(err, sites) {
         if (err) {
