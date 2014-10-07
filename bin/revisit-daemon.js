@@ -16,7 +16,7 @@ implement clusters.
 // require('daemon')();
 
 // Run the HTTP server
-require('../server');
+// require('../server');
 
 var cluster = require('cluster');
 
