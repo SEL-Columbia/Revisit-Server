@@ -8,13 +8,16 @@ start on started network
 stop on stopping network
 
 respawn
-#respawn limit 5 30
-#expect fork
+respawn limit 20 10
 
+# if using daemon module
 expect daemon
 
-env NODE_ENV=#{fetch:stage}
+# if using forever
+# expect fork
 
+# set node environment and user
+env NODE_ENV=#{fetch:stage}
 setuid web
 
 script
@@ -34,6 +37,8 @@ end script
 pre-stop script
 
     echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Stopping" >> #{fetch(:log_path)}
+
+    # using forever, we need to stop the server here
     # exec forever stop #{fetch(:deploy_to)}/current/bin/#{fetch(:server_init_file)}
 end script
 EOD

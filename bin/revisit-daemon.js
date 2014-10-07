@@ -9,14 +9,13 @@ implement clusters.
 
 */
 
-// Daemon wasn't working properly, caused upstart to hang due to wrong PID... not sure where the issue originated.
-// Using 'forever' instead.
-// 
-// If using daemon, everything above this line will be executed twice.
-// require('daemon')();
 
-// Run the HTTP server
-// require('../server');
+// If using daemon module, everything above this line will be executed twice.
+// You'll need to include "expect daemon" in the upstart script.
+require('daemon')();
+
+// If using forever module to create daemon, remove the above line and replace the "expect daemon" with "expect fork"
+// in the upstart script.
 
 var cluster = require('cluster');
 
