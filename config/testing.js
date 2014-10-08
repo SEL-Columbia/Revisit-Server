@@ -15,6 +15,7 @@ var config = {};
 config.prePath = '/api/testing';
 config.host = 'localhost';
 config.port = '1337';
+config.db_loc = config.host + '/test';
 
 // staging serves the site on port 80 via nginx
 config.site = "http://" + config.host;
