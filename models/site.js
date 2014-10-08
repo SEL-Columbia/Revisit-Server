@@ -2,7 +2,7 @@
 var mongoose = require('mongoose');
 
 // local deps
-var conf = require('./../config/config.js');
+var conf = require('./../config/app/config.js');
 
 var Schema = mongoose.Schema;
 var SiteModel = new Schema({
