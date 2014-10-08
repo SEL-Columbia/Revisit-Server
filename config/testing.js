@@ -15,14 +15,13 @@ var config = {};
 config.prePath = '/api/testing';
 config.host = 'localhost';
 config.port = '1337';
+config.db_loc = config.host + '/test';
 
 // staging serves the site on port 80 via nginx
 config.site = "http://" + config.host;
 config.site += config.prePath + "/" + "facilities/";
 
 config.USE_AUTH = false;
-
-config.log_root = '/var/log/' + def_config.app_name + '/';
 
 // add default config to this env config
 _.defaults(config, def_config);
