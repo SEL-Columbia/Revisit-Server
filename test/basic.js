@@ -1,7 +1,6 @@
 process.env['NODE_ENV'] = 'testing';
 
 var conf = require('./../config/app/config.js');
-var db_conf = require('./../config/db/db_config.js');
 var assert = require('assert');
 var request = require('supertest');
 var should = require('should');
