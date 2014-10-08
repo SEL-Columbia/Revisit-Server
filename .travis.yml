@@ -8,4 +8,4 @@ services:
 
 before_script:
   - sleep 15
-  - mongo mydb_test --eval 'db.addUser("travis", "test");'
+  - mongo test --eval 'db.addUser("test", "test");'
