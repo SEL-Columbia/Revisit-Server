@@ -11,15 +11,8 @@ var conf = require('./../config/db/db_config');
 var connect = function(db_loc) {
     // var db_location = db_loc || 'localhost/sel';
     // log.info(conf);
-    // mongoose.connect('mongodb://revisit:password@localhost/sel');
-	mongoose.connect('mongodb://localhost/sel', {
-        user: 'revisit',
-        pass: 'password',
-        auth: {
-        	authdb: 'sel'
-        }
-    });
-
+    mongoose.connect(conf.uri, conf.options);
+	
     var db = mongoose.connection;
     // var db = mongoose.createConnection('mongodb://test:test@localhost/sel');
     db.on('error', console.error.bind(console, 'connection err:'));
