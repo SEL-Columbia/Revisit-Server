@@ -5,14 +5,23 @@ var assert = require('assert');
 var request = require('supertest');
 var should = require('should');
 var _ = require('lodash-node');
+var exec = require('child_process').exec;
 var server = require('./../server.js').server;
 
 describe('API Routes', function(done) {
 
     before(function(done) {
-        //var db = db_controller.connect();
-        var deletion_uuid = null;
         done();
+    });
+
+    beforeEach(function(done) {
+        console.log(__dirname);
+        var child = exec("sh " + __dirname + "/clean.sh " + __dirname, 
+                    function(err, stdout, stderr) {
+                        if (err) throw err;
+                        // important to wait for clean to return
+                        done();
+                    });
     });
     
     describe('#getFacilities', function(done) {
@@ -334,7 +343,7 @@ describe('API Routes', function(done) {
         function(done) {
             var new_name = "" + Math.random();
             request(server)
-                .put(conf.prePath + "/facilities/53e38721e1df2b796e76b7bd.json")
+                .put(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
                 .send({"name": new_name})
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -343,16 +352,18 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
+                    console.log(res.body);
                     res.body.should.be.ok;
-                    res.body.uuid.should.match("53e38721e1df2b796e76b7bd");
+                    res.body.uuid.should.match("535823222b7a61adb4ed67c7");
                     res.body.name.should.match(new_name);
+                    console.log(res.body);
                     done();
                 });
         });
     
         it("should fail to update facility's createdAt field", function(done) {
             request(server)
-                .put(conf.prePath + "/facilities/53e38721e1df2b796e76b7bd.json")
+                .put(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
                 .send({"createdAt": new Date(2000, 0, 1)})
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -369,7 +380,7 @@ describe('API Routes', function(done) {
 
         it('should fail to update facility with empty post', function(done) {
             request(server)
-                .put(conf.prePath + "/facilities/53e38721e1df2b796e76b7bd.json")
+                .put(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
                 .send()
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -435,40 +446,47 @@ describe('API Routes', function(done) {
 
     describe('#deleteFacility', function(done) {
         it('should delete the facility"', function(done) {
-            if (!deletion_uuid) {
-                assert(false, "Creation request above failed to return uuid");
-            }
 
             request(server)
-                .del(conf.prePath + "/facilities/" + deletion_uuid + ".json")
+                .del(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-                    res.body.id.should.match(deletion_uuid);
+                    res.body.id.should.match("535823222b7a61adb4ed67c7");
                     res.body.message.should.match("Resource deleted");
                     done();
                 });
         });
 
         it('should fail to delete the facility', function(done) {
-            if (!deletion_uuid) {
-                assert(false, "Creation request above failed to return uuid");
-            }
 
+            // fixture readded this id so remove it again.
             request(server)
-                .del(conf.prePath + "/facilities/" + deletion_uuid + ".json")
+                .del(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
                 .expect('Content-Type', /json/)
-                .expect(404) 
+                .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("Not Found");
-                    //console.log(res.body)
-                    done();
+                    res.body.id.should.match("535823222b7a61adb4ed67c7");
+                    res.body.message.should.match("Resource deleted");
+
+                    // no try to redelete
+                    request(server)
+                        .del(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
+                        .expect('Content-Type', /json/)
+                        .expect(404) 
+                        .end(function(err, res) {
+                            if (err) {
+                                throw err;
+                            }
+                            res.body.code.should.match("Not Found");
+                            done();
+                        });
                 });
         });
     });
