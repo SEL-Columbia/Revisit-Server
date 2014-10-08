@@ -11,14 +11,14 @@ var conf = require('./../config/db/db_config');
 var connect = function(db_loc) {
     // var db_location = db_loc || 'localhost/sel';
     // log.info(conf);
-    mongoose.connect('mongodb://revisit:password@localhost:27017/sel');
-// mongoose.connect('mongodb://localhost/sel', {
-//         user: 'revisit',
-//         pass: 'password',
-//         auth: {
-//         	authdb: 'sel'
-//         }
-//     });
+    // mongoose.connect('mongodb://revisit:password@localhost/sel');
+	mongoose.connect('mongodb://localhost/sel', {
+        user: 'revisit',
+        pass: 'password',
+        auth: {
+        	authdb: 'sel'
+        }
+    });
 
     var db = mongoose.connection;
     // var db = mongoose.createConnection('mongodb://test:test@localhost/sel');
@@ -27,7 +27,7 @@ var connect = function(db_loc) {
         log.info('Connected To Mongo Database at ' + conf.uri);
     });
 
-    db.user = UserModel;
+    // db.user = UserModel;
 
     return db;
 };
