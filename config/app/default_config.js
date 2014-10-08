@@ -2,10 +2,7 @@
  * This file defines the default settings used on local development environments.
  */
 
-var _ = require('lodash-node'),
-
-	// the default config, populated below
-	config = {};
+var config = {};
 
 // set defaults -- these will be overriden by duplicate settings in env_config
 config.app_name = "revisit-server";
@@ -26,10 +23,11 @@ config.site += config.prePath + "/" + "facilities/";
 
 config.photoPath = "http://" + config.host + "/sites/photos/";
 
-config.log_root = __dirname + '/../log/';
+config.log_root = __dirname + '/../../log/';
+
+if (config.ALLOW_POST || config.ALLOW_PUT) {
+    config.ALLOW_GET = true; // enforce get if put/post
+}
 
 // export combined configuration for this environment
 module.exports = config;
-
-if (config.ALLOW_POST || config.ALLOW_PUT) 
-    config.ALLOW_GET = true; // enforce get if put/post
