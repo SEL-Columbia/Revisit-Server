@@ -8,8 +8,8 @@ var routes = require('./views/routes.js');
 var extras = require('./views/extras.js');
 var auth = require('./views/auth.js');
 var replies = require('./views/responses.js');
-var db = require('./models/dbcontroller.js').connect();
 var conf = require('./config/config.js');
+var db = require('./models/dbcontroller.js').connect(conf.db_loc);
 var log = require('./log/logger.js').log;
 
 // server
