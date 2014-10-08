@@ -6,6 +6,7 @@ var request = require('supertest');
 var should = require('should');
 var _ = require('lodash-node');
 var server = require('./../server.js').server;
+var exec = require('child_process').exec;
 var db_controller = require('./../models/dbcontroller.js');
 
 describe('API Extra Routes', function() {
@@ -13,6 +14,16 @@ describe('API Extra Routes', function() {
         done();
     });
 
+    beforeEach(function(done) {
+        console.log(__dirname);
+        var child = exec("sh " + __dirname + "/clean.sh " + __dirname, 
+                    function(err, stdout, stderr) {
+                        if (err) throw err;
+                        // important to wait for clean to return
+                        done();
+                    });
+    });
+ 
     describe('#near', function() {
         it('should return facilties with 1km', function(done) {
             request(server)
@@ -26,7 +37,7 @@ describe('API Extra Routes', function() {
 
 
                     res.body.facilities.should.be.ok;
-                    res.body.facilities.should.have.lengthOf(13);
+                    res.body.facilities.should.have.lengthOf(10);
                     res.body.facilities.length.should.be.above(1);
                     done();
                 });
@@ -43,7 +54,7 @@ describe('API Extra Routes', function() {
                     }
 
                     res.body.facilities.should.be.ok;
-                    res.body.facilities.should.have.lengthOf(16);
+                    res.body.facilities.should.have.lengthOf(12);
                     res.body.facilities.length.should.be.above(1);
                     done();
                 });
@@ -97,7 +108,7 @@ describe('API Extra Routes', function() {
 
 
                     res.body.facilities.should.be.ok;
-                    res.body.facilities.should.have.lengthOf(13);
+                    res.body.facilities.should.have.lengthOf(10);
                     res.body.facilities.length.should.be.above(1);
                     done();
                 });
@@ -114,7 +125,7 @@ describe('API Extra Routes', function() {
                     }
 
                     res.body.facilities.should.be.ok;
-                    res.body.facilities.should.have.lengthOf(16);
+                    res.body.facilities.should.have.lengthOf(12);
                     res.body.facilities.length.should.be.above(1);
                     done();
                 });
@@ -170,7 +181,7 @@ describe('API Extra Routes', function() {
 
 
                     res.body.facilities.should.be.ok;
-                    res.body.facilities.should.have.lengthOf(196);
+                    res.body.facilities.should.have.lengthOf(100);
                     done();
                 });
 
@@ -221,7 +232,7 @@ describe('API Extra Routes', function() {
                     }
 
                     res.body.facilities.should.be.ok;
-                    res.body.facilities.should.have.lengthOf(76);
+                    res.body.facilities.should.have.lengthOf(56);
                     done();
                 });
 
