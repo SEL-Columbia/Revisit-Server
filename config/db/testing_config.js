@@ -6,10 +6,7 @@
 
 var config = {
 	uri: 'mongodb://localhost/test',
-	options: {
-		user: 'test',
-		pass: 'test'
-	}
+	options: {}
 };
 
 module.exports = config;
