@@ -2,6 +2,8 @@
 
 A RESTful API that serves basic facility information, designed for simple integration with other applications that use facilities.
 
+[![Build Status](https://travis-ci.org/SEL-Columbia/Revisit-Server.png)](https://travis-ci.org/SEL-Columbia/Revisit-Server)
+
 Although we are not limiting the data to health sector facilities, the service will conform to the [FRED API specification](http://facilityregistry.org/) as closely as possible, with several extensions.
 
 For details on setting up a local dev enviroment, [see the wiki](https://github.com/SEL-Columbia/Revisit-Server/wiki/Setting-Up-a-Local-Environment).
