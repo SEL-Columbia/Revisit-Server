@@ -3,6 +3,8 @@
 
 # Logs
 *.log
+log/*.log.*
+log/*.log
 *.DS_Store
 
 # Runtime data

@@ -72,7 +72,6 @@ describe('API Routes', function(done) {
                 });
         });
 
-        // TODO - use fixtures / mock data so we can check against known max
         it('should return max number of facilities', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json?limit=off")
@@ -83,7 +82,7 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                   res.body.facilities.length.should.be.above(25);
+                   res.body.facilities.should.have.length(100);
                    done();
                 });
 
@@ -108,12 +107,11 @@ describe('API Routes', function(done) {
                 });
         });
         
-        // TODO - change properties:sector to match test, consider making sector required
         it('should return facilities with only uuid, active, properties:sector' 
                 + ' fields', function(done) {
 
             request(server)
-                .get(conf.prePath + "/facilities.json?fields=uuid,active,properties:photoUrls")
+                .get(conf.prePath + "/facilities.json?fields=uuid,active,properties:sector")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -128,7 +126,7 @@ describe('API Routes', function(done) {
                             var prop_keys = Object.keys(facility.properties);
 
                             fac_keys.should.be.equal = ['uuid', 'active', 'properties'];
-                            prop_keys.should.be.equal = ['photoUrls'];
+                            prop_keys.should.be.equal = ['sector'];
 
                         });
                     done();
@@ -469,7 +467,6 @@ describe('API Routes', function(done) {
         });
 
         it('should fail to delete the facility', function(done) {
-
             // fixture readded this id so remove it again.
             request(server)
                 .del(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
@@ -482,7 +479,7 @@ describe('API Routes', function(done) {
                     res.body.id.should.match("535823222b7a61adb4ed67c7");
                     res.body.message.should.match("Resource deleted");
 
-                    // no try to redelete
+                    // now try to redelete
                     request(server)
                         .del(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
                         .expect('Content-Type', /json/)
