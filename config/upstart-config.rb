@@ -18,7 +18,7 @@ expect daemon
 
 # set node environment and user
 env NODE_ENV=#{fetch:stage}
-setuid web
+setuid #{fetch:user}
 
 script
 
