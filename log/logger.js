@@ -1,6 +1,6 @@
 // local includes
 var bunyan = require('bunyan'),
-    conf = require('../config/config');
+    conf = require('../config/app/config');
 
 console.log(conf);
 

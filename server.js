@@ -8,8 +8,9 @@ var routes = require('./views/routes.js');
 var extras = require('./views/extras.js');
 var auth = require('./views/auth.js');
 var replies = require('./views/responses.js');
-var conf = require('./config/config.js');
-var db = require('./models/dbcontroller.js').connect(conf.db_loc);
+var dbcontroller = require('./models/dbcontroller.js');
+var db = dbcontroller.connect();
+var conf = require('./config/app/config.js');
 var log = require('./log/logger.js').log;
 
 // server
@@ -84,7 +85,7 @@ if (conf.USE_AUTH) {
             return replies.apiUnauthorized(res,"No basic auth information provided");
         }
     
-        db.user.login(req.username, req.authorization.basic.password, function(success) {
+        dbcontroller.UserModel.login(req.username, req.authorization.basic.password, function(success) {
             if (!success) {
                 log.info("Basic auth failed");
                 return replies.apiUnauthorized(res, req.username);
