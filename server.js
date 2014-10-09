@@ -1,8 +1,6 @@
 // dependancies 
 var restify = require('restify');
 
-//var fs = require('fs');
-
 // local includes
 var routes = require('./views/routes.js');
 var extras = require('./views/extras.js');
@@ -49,11 +47,6 @@ server.use(restify.throttle({
                     rate: 0,        // unlimited
                     burst: 0
                 }
-
-                //'admin' : { Cant have both ip and user set for throttling 
-                //    rate: 0,
-                //    burst: 0
-                //}
             }
 }));
 
@@ -131,17 +124,15 @@ server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
 
 // extras
 server.get(new RegExp(conf.prePath + 
-            "/facilities/near/(\\d*(\.\\d+)?)/(\\w{24})\.json/(\\w{2})"), 
+            "/near/facilities/(\\w{24})\.json"), 
+            //"/near/facilities/(\\d*(\.\\d+)?)/(\\w{24})\.json"), 
         extras.nearID); // near site by id with units
-server.get(new RegExp(conf.prePath + 
-            "/facilities/near/(\\d*(\.\\d+)?)/(\\w{24})\.json"), 
-        extras.nearID); // near site by id without units
 
-server.get(conf.prePath+'/facilities/near/:lat/:lng/:rad/', extras.near); // search near coord
-server.get(conf.prePath+'/facilities/near/:lat/:lng/:rad/:units/', extras.near); // search near coord
+server.get(conf.prePath+'/near/facilities.json/:lat/:lng/:rad/', extras.near); // search near coord
+server.get(conf.prePath+'/near/facilities.json/:lat/:lng/:rad/:units/', extras.near); // search near coord
 
-server.get(conf.prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/', extras.within); // search within box
-server.get(conf.prePath+'/facilities/within/:swlat/:swlng/:nelat/:nelng/:sector/', extras.withinSector); // search within box and sector
+server.get(conf.prePath+'/within/facilities.json/:swlat/:swlng/:nelat/:nelng/', extras.within); // search within box
+server.get(conf.prePath+'/within/facilities.json/:swlat/:swlng/:nelat/:nelng/:sector/', extras.withinSector); // search within box and sector
 
 // users
 server.post(conf.prePath+'/users/add/', auth.addUser); // just for testing, should be in admin console
@@ -151,8 +142,6 @@ server.post(conf.prePath+'/users/login/', auth.login); // just for testing, done
 server.get('/hello/:name/', routes.respond);
 
 exports.server = server;
-
-
 
 /**
  * Listen for SIGTERM signal, close the server if it's running.
