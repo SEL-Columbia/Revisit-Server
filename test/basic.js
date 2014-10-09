@@ -7,32 +7,38 @@ var should = require('should');
 var _ = require('lodash-node');
 var exec = require('child_process').exec;
 var server = require('./../server.js').server;
+var sites = require('./fixturez.js');
 var SiteModel = require('../models/dbcontroller').SiteModel;
-var sites = require('./fixtures.js');
 
 describe('API Routes', function(done) {
 
+    var the_uuid = null;
     before(function(done) {
-        done();
+       done(); 
     });
 
     beforeEach(function(done) {
-        console.log(__dirname);
 
         SiteModel.find({}).remove(function(err, result) {
             SiteModel.collection.insert(sites, function(err, result) {
                 if (err) console.log(err);
-                    done();
+
+                //TODO: Get endpoint through mongo instead of endpoint
+                request(server)
+                    .get(conf.prePath + "/facilities.json?limit=1")
+                    .expect(200) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+
+                        the_uuid = res.body.facilities[0].uuid;
+                        done();
+                    });
+
                 });
         });
-
-        
-        // var child = exec("sh " + __dirname + "/clean.sh " + __dirname, 
-        //             function(err, stdout, stderr) {
-        //                 if (err) throw err;
-        //                 // important to wait for clean to return
-        //                 done();
-        //             });
+                
     });
     
     describe('#getFacilities', function(done) {
@@ -319,7 +325,7 @@ describe('API Routes', function(done) {
     describe('#getFacility', function(done) {
         it('should return one facilty', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
+                .get(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -328,7 +334,7 @@ describe('API Routes', function(done) {
                     }
 
                     res.body.should.be.ok;
-                    res.body.uuid.should.match("535823222b7a61adb4ed67c7");
+                    res.body.uuid.should.match(the_uuid);
                     done();
                 });
 
@@ -355,7 +361,7 @@ describe('API Routes', function(done) {
         function(done) {
             var new_name = "" + Math.random();
             request(server)
-                .put(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
+                .put(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .send({"name": new_name})
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -366,7 +372,7 @@ describe('API Routes', function(done) {
 
                     console.log(res.body);
                     res.body.should.be.ok;
-                    res.body.uuid.should.match("535823222b7a61adb4ed67c7");
+                    res.body.uuid.should.match(the_uuid);
                     res.body.name.should.match(new_name);
                     console.log(res.body);
                     done();
@@ -375,7 +381,7 @@ describe('API Routes', function(done) {
     
         it("should fail to update facility's createdAt field", function(done) {
             request(server)
-                .put(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
+                .put(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .send({"createdAt": new Date(2000, 0, 1)})
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -392,7 +398,7 @@ describe('API Routes', function(done) {
 
         it('should fail to update facility with empty post', function(done) {
             request(server)
-                .put(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
+                .put(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .send()
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -464,14 +470,14 @@ describe('API Routes', function(done) {
         it('should delete the facility"', function(done) {
 
             request(server)
-                .del(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
+                .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-                    res.body.id.should.match("535823222b7a61adb4ed67c7");
+                    res.body.id.should.match(the_uuid);
                     res.body.message.should.match("Resource deleted");
                     done();
                 });
@@ -480,19 +486,19 @@ describe('API Routes', function(done) {
         it('should fail to delete the facility', function(done) {
             // fixture readded this id so remove it again.
             request(server)
-                .del(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
+                .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-                    res.body.id.should.match("535823222b7a61adb4ed67c7");
+                    res.body.id.should.match(the_uuid);
                     res.body.message.should.match("Resource deleted");
 
                     // now try to redelete
                     request(server)
-                        .del(conf.prePath + "/facilities/535823222b7a61adb4ed67c7.json")
+                        .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                         .expect('Content-Type', /json/)
                         .expect(404) 
                         .end(function(err, res) {
