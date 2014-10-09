@@ -65,6 +65,8 @@ namespace :setup do
       info "---------------------"
       info " "
 
+      execute :sudo, "chown -R #{fetch:user}:#{fetch:user} /var/log/#{fetch(:application)}"
+
       info "Checking if access log file is present..."
       if test("[ -f /var/log/#{fetch(:application)}/#{fetch(:application)}-access.log ]")
         info "Access log is present."
