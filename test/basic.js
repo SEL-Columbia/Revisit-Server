@@ -7,6 +7,8 @@ var should = require('should');
 var _ = require('lodash-node');
 var exec = require('child_process').exec;
 var server = require('./../server.js').server;
+var SiteModel = require('../models/dbcontroller').SiteModel;
+var sites = require('./fixtures.js');
 
 describe('API Routes', function(done) {
 
@@ -16,12 +18,21 @@ describe('API Routes', function(done) {
 
     beforeEach(function(done) {
         console.log(__dirname);
-        var child = exec("sh " + __dirname + "/clean.sh " + __dirname, 
-                    function(err, stdout, stderr) {
-                        if (err) throw err;
-                        // important to wait for clean to return
-                        done();
-                    });
+
+        SiteModel.find({}).remove(function(err, result) {
+            SiteModel.collection.insert(sites, function(err, result) {
+                if (err) console.log(err);
+                    done();
+                });
+        });
+
+        
+        // var child = exec("sh " + __dirname + "/clean.sh " + __dirname, 
+        //             function(err, stdout, stderr) {
+        //                 if (err) throw err;
+        //                 // important to wait for clean to return
+        //                 done();
+        //             });
     });
     
     describe('#getFacilities', function(done) {
