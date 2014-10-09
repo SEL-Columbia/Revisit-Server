@@ -8,9 +8,9 @@ var config = {};
 config.app_name = "revisit-server";
 config.version = '0.1.0';
 
-config.USE_AUTH = true;
+config.USE_AUTH = false;
 config.ALLOW_GET = true;
-config.ALLOW_POST = true;
+config.ALLOW_POST = false;
 config.ALLOW_PUT = false;
 
 config.prePath = '/api/v0';
