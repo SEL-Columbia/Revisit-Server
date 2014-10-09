@@ -16,7 +16,9 @@ describe('API Routes', function(done) {
 
     beforeEach(function(done) {
         console.log(__dirname);
-        var child = exec("sh " + __dirname + "/clean.sh " + __dirname, 
+        var child = exec('mongo test --eval "db.dropDatabase();"'
+                + ' && mongoimport -d test -c facilities ' 
+                + __dirname + '/fixtures.json',
                     function(err, stdout, stderr) {
                         if (err) throw err;
                         // important to wait for clean to return
