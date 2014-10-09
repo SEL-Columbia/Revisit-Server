@@ -7,10 +7,7 @@ var should = require('should');
 var _ = require('lodash-node');
 var server = require('./../server.js').server;
 var exec = require('child_process').exec;
-
 var db_controller = require('./../models/dbcontroller.js');
-var SiteModel = require('../models/dbcontroller').SiteModel;
-var sites = require('./fixtures.js');
 
 describe('API Extra Routes', function() {
     before(function(done) {
@@ -19,20 +16,17 @@ describe('API Extra Routes', function() {
 
     beforeEach(function(done) {
         console.log(__dirname);
-
-        SiteModel.find({}).remove(function(err, result) {
-            SiteModel.create(sites, function(err, result) {
-                if (err) console.log(err);
-                done();
-            });
-        });
-
-        // var child = exec("sh " + __dirname + "/clean.sh " + __dirname, 
-        //             function(err, stdout, stderr) {
-        //                 if (err) throw err;
-        //                 // important to wait for clean to return
-        //                 done();
-        //             });
+        var child = exec('mongo test --eval "db.dropDatabase();"'
+                + ' && mongoimport -d test -c facilities ' 
+                + __dirname + '/fixtures.json',
+                    function(err, stdout, stderr) {
+                        console.log(stderr);
+                        console.log(stdout);
+                        console.log(err);
+                        if (err) throw err;
+                        // important to wait for clean to return
+                        done();
+                    });
     });
  
     describe('#near', function() {
