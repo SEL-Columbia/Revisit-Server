@@ -20,6 +20,9 @@ describe('API Routes', function(done) {
                 + ' && mongoimport -d test -c facilities ' 
                 + __dirname + '/fixtures.json',
                     function(err, stdout, stderr) {
+                        console.log(stderr);
+                        console.log(stdout);
+                        console.log(err);
                         if (err) throw err;
                         // important to wait for clean to return
                         done();
