@@ -19,8 +19,8 @@ set :user, 'web'
 
 server 'staging.revisit.global', user: fetch(:user), roles: %w{web app}
 
+# PATHS
 set :deploy_to, "/var/www/staging.revisit.global/api"
-
 set :log_path, "/var/log/#{fetch:application}/staging.revisit.global-debug.log"
 
 set :linked_files, %w{config/db/staging_config.js}

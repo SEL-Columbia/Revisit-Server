@@ -6,10 +6,7 @@
 
 var config = {
 	uri: 'mongodb://localhost/sel',
-	options: {
-		user: 'revisit',
-		pass: 'password'
-	}
+	options: {}
 };
 
 module.exports = config;
