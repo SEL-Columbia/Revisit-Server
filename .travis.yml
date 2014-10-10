@@ -5,3 +5,6 @@ node_js:
 
 services:
   - mongodb
+  
+notifications:
+  irc: "irc.freenode.org#sel-columbia"
