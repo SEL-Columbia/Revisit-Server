@@ -15,9 +15,6 @@ set :node_bin_path, '/usr/bin/node'
 
 set :npm_roles, :web
 
-# load in upstart config content
-require_relative "upstart-config.rb"
-
 # Default value for :linked_files is []
 # set :linked_files, %w{config/database.yml}
 
@@ -99,20 +96,29 @@ namespace :setup do
         info " "
 
         run_locally do
-          execute :tar, "-zcf scripts/mongo.tar.gz scripts/mongo"
+          execute :tar, "-zcf config/mongo.tar.gz config/scripts/mongo"
+        end
+
+        require_relative "scripts/provision.rb"
+
+        tmp_provision_path = "config/provision.sh"
+        run_locally do
+          open(tmp_provision_path, 'w') do |f|
+            f.puts "#{fetch(:provision_file_contents)}" 
+          end
         end
 
         on roles(:app) do
           # upload to the user's home folder then execute
-          upload! "scripts/provision.sh", "/home/#{fetch:user}/provision.sh"
+          upload! tmp_provision_path, "/home/#{fetch:user}/provision.sh"
           execute :sudo, "chmod +x /home/#{fetch:user}/provision.sh"
           
           # upload mongo scripts
-          upload! "scripts/mongo.tar.gz", "/home/#{fetch:user}/mongo.tar.gz"
+          upload! "config/mongo.tar.gz", "/home/#{fetch:user}/mongo.tar.gz"
           execute :tar, "-zxf /home/#{fetch:user}/mongo.tar.gz"
 
           # provision!
-          execute :sudo, "$HOME/provision.sh"
+          execute :sudo, "/home/#{fetch:user}/provision.sh"
           
           ### cleanup remote
           execute :rm, "-rf /home/#{fetch:user}/mongo*"
@@ -123,7 +129,8 @@ namespace :setup do
 
         ### cleanup local
         run_locally do
-          execute :rm, "-rf scripts/mongo.tar.gz"
+          execute :rm, "-rf config/mongo.tar.gz"
+          execute :rm, "-rf", tmp_provision_path
         end
 
         info " "
@@ -131,12 +138,12 @@ namespace :setup do
         info " "
         info "It is recommended that you now change the database users' credentials on the server."
         info " "
-        info "Once new credentials have been put in place, you'll want to generate the db config:"
+        info "Once new credentials have been put in place, you'll want to generate the db config by running:"
         info " "
         info "$ cap [env] setup:db:config"
-        
+        info " "
       end
-    end  
+    end
 
   namespace :db do 
     desc "Create database settings"
@@ -148,11 +155,11 @@ namespace :setup do
         info "------------------------------"
         info " "
 
-        ask(:db_user, '')
+        ask(:db_user, 'revisit')
         ask(:db_pass, '')
         ask(:db_name, 'sel')
 
-        require_relative "templates/db_config.rb"
+        require_relative "scripts/db_config.rb"
 
         tmp_db_config_path = "config/#{fetch(:stage)}_config.js"
         run_locally do
@@ -166,26 +173,46 @@ namespace :setup do
           upload! tmp_db_config_path, "/tmp/#{fetch(:stage)}_config.js"
           execute :sudo, "cp /tmp/#{fetch(:stage)}_config.js #{fetch:deploy_to}/shared/config/db/"
         end
+
+        ### cleanup local
+        run_locally do
+          execute :rm, "-rf", tmp_db_config_path
+        end
         
       end
     end
 
-    desc "Create database user"
-    task :create_user do
-      on roles(:db) do |h|
+    desc "Setup database snapshots"
+    task :snapshots do
+      on roles(:app) do
         info " "
-        info "--------------------------"
-        info "-- CREATE DATABASE USER --"
-        info "--------------------------"
+        info "-------------------------------"
+        info "-- SETUP DATABASE SNAPSHOTS --"
+        info "-------------------------------"
         info " "
 
-        ask(:db_user, '')
+        ask(:db_user, 'backup')
         ask(:db_pass, '')
-        ask(:db_name, 'sel')
+
+        require_relative "scripts/db_backup.rb"
+
+        tmp_db_backup_path = "config/#{fetch(:application)}_db_backup.sh"
+        run_locally do
+          open(tmp_db_backup_path, 'w') do |f|
+            f.puts "#{fetch(:db_backup_file_contents)}" 
+          end
+        end
 
         on roles(:app) do
           # we upload to tmp and then move to the correct location in order to deal with permissions during upload
-          #execute :mongo, "admin --eval 'db.createUser({user:'userAdmin',pwd:'password',roles:[{role:"userAdminAnyDatabase",db:"admin"}]})'"
+          upload! tmp_db_backup_path, "/tmp/#{fetch(:application)}_db_backup.sh"
+          execute :sudo, "cp /tmp/#{fetch(:application)}_db_backup.sh /etc/cron.daily/#{fetch(:application)}_db_backup.sh"
+          execute :sudo, "chmod +x /etc/cron.daily/#{fetch(:application)}_db_backup.sh"
+        end
+
+        ### cleanup local
+        run_locally do
+          execute :rm, "-rf", tmp_db_backup_path
         end
         
       end
@@ -194,7 +221,7 @@ namespace :setup do
   end
 
   desc "Create and upload upstart script for this node app"
-  task :upstart_config do
+  task :upstart do
     run_locally do
       info " "
       info "---------------------------"
@@ -203,6 +230,9 @@ namespace :setup do
       info " "
     end
     
+    # load in upstart config content
+    require_relative "scripts/upstart-config.rb"
+
     tmp_upstart_config_path = "config/#{fetch(:upstart_job_name)}.conf"
     run_locally do
       open(tmp_upstart_config_path, 'w') do |f|
@@ -215,6 +245,11 @@ namespace :setup do
       upload! tmp_upstart_config_path, "/tmp/revisit.conf"
       execute :sudo, "cp /tmp/revisit.conf #{fetch(:upstart_conf_file_path)}"
     end
+
+    run_locally do
+      execute :rm, tmp_upstart_config_path
+    end
+
   end
 
 
