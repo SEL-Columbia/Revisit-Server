@@ -10,31 +10,35 @@ var exec = require('child_process').exec;
 
 var db_controller = require('./../models/dbcontroller.js');
 var SiteModel = require('../models/dbcontroller').SiteModel;
-var sites = require('./fixtures.js');
+var sites = require('./fixturez.js');
 
 describe('API Extra Routes', function() {
+
+    var the_uuid = null;
     before(function(done) {
-        done();
+       done(); 
     });
 
     beforeEach(function(done) {
-        console.log(__dirname);
 
+        // wipe db
         SiteModel.find({}).remove(function(err, result) {
-            SiteModel.create(sites, function(err, result) {
-                if (err) console.log(err);
-                done();
+            // load db
+            SiteModel.collection.insert(sites, function(err, result) {
+                if (err) throw (err);
+
+                // get an example uuid with specific coords
+                SiteModel.findOne({'coordinates': [-73.9570783, 40.7645704]}, 
+                function(err, site) {
+                    if (err) throw (err);
+                    the_uuid = site.uuid;
+                    done();
+                });
             });
         });
-
-        // var child = exec("sh " + __dirname + "/clean.sh " + __dirname, 
-        //             function(err, stdout, stderr) {
-        //                 if (err) throw err;
-        //                 // important to wait for clean to return
-        //                 done();
-        //             });
+                
     });
- 
+
     describe('#near', function() {
         it('should return facilties with 1km', function(done) {
             request(server)
@@ -49,7 +53,6 @@ describe('API Extra Routes', function() {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(10);
-                    res.body.facilities.length.should.be.above(1);
                     done();
                 });
         });
@@ -66,7 +69,6 @@ describe('API Extra Routes', function() {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(12);
-                    res.body.facilities.length.should.be.above(1);
                     done();
                 });
 
@@ -109,7 +111,7 @@ describe('API Extra Routes', function() {
     describe('#nearID', function() {
         it('should return facilties with 1km', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities/near/1/535823222b7a61adb4ed67cd.json/km")
+                .get(conf.prePath + "/facilities/near/1/"+ the_uuid +".json/km")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -120,14 +122,13 @@ describe('API Extra Routes', function() {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(10);
-                    res.body.facilities.length.should.be.above(1);
                     done();
                 });
         });
 
         it('should return facilities within 1mi', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities/near/1/535823222b7a61adb4ed67cd.json")
+                .get(conf.prePath + "/facilities/near/1/"+ the_uuid +".json")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -137,7 +138,6 @@ describe('API Extra Routes', function() {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(12);
-                    res.body.facilities.length.should.be.above(1);
                     done();
                 });
 
@@ -145,7 +145,7 @@ describe('API Extra Routes', function() {
 
         it('should return 1 facilities within 0km', function(done) {
              request(server)
-                .get(conf.prePath + "/facilities/near/0/535823222b7a61adb4ed67cd.json/km")
+                .get(conf.prePath + "/facilities/near/0/"+ the_uuid + ".json")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -156,7 +156,7 @@ describe('API Extra Routes', function() {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(1);
-                    res.body.facilities[0].uuid.should.match("535823222b7a61adb4ed67cd");
+                    res.body.facilities[0].uuid.should.match(the_uuid);
                     done();
                 });
         });
