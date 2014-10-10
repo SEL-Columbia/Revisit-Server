@@ -19,24 +19,20 @@ describe('API Routes', function(done) {
 
     beforeEach(function(done) {
 
+        // wipe db
         SiteModel.find({}).remove(function(err, result) {
+            // load db
             SiteModel.collection.insert(sites, function(err, result) {
-                if (err) console.log(err);
+                if (err) throw (err);
 
-                //TODO: Get endpoint through mongo instead of endpoint
-                request(server)
-                    .get(conf.prePath + "/facilities.json?limit=1")
-                    .expect(200) 
-                    .end(function(err, res) {
-                        if (err) {
-                            throw err;
-                        }
+                // get an example uuid
+                SiteModel.findOne({}, function(err, site) {
+                if (err) throw (err);
 
-                        the_uuid = res.body.facilities[0].uuid;
-                        done();
-                    });
-
+                    the_uuid = site.uuid;
+                    done();
                 });
+            });
         });
                 
     });
