@@ -1,5 +1,5 @@
 /**
- * This file defines the settings used on the production environment.
+ * This file defines the settings used on the staging environment.
  *
  * The defaults are pulled in and combined with the env specific settings -- only the necessary settings
  * should be overridden here.
@@ -14,9 +14,10 @@ var config = {};
 
 config.prePath = '/api/v0';
 config.host = 'revisit.global';
-config.port = '';
+config.port = '3000';
+
+// serves the site on port 80 via nginx
 config.site = "http://" + config.host;
-config.site += config.port ? ":" + config.port : '';
 config.site += config.prePath + "/" + "facilities/";
 
 config.USE_AUTH = false;
