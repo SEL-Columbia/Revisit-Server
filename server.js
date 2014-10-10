@@ -142,6 +142,7 @@ server.post(conf.prePath+'/users/login/', auth.login); // just for testing, done
 server.get('/hello/:name/', routes.respond);
 
 exports.server = server;
+exports.db = db;
 
 /**
  * Listen for SIGTERM signal, close the server if it's running.
