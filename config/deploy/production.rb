@@ -15,8 +15,30 @@
 # server list. The second argument is a, or duck-types, Hash and is
 # used to set extended properties on the server.
 
-server '23.21.86.131', user: 'web', roles: %w{web app}
+set :user, 'revisit'
 
+server '178.62.52.105', user: fetch(:user), roles: %w{web app}
+
+# PATHS
+set :deploy_to, "/var/www/api"
+set :log_path, "/var/log/#{fetch:application}/revisit.global-debug.log"
+
+set :linked_files, %w{config/db/production_config.js}
+# set :forever_log_path, "/var/log/#{fetch:application}/staging.revisit.global-forever.log"
+
+# We can use environment vars to specify a revision or branch to deploy to staging.
+# Defaults to 'master' branch.
+#
+# Examples:
+# 
+# REVISION=8b42a3e cap production deploy
+# BRANCH=some_test_branch cap staging deploy
+#
+set :branch, ENV["REVISION"] || ENV["BRANCH"] || "master"
+
+# For staging, we DO want devDependencies included, at least for now.
+# set :npm_flags, '--production --silent'
+set :npm_flags, '--silent'
 
 # Custom SSH Options
 # ==================

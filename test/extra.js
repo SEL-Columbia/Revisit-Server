@@ -7,19 +7,9 @@ var should = require('should');
 var _ = require('lodash-node');
 var server = require('./../server.js').server;
 var exec = require('child_process').exec;
-
 var db_controller = require('./../models/dbcontroller.js');
 var SiteModel = require('../models/dbcontroller').SiteModel;
 var sites = require('./fixturez.js');
-
-describe('API Extra Routes', function() {
-
-    var the_uuid = null;
-    before(function(done) {
-       done(); 
-    });
-
-    beforeEach(function(done) {
 
         // wipe db
         SiteModel.find({}).remove(function(err, result) {
@@ -36,7 +26,6 @@ describe('API Extra Routes', function() {
                 });
             });
         });
-                
     });
 
     describe('#near', function() {

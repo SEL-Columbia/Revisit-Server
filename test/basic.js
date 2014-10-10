@@ -18,7 +18,7 @@ describe('API Routes', function(done) {
     });
 
     beforeEach(function(done) {
-
+        
         // wipe db
         SiteModel.find({}).remove(function(err, result) {
             // load db
@@ -34,7 +34,6 @@ describe('API Routes', function(done) {
                 });
             });
         });
-                
     });
     
     describe('#getFacilities', function(done) {
