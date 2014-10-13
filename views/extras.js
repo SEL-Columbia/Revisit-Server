@@ -13,19 +13,23 @@ function near(req, res, next) {
 
     var lat = req.params.lat;
     var lng = req.params.lng;
-    var rad = req.params.rad;
+
+    if (typeof lat === 'undefined' || typeof lng === 'undefined') {
+        return replies.apiBadRequest(res, "TODO: This message is not used");
+    } 
+
+    var rad = req.params.rad || 0;
     var units = req.params.units || 'mi';
+
     var earthRad = 3959; // miles
     if (units === 'km') {
         earthRad = 6371;
     }
 
     if (isNaN(rad) || parseInt(rad) < 0 || isNaN(lng) || isNaN(lat)) {
-        replies.apiBadRequest(res, "TODO: This message is not used!");
-        return;
+        return replies.apiBadRequest(res, "TODO: This message is not used!");
     }
 
-    //(lat < 0) || (lng < 0) 
     database.SiteModel.findNear(lng, lat, rad, earthRad, function(err, sites) {
         if (err) {
             req.log.error(err);
@@ -52,7 +56,7 @@ function near(req, res, next) {
 function nearID(req, res, next) {
     req.log.info("GET near facility with id REQUEST", {"req": req.params})
 
-    database.SiteModel.findById(req.params[2], function(err, sites) {
+    database.SiteModel.findById(req.params[0], function(err, sites) {
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
@@ -63,12 +67,6 @@ function nearID(req, res, next) {
 
         } else {
             site = sites[0]; // should only be one
-            console.log(site);
-            console.log(req.params.length);
-            console.log(req.params);
-            req.params.rad = req.params[0];
-            req.params.units = req.params[3];
-
             req.params.lng = site.coordinates[0];
             req.params.lat = site.coordinates[1];
             return near(req, res, next);
@@ -85,9 +83,12 @@ function within(req, res, next) {
     var nelat = req.params.nelat;
     var nelng = req.params.nelng;
 
+    if (req.params.sector) {
+        return withinSector(req, res, next);
+    }
+
     if (isNaN(swlat) || isNaN(swlng) || isNaN(nelng) || isNaN(nelat)) {
-        replies.apiBadRequest(res, "TODO: This message is not used!");
-        return;
+        return replies.apiBadRequest(res, "TODO: This message is not used!");
     }
 
     database.SiteModel.findWithin(swlat, swlng, nelat, nelng, function(err, sites) {
