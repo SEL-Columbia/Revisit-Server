@@ -124,15 +124,9 @@ server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
 
 // extras
 server.get(new RegExp(conf.prePath + 
-            "/near/facilities/(\\w{24})\.json"), 
-            //"/near/facilities/(\\d*(\.\\d+)?)/(\\w{24})\.json"), 
-        extras.nearID); // near site by id with units
-
-server.get(conf.prePath+'/near/facilities.json/:lat/:lng/:rad/', extras.near); // search near coord
-server.get(conf.prePath+'/near/facilities.json/:lat/:lng/:rad/:units/', extras.near); // search near coord
-
-server.get(conf.prePath+'/within/facilities.json/:swlat/:swlng/:nelat/:nelng/', extras.within); // search within box
-server.get(conf.prePath+'/within/facilities.json/:swlat/:swlng/:nelat/:nelng/:sector/', extras.withinSector); // search within box and sector
+            "/near/facilities/(\\w{24})\.json\$"), extras.nearID); // near site by id with units
+server.get(conf.prePath+'/near/facilities.json', extras.near); // search near coord
+server.get(conf.prePath+'/within/facilities.json', extras.within); // search within box and/or sector
 
 // users
 server.post(conf.prePath+'/users/add/', auth.addUser); // just for testing, should be in admin console
