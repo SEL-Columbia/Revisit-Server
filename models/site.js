@@ -61,7 +61,8 @@ var SiteModel = new Schema({
     { id: false }
 );
 
-SiteModel.index({ coordinates: "2dsphere", 'properties.sector': 1 });
+// Using 2d instead of 2dsphere based on performance in loadtests
+SiteModel.index({ coordinates: "2d", 'properties.sector': 1 });
 
 // Create virtual for UUID from ID
 SiteModel.virtual('uuid').get(function(){
