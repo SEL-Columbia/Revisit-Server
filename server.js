@@ -22,13 +22,15 @@ var server = restify.createServer({
 });
 
 // server modules
+server.pre(restify.CORS({origins: ['*'], headers: ['x-request-within']})); // CORS support when requested only.
 server.pre(restify.pre.sanitizePath());
 server.pre(restify.pre.userAgentConnection());
 
-server.use(restify.acceptParser(server.acceptable));
+//server.use(restify.fullResponse()); // Sets default headers
+server.use(restify.acceptParser(server.acceptable)); // ???
+server.use(restify.queryParser());         // query params pushed to query field (busted goes to params)
+server.use(restify.bodyParser());          // body pushed into params field
 server.use(restify.authorizationParser()); // basic auth
-server.use(restify.queryParser());         // gets
-server.use(restify.bodyParser());          // sets up body field
 server.use(restify.gzipResponse());        // compressed response
 server.use(restify.throttle({
             burst: 100,
