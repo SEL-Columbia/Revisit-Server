@@ -36,6 +36,7 @@ describe('API Extra Routes', function(done) {
         });
     });
 
+    //TODO: switch slug and facilities
     describe('#near', function() {
         it('should return facilties with 1km', function(done) {
             request(server)
@@ -197,6 +198,7 @@ describe('API Extra Routes', function(done) {
         });
     });
 
+    //TODO: combine sw lat/lng and ne lat/lng
     describe('#within', function() {
         it('should return facilties within box defined by x,y and x",y"', 
         function(done) {
