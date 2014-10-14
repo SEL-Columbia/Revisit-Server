@@ -40,7 +40,7 @@ describe('API Extra Routes', function(done) {
     describe('#near', function() {
         it('should return facilties with 1km', function(done) {
             request(server)
-                .get(conf.prePath + "/near/facilities.json"
+                .get(conf.prePath + "/facilities/near.json"
                         + "?lat=40.7645704&lng=-73.9570783&rad=1&units=km")
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -58,7 +58,7 @@ describe('API Extra Routes', function(done) {
 
         it('should return facilities within 1mi', function(done) {
             request(server)
-                .get(conf.prePath + "/near/facilities.json"
+                .get(conf.prePath + "/facilities/near.json"
                         + "?lat=40.7645704&lng=-73.9570783&rad=1")
                 .expect('Content-Type', /json/)
                 .expect('Content-Type', /json/)
@@ -77,7 +77,7 @@ describe('API Extra Routes', function(done) {
 
         it('should return 1 facilities within 0km', function(done) {
              request(server)
-                .get(conf.prePath + "/near/facilities.json"
+                .get(conf.prePath + "/facilities/near.json"
                         + "?lat=40.7645704&lng=-73.9570783")
                 .expect('Content-Type', /json/)
                 .expect('Content-Type', /json/)
@@ -97,7 +97,7 @@ describe('API Extra Routes', function(done) {
         
         it('should return no facilities', function(done) {
              request(server)
-                .get(conf.prePath + "/near/facilities.json"
+                .get(conf.prePath + "/facilities/near.json"
                         + "?lat=0&lng=0&rad=0&units=km")
                 .expect('Content-Type', /json/)
                 .expect(404) 
@@ -113,7 +113,7 @@ describe('API Extra Routes', function(done) {
 
         it('should fail to search near facility', function(done) {
             request(server)
-                .get(conf.prePath + "/near/facilities.json"
+                .get(conf.prePath + "/facilities/near.json"
                         + "?lat=40.7645704rad=0&units=km")
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -131,7 +131,7 @@ describe('API Extra Routes', function(done) {
     describe('#nearID', function() {
         it('should return facilties with 1km', function(done) {
             request(server)
-                .get(conf.prePath + "/near/facilities/"+ the_uuid +".json?units=km&rad=1")
+                .get(conf.prePath + "/facilities/near/"+ the_uuid +".json?units=km&rad=1")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -148,7 +148,7 @@ describe('API Extra Routes', function(done) {
 
         it('should return facilities within 1mi', function(done) {
             request(server)
-                .get(conf.prePath + "/near/facilities/"+ the_uuid +".json?rad=1")
+                .get(conf.prePath + "/facilities/near/"+ the_uuid +".json?rad=1")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -165,7 +165,7 @@ describe('API Extra Routes', function(done) {
 
         it('should return 1 facilities within 0km', function(done) {
              request(server)
-                .get(conf.prePath + "/near/facilities/"+ the_uuid +".json")
+                .get(conf.prePath + "/facilities/near/"+ the_uuid +".json")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -184,7 +184,7 @@ describe('API Extra Routes', function(done) {
         
         it('should return no facilities', function(done) {
              request(server)
-                .get(conf.prePath + "/near/facilities/111111111111111111111111.json/?units=km&rad=100")
+                .get(conf.prePath + "/facilities/near/111111111111111111111111.json/?units=km&rad=100")
                 .expect('Content-Type', /json/)
                 .expect(404) 
                 .end(function(err, res) {
@@ -203,7 +203,7 @@ describe('API Extra Routes', function(done) {
         it('should return facilties within box defined by x,y and x",y"', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/within/facilities.json"
+                .get(conf.prePath + "/facilities/within.json"
                         +"?swlat=0&swlng=-180&nelat=90&nelng=0")
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -223,7 +223,7 @@ describe('API Extra Routes', function(done) {
         it('should return no facilties within box a,b and a,b (point)', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/within/facilities.json"
+                .get(conf.prePath + "/facilities/within.json"
                         +"?swlat=40.7645704&swlng=-73.9570783&nelat=40.7645704&nelng=-73.9570783")
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -240,7 +240,7 @@ describe('API Extra Routes', function(done) {
 
         it('should fail to search within box', function(done) {
             request(server)
-                .get(conf.prePath + "/within/facilities.json"
+                .get(conf.prePath + "/facilities/within.json"
                         +"?swlng=-73.9570783&nelat=40.7645704&nelng=-73.9570783")
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -255,7 +255,7 @@ describe('API Extra Routes', function(done) {
 
         it('should return no facilities', function(done) {
             request(server)
-                .get(conf.prePath + "/within/facilities.json"
+                .get(conf.prePath + "/facilities/within.json"
                         +"?swlat=0&swlng=0&nelat=0&nelng=0")
                 .expect('Content-Type', /json/)
                 .expect(404) 
@@ -273,8 +273,8 @@ describe('API Extra Routes', function(done) {
         it('should return facilties within box x,y and x",y" and sector', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/within/facilities.json"+
-                        "?swlat=0&swlng=-180&nelat=90&nelng=0&sector=health")
+                .get(conf.prePath + "/facilities/within.json"
+                        +"?swlat=0&swlng=-180&nelat=90&nelng=0&sector=health")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -292,7 +292,7 @@ describe('API Extra Routes', function(done) {
         it('should return no facilties within box a,b and a,b (point) and sec', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/within/facilities.json"
+                .get(conf.prePath + "/facilities/within.json"
                         +"?swlat=40.7645704&swlng=-73.9570783&nelat=40.7645704&nelng=-73.9570783&sector=health")
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -309,7 +309,7 @@ describe('API Extra Routes', function(done) {
 
         it('should return no facilities', function(done) {
             request(server)
-                .get(conf.prePath + "/within/facilities.json"
+                .get(conf.prePath + "/facilities/within.json"
                         +"?swlat=0&swlng=0&nelat=0&nelng=0&sector=health")
                 .expect('Content-Type', /json/)
                 .expect('Content-Type', /json/)
@@ -325,7 +325,7 @@ describe('API Extra Routes', function(done) {
 
         it('should fail to search within box', function(done) {
             request(server)
-                .get(conf.prePath + "/within/facilities.json"
+                .get(conf.prePath + "/facilities/within.json"
                         +"?swlng=-73.9570783&nelat=40.7645704&sector=health")
                 .expect('Content-Type', /json/)
                 .expect(400) 
