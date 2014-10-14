@@ -1,20 +1,16 @@
 {
-  "name": "faciltyrestapi",
+  "name": "revisit-api-server",
   "version": "1.0.0",
-  "description": "facility registry api for use with Revisit, Formhub and various services",
+  "description": "A RESTful, FRED-compliant global facility registry.",
   "main": "server.js",
+  "private": true,
   "scripts": {
     "test": "make test"
   },
   "author": "Abdi Dahir, Jonathan Wohl",
   "license": "MIT",
   "devDependencies": {
-    "mongoose": "^3.8.17",
-    "restify": "^2.8.2",
-    "jshashes": "^1.0.5",
-    "mkdirp": "^0.5.0",
     "mocha": "^1.21.4",
-    "bunyan": "^1.1.0",
     "should": "^4.0.4",
     "supertest": "^0.14.0"
   },
