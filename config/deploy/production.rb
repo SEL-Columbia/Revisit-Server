@@ -37,8 +37,8 @@ set :linked_files, %w{config/db/production_config.js}
 set :branch, ENV["REVISION"] || ENV["BRANCH"] || "master"
 
 # For staging, we DO want devDependencies included, at least for now.
-# set :npm_flags, '--production --silent'
-set :npm_flags, '--silent'
+set :npm_flags, '--production --silent'
+# set :npm_flags, '--silent'
 
 # Custom SSH Options
 # ==================
