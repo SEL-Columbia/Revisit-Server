@@ -15,6 +15,8 @@ set :node_bin_path, '/usr/bin/node'
 
 set :npm_roles, :web
 
+set :local_tmp_dir, 'tmp'
+
 # Default value for :linked_files is []
 # set :linked_files, %w{config/database.yml}
 
@@ -161,8 +163,11 @@ namespace :setup do
 
         require_relative "scripts/db_config.rb"
 
-        tmp_db_config_path = "config/#{fetch(:stage)}_config.js"
+        tmp_db_config_path = "#{fetch(:local_tmp_dir)}/#{fetch(:stage)}_config.js"
         run_locally do
+          unless test("[ -d #{fetch(:local_tmp_dir)} ]")
+            execute :mkdir, fetch(:local_tmp_dir)
+          end
           open(tmp_db_config_path, 'w') do |f|
             f.puts "#{fetch(:db_config_file_contents)}" 
           end
@@ -196,8 +201,11 @@ namespace :setup do
 
         require_relative "scripts/db_backup.rb"
 
-        tmp_db_backup_path = "config/#{fetch(:application)}_db_backup.sh"
+        tmp_db_backup_path = " #{fetch(:local_tmp_dir)}/#{fetch(:application)}_db_backup.sh"
         run_locally do
+          unless test("[ -d #{fetch(:local_tmp_dir)} ]")
+            execute :mkdir, fetch(:local_tmp_dir)
+          end
           open(tmp_db_backup_path, 'w') do |f|
             f.puts "#{fetch(:db_backup_file_contents)}" 
           end
@@ -233,8 +241,11 @@ namespace :setup do
     # load in upstart config content
     require_relative "scripts/upstart-config.rb"
 
-    tmp_upstart_config_path = "config/#{fetch(:upstart_job_name)}.conf"
+    tmp_upstart_config_path = " #{fetch(:local_tmp_dir)}/#{fetch(:upstart_job_name)}.conf"
     run_locally do
+      unless test("[ -d #{fetch(:local_tmp_dir)} ]")
+        execute :mkdir, fetch(:local_tmp_dir)
+      end
       open(tmp_upstart_config_path, 'w') do |f|
         f.puts "#{fetch(:upstart_file_contents)}" 
       end
