@@ -41,7 +41,7 @@ describe('API Extra Routes', function(done) {
         it('should return facilties with 1km', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities/near.json"
-                        + "?lat=40.7645704&lng=-73.9570783&rad=1&units=km")
+                        + "?lat=40.7645704&lng=-73.9570783&rad=1")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -59,7 +59,7 @@ describe('API Extra Routes', function(done) {
         it('should return facilities within 1mi', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities/near.json"
-                        + "?lat=40.7645704&lng=-73.9570783&rad=1")
+                        + "?lat=40.7645704&lng=-73.9570783&rad=1&units=mi")
                 .expect('Content-Type', /json/)
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -131,7 +131,7 @@ describe('API Extra Routes', function(done) {
     describe('#nearID', function() {
         it('should return facilties with 1km', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities/near/"+ the_uuid +".json?units=km&rad=1")
+                .get(conf.prePath + "/facilities/near/"+ the_uuid +".json?rad=1")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -148,7 +148,7 @@ describe('API Extra Routes', function(done) {
 
         it('should return facilities within 1mi', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities/near/"+ the_uuid +".json?rad=1")
+                .get(conf.prePath + "/facilities/near/"+ the_uuid +".json?rad=1&units=mi")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {

@@ -19,11 +19,11 @@ function near(req, res, next) {
     } 
 
     var rad = req.params.rad || 0;
-    var units = req.params.units || 'mi';
+    var units = req.params.units || 'km';
 
-    var earthRad = 3959; // miles
-    if (units === 'km') {
-        earthRad = 6371;
+    var earthRad = 6371; // km
+    if (units === 'mi') {
+        earthRad = 3959;
     }
 
     if (isNaN(rad) || parseInt(rad) < 0 || isNaN(lng) || isNaN(lat)) {
