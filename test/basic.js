@@ -334,6 +334,21 @@ describe('API Routes', function(done) {
                 });
 
         });
+        it('should return fail to find a facilty if the url does not end in .json', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities/" + the_uuid + ".jsonabcd")
+                .expect('Content-Type', /json/)
+                .expect(404) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.code.should.match("ResourceNotFound");
+                    done();
+                });
+
+        });
         it('should fail to find a facility with this id', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities/111111111111111111111111.json")

@@ -81,7 +81,7 @@ var dbEmptyReturn = function(res, data) {
     // data is unused
      res.send( new restify.RestError({
         statusCode: 404, 
-        restCode: "Not Found", 
+        restCode: "Not Found",
         message: "Resource was not found."
     }));
     

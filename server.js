@@ -109,7 +109,7 @@ server.listen(conf.port, function() {
 });
 
 // Gotta create an regexp object when working with string variables
-var id_path = new RegExp(conf.prePath + "/facilities/(\\w{24})\.json");
+var id_path = new RegExp(conf.prePath + "/facilities/(\\w{24})\.json$");
 
 // main
 server.get(conf.prePath + "/facilities.json", routes.sites); // all sites
