@@ -201,7 +201,7 @@ namespace :setup do
 
         require_relative "scripts/db_backup.rb"
 
-        tmp_db_backup_path = " #{fetch(:local_tmp_dir)}/#{fetch(:application)}_db_backup.sh"
+        tmp_db_backup_path = "#{fetch(:local_tmp_dir)}/#{fetch(:application)}_db_backup.sh"
         run_locally do
           unless test("[ -d #{fetch(:local_tmp_dir)} ]")
             execute :mkdir, fetch(:local_tmp_dir)
@@ -214,8 +214,8 @@ namespace :setup do
         on roles(:app) do
           # we upload to tmp and then move to the correct location in order to deal with permissions during upload
           upload! tmp_db_backup_path, "/tmp/#{fetch(:application)}_db_backup.sh"
-          execute :sudo, "cp /tmp/#{fetch(:application)}_db_backup.sh /etc/cron.daily/#{fetch(:application)}_db_backup.sh"
-          execute :sudo, "chmod +x /etc/cron.daily/#{fetch(:application)}_db_backup.sh"
+          execute :sudo, "cp /tmp/#{fetch(:application)}_db_backup.sh /etc/cron.daily/#{fetch(:application)}_db_backup"
+          execute :sudo, "chmod +x /etc/cron.daily/#{fetch(:application)}_db_backup"
         end
 
         ### cleanup local
