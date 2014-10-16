@@ -134,9 +134,6 @@ server.get(conf.prePath+'/facilities/within.json', extras.within); // search wit
 server.post(conf.prePath+'/users/add/', auth.addUser); // just for testing, should be in admin console
 server.post(conf.prePath+'/users/login/', auth.login); // just for testing, done during basic auth
 
-// echo
-server.get('/hello/:name/', routes.respond);
-
 exports.server = server;
 exports.db = db;
 

@@ -20,7 +20,7 @@ config.port = '3000';
 config.site = "http://" + config.host;
 config.site += config.prePath + "/" + "facilities/";
 
-config.USE_AUTH = false;
+config.USE_AUTH = true;
 
 config.log_root = '/var/log/' + def_config.app_name + '/';
 
