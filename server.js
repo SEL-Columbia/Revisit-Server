@@ -98,6 +98,24 @@ server.on('after', restify.auditLogger({
   log: log
 }));
 
+// Overwrite default error msgs for internal errors and missing endpoints
+server.on('uncaughtException', function (req, res, route, err) {
+    res.send( new restify.RestError({
+        statusCode: 500, 
+        restCode: "Internal Server Error", 
+        message: JSON.stringify(err)
+    }));
+});
+
+server.on('NotFound', function (req, res, cb) {
+
+    res.send( new restify.RestError({
+        statusCode: 404, 
+        restCode: "Not Found",
+        message: "Resource was not found."
+    }));
+});
+
 server.listen(conf.port, function() {
     log.info('%s listening at %s', server.name, server.url);
     log.debug('%s listening at %s', server.name, server.url);
@@ -151,3 +169,5 @@ process.on('SIGTERM', function() {
         process.disconnect && process.disconnect();
     });
 });
+
+console.log(restify.ResourceNotFoundError)

@@ -37,7 +37,7 @@ var jsonReply = function(res, site, code) {
 var dbErrorReply = function(res, err) {
     res.send( new restify.RestError({
         statusCode: 500, 
-        restCode: "Database Error", 
+        restCode: "Internal Server Error", 
         message: JSON.stringify(err)
     }));
 

@@ -344,7 +344,7 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("ResourceNotFound");
+                    res.body.code.should.match("Not Found");
                     done();
                 });
 
