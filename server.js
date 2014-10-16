@@ -115,11 +115,10 @@ server.on('uncaughtException', function (req, res, route, err) {
 });
 
 server.on('NotFound', function (req, res, cb) {
-
     res.send( new restify.RestError({
         statusCode: 404, 
         restCode: "Not Found",
-        message: "Resource was not found."
+        message: req.url + " was not found."
     }));
 });
 
