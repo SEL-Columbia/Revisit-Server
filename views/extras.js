@@ -78,20 +78,21 @@ function nearID(req, res, next) {
 function within(req, res, next) {
     req.log.info("GET within facility REQUEST", {"req": req.params})
 
-    var swlat = req.params.swlat;
-    var swlng = req.params.swlng;
-    var nelat = req.params.nelat;
-    var nelng = req.params.nelng;
+    var slat = req.params.slat;
+    var wlng = req.params.wlng;
+    var nlat = req.params.nlat;
+    var elng = req.params.elng;
 
+    //TODO: Remove withinSector and just merge it with this func
     if (req.params.sector) {
         return withinSector(req, res, next);
     }
 
-    if (isNaN(swlat) || isNaN(swlng) || isNaN(nelng) || isNaN(nelat)) {
+    if (isNaN(slat) || isNaN(wlng) || isNaN(elng) || isNaN(nlat)) {
         return replies.apiBadRequest(res, "TODO: This message is not used!");
     }
 
-    database.SiteModel.findWithin(swlat, swlng, nelat, nelng, function(err, sites) {
+    database.SiteModel.findWithin(slat, wlng, nlat, elng, function(err, sites) {
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
@@ -116,19 +117,19 @@ function within(req, res, next) {
 function withinSector(req, res, next) {
     req.log.info("GET within sector facility REQUEST", {"req": req.params})
 
-    var swlat = req.params.swlat;
-    var swlng = req.params.swlng;
-    var nelat = req.params.nelat;
-    var nelng = req.params.nelng;
+    var slat = req.params.slat;
+    var wlng = req.params.wlng;
+    var nlat = req.params.nlat;
+    var elng = req.params.elng;
     var sector = req.params.sector;
 
-    if (isNaN(swlat) || isNaN(swlng) || isNaN(nelng) || isNaN(nelat)) {
+    if (isNaN(slat) || isNaN(wlng) || isNaN(elng) || isNaN(nlat)) {
         replies.apiBadRequest(res, "TODO: This message is not used!");
         return;
     }
 
 
-    database.SiteModel.findWithinSector(swlat, swlng, nelat, nelng, sector, function(err, sites) {
+    database.SiteModel.findWithinSector(slat, wlng, nlat, elng, sector, function(err, sites) {
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
