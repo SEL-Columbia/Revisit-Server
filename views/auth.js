@@ -8,11 +8,11 @@ var replies = require('./responses.js');
 
 function addUser(req, res, next) {
     console.log("New user:", req.params);
-    database.UserModel.addUser(req.params.user, req.params.pass, 
-            function(success) {
-                console.log(">>> User created?: ", success);
-                res.send("User Created? " + success);
-            });
+    database.UserModel.addUser(req.params.user, req.params.pass,
+        function(success) {
+            console.log(">>> User created?: ", success);
+            res.send("User Created? " + success);
+        });
 
     return next();
 }
@@ -20,10 +20,10 @@ function addUser(req, res, next) {
 function login(req, res, next) {
     console.log("User:", req.params);
     database.UserModel.login(req.params.user, req.params.pass,
-            function(success) {
-                //console.log(">>> User logged in?: ",  success);
-                res.send("User logged in? "+ success);
-            });
+        function(success) {
+            //console.log(">>> User logged in?: ",  success);
+            res.send("User logged in? " + success);
+        });
 
     return next();
 }

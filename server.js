@@ -22,34 +22,37 @@ var server = restify.createServer({
 });
 
 // server modules
-server.pre(restify.CORS({origins: ['*'], headers: ['x-request-within']})); // CORS support when requested only.
+server.pre(restify.CORS({
+    origins: ['*'],
+    headers: ['x-request-within']
+})); // CORS support when requested only.
 server.pre(restify.pre.sanitizePath());
 server.pre(restify.pre.userAgentConnection());
 
 //server.use(restify.fullResponse()); // Sets default headers
 server.use(restify.acceptParser(server.acceptable)); // ???
-server.use(restify.queryParser());         // query params pushed to query field (busted goes to params)
-server.use(restify.bodyParser());          // body pushed into params field
+server.use(restify.queryParser()); // query params pushed to query field (busted goes to params)
+server.use(restify.bodyParser()); // body pushed into params field
 server.use(restify.authorizationParser()); // basic auth
-server.use(restify.gzipResponse());        // compressed response
+server.use(restify.gzipResponse()); // compressed response
 server.use(restify.throttle({
-            burst: 100,
-            rate: 50,
-            // ip: true,
-            // we're using nginx as reverse proxy
-            xff: true,
-            //username: true, // can throttle on basic auth username
-            overrides: {
-                '127.0.0.1': {
-                    rate: 0,        // unlimited
-                    burst: 0
-                },
-                // SEL IP
-                '128.59.46.168': {
-                    rate: 0,        // unlimited
-                    burst: 0
-                }
-            }
+    burst: 100,
+    rate: 50,
+    // ip: true,
+    // we're using nginx as reverse proxy
+    xff: true,
+    //username: true, // can throttle on basic auth username
+    overrides: {
+        '127.0.0.1': {
+            rate: 0, // unlimited
+            burst: 0
+        },
+        // SEL IP
+        '128.59.46.168': {
+            rate: 0, // unlimited
+            burst: 0
+        }
+    }
 }));
 
 // adds child logger to each request in order to track requests
@@ -57,45 +60,49 @@ server.use(restify.requestLogger({
     // properties: {}
 }));
 
-// From db
-if (conf.USE_AUTH) {
-    server.use(function authenticate(req, res, next) {
+// always use auth middleware, inside determine whether to enforce
+// TODO - move auth middleware to auth module
+server.use(function authenticate(req, res, next) {
+    if (!conf.useAuth()) {
+        return next();
+    }
 
-        if (conf.ALLOW_GET && req.method === 'GET') {
-            return next();
-        }
+    if (conf.allowGet() && req.method === 'GET') {
+        return next();
+    }
 
-        if (conf.ALLOW_POST && req.method === 'POST') {
-            return next();
-        }
+    if (conf.allowPost() && req.method === 'POST') {
+        return next();
+    }
 
-        if (conf.ALLOW_PUT && req.method === 'PUT') {
-            return next();
-        }
+    if (conf.allowPut() && req.method === 'PUT') {
+        return next();
+    }
 
-        // Delete should always be authenticated 
-        log.info("Basic auth verification", {"user": res.username, "auth": req.authorization});
-        if (req.username === 'anonymous' || typeof req.authorization.basic === 'undefined') {
-            log.info("Basic auth failed");
-            return replies.apiUnauthorized(res,"No basic auth information provided");
-        }
-    
-        dbcontroller.UserModel.login(req.username, req.authorization.basic.password, function(success) {
-            if (!success) {
-                log.info("Basic auth failed");
-                return replies.apiUnauthorized(res, req.username);
-            }
-            
-            log.debug(">>> User success!");
-            log.info("Basic auth passed");
-            return next();
-        });
+    // Delete should always be authenticated 
+    log.info("Basic auth verification", {
+        "user": res.username,
+        "auth": req.authorization
     });
+    if (req.username === 'anonymous' || typeof req.authorization.basic === 'undefined') {
+        log.info("Basic auth failed");
+        return replies.apiUnauthorized(res, "No basic auth information provided");
+    }
 
-}
+    dbcontroller.UserModel.login(req.username, req.authorization.basic.password, function(success) {
+        if (!success) {
+            log.info("Basic auth failed");
+            return replies.apiUnauthorized(res, req.username);
+        }
+
+        log.debug(">>> User success!");
+        log.info("Basic auth passed");
+        return next();
+    });
+});
 
 server.on('after', restify.auditLogger({
-  log: log
+    log: log
 }));
 
 // Overwrite default error msgs for internal errors and missing endpoints
@@ -137,26 +144,36 @@ server.del(id_path, routes.del); // delete by id
 server.put(id_path, routes.update); // update site by id
 
 // photos
-server.post(conf.prePath+'/facilities/:id/photos', extras.uploadPhoto);
+server.post(conf.prePath + '/facilities/:id/photos', extras.uploadPhoto);
 server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
-  directory: './public'
+    directory: './public'
 }));
 
 // extras
-server.get(new RegExp(conf.prePath + 
-            "/facilities/near/(\\w{24})\.json\$"), extras.nearID); // near site by id with units
-server.get(conf.prePath+'/facilities/near.json', extras.near); // search near coord
-server.get(conf.prePath+'/facilities/within.json', extras.within); // search within box and/or sector
+server.get(new RegExp(conf.prePath +
+    "/facilities/near/(\\w{24})\.json\$"), extras.nearID); // near site by id with units
+server.get(conf.prePath + '/facilities/near.json', extras.near); // search near coord
+server.get(conf.prePath + '/facilities/within.json', extras.within); // search within box and/or sector
 
 // users
-server.post(conf.prePath+'/users/add/', auth.addUser); // just for testing, should be in admin console
-server.post(conf.prePath+'/users/login/', auth.login); // just for testing, done during basic auth
-
-// echo
-server.get('/hello/:name/', routes.respond);
+server.post(conf.prePath + '/users/add/', auth.addUser); // just for testing, should be in admin console
+server.post(conf.prePath + '/users/login/', auth.login); // just for testing, done during basic auth
 
 exports.server = server;
 exports.db = db;
+
+// exports.enableAuth = function(enable) {
+//     config.USE_AUTH = !!enable;
+// };
+// exports.allowGet = function(allow) {
+//     config.ALLOW_GET = !!allow;
+// };
+// exports.allowPut = function(allow) {
+//     config.ALLOW_PUT = !!allow;
+// };
+// exports.allowPost = function(allow) {
+//     config.ALLOW_POST = !!allow;
+// };
 
 /**
  * Listen for SIGTERM signal, close the server if it's running.
