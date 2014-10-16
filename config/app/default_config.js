@@ -29,5 +29,39 @@ if (config.ALLOW_POST || config.ALLOW_PUT) {
     config.ALLOW_GET = true; // enforce get if put/post
 }
 
+/**
+ * Combo getter/setters for auth
+ * 
+ * TODO: this should be moved to an authorization module
+ */
+
+config.useAuth = function(use) {
+	if (typeof use === "boolean") {
+		config.USE_AUTH = use;
+	}
+	return config.USE_AUTH;
+};
+
+config.allowGet = function(allow) {
+	if (typeof allow === "boolean") {
+		config.ALLOW_GET = allow;
+	}
+	return config.ALLOW_GET;
+};
+
+config.allowPut = function(allow) {
+	if (typeof allow === "boolean") {
+		config.ALLOW_PUT = allow;
+	}
+	return config.ALLOW_PUT;
+};
+
+config.allowPost = function(allow) {
+	if (typeof allow === "boolean") {
+		config.ALLOW_POST = allow;
+	}
+	return config.ALLOW_POST;
+};
+
 // export combined configuration for this environment
 module.exports = config;
