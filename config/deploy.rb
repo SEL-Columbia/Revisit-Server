@@ -272,7 +272,12 @@ namespace :node do
   desc "Start the node application"
   task :start do
     on roles(:app) do
-      execute :sudo, "start #{fetch(:upstart_job_name)}"
+      status = capture("initctl status #{fetch:upstart_job_name}")
+      unless status.include? "#{fetch:upstart_job_name} start/running"
+        execute :sudo, "start #{fetch(:upstart_job_name)}"
+      else
+        info "Service already running."
+      end
     end
   end
 
@@ -280,7 +285,12 @@ namespace :node do
   desc "Stop the node application"
   task :stop do
     on roles(:app) do
-      execute :sudo, "stop #{fetch(:upstart_job_name)}"
+      status = capture("initctl status #{fetch:upstart_job_name}")
+      if status.include? "#{fetch:upstart_job_name} start/running"
+        execute :sudo, "stop #{fetch(:upstart_job_name)}"
+      else
+        info "Service already stopped."
+      end
     end
   end
 
@@ -290,6 +300,18 @@ namespace :node do
     on roles(:app) do
       invoke 'node:stop'
       invoke 'node:start'
+    end
+  end
+
+  desc "Check if application is running"
+  task :status do
+    on roles(:app) do
+      status = capture("initctl status #{fetch:upstart_job_name}")
+      if status.include? "#{fetch:upstart_job_name} start/running"
+        info "server running"
+      else
+        error "server not running"
+      end
     end
   end
 end
