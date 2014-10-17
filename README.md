@@ -34,4 +34,4 @@ For details on setting up a local dev enviroment, [see the wiki](https://github.
 
 
 ## Deployment
-* Ruby based deployment vai [Capistrano](http://capistranorb.com). For details on deployment, [see the  wiki](https://github.com/SEL-Columbia/Revisit-Server/wiki/Deployment).
+* Ruby based deployment via [Capistrano](http://capistranorb.com). For details on deployment, [see the  wiki](https://github.com/SEL-Columbia/Revisit-Server/wiki/Deployment).
