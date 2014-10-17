@@ -28,7 +28,7 @@ For details on setting up a local dev enviroment, [see the wiki](https://github.
 * should: readable asserts 
 
 ## Possible Alternatives
-* Save: DB interation layer, allows us to swap mongodb without much code change
+* Save: DB interaction layer, allows us to swap mongodb without much code change
 * Express: More involved stack then restify, has restify extension as well
 * Mongojs: Exposes mongoapi directly
 
