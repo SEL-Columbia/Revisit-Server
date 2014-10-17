@@ -5,7 +5,7 @@ var restify = require('restify');
 var log = require('./../log/logger.js').log;
 
 // response_style
-var jsonArrayReply = function(res, sites, code, hidden) {
+var jsonArrayReply = function(res, sites, code, hidden, extras) {
     code = code || 200;
     res.writeHead(code, {
         'Content-Type': 'application/json; charset=utf-8'});
@@ -18,6 +18,13 @@ var jsonArrayReply = function(res, sites, code, hidden) {
             res.write(", ");
         }
     });
+
+    if (extras) {
+        res.write(', "length": ' + extras.length)
+        res.write(', "offset": ' + extras.offset)
+        res.write(', "total": ' + extras.total)
+    }
+
     res.write(']}');
     res.end()
     log.info("JSON ARRAY reply sent", {"code": code});

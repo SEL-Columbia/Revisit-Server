@@ -19,23 +19,34 @@ var sites = function (req, res, next) {
     var hidden_str = Object.keys(hidden).join(',');
 
     query.exec(function(err, sites) {
+
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
         }
 
-        if (sites !== null && sites.length > 0) {
-            // check if a site is empty in JSON form (it can never be empty otherwise
-            var a_site = JSON.stringify(sites[0].toJSON({ hide: hidden_str, transform: true}));
-            if (a_site !== "{}") { 
-                replies.jsonArrayReply(res, sites, 200, hidden_str);
+        query.limit(0).skip(0).count().exec(function(err, count) {
+
+            if (err) {
+                req.log.error(err);
+                return replies.dbErrorReply(res, err);
+            }
+
+            if (sites !== null && sites.length > 0) {
+                // check if a site is empty in JSON form (it can never be empty otherwise
+                var a_site = JSON.stringify(sites[0].toJSON({ hide: hidden_str, transform: true}));
+                var off = req.params.offset || 0;
+                var extras = {"length": sites.length, "offset": off, "total": count};
+                if (a_site !== "{}") { 
+                    replies.jsonArrayReply(res, sites, 200, hidden_str, extras);
+                } else {
+                    replies.dbEmptyReturn(res);
+                }
             } else {
                 replies.dbEmptyReturn(res);
             }
-        } else {
-            replies.dbEmptyReturn(res);
-        }
 
+        });
     });
 
     return next();

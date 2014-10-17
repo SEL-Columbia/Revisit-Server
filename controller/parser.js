@@ -118,7 +118,8 @@ var genLimitQuery = function(params, query) {
     if (params.limit == null ) {
         params.limit = 25; 
     } else if (params.limit == "off") {
-        params.limit = 0;
+        //params.limit = 0;
+        params.limit = 1000;
     } 
 
     if (params.offset == null) {
