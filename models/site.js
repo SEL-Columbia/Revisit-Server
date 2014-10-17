@@ -111,7 +111,7 @@ SiteModel.statics.findById = function(id, callback) {
     return this.find({"_id" : id}, callback);
 }
 
-SiteModel.statics.findNear = function(lng, lat, rad, earthRad, callback) {
+SiteModel.statics.findNear = function(lng, lat, rad, earthRad) {
     return this.find({ "coordinates": 
                         {"$geoWithin": 
                             { "$centerSphere": 
@@ -120,10 +120,10 @@ SiteModel.statics.findNear = function(lng, lat, rad, earthRad, callback) {
                                 ]
                             }
                         }
-                     }, callback);
+                     });
 }
 
-SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng, callback) {
+SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng) {
     return this.find({"coordinates": 
                         {"$geoWithin": 
                             { "$box": 
@@ -133,10 +133,10 @@ SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng, callback) {
                                 ]
                             }
                         }
-                    }, callback);
+                    })
 }
 
-SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector, callback) {
+SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector) {
     return this.find(
              {"$and": 
                 [{"coordinates": 
@@ -150,7 +150,7 @@ SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector
                         }
                     },
                  {"properties.sector": sector}]
-             }, callback);
+             });
 }
 
 SiteModel.statics.updateById = function(id, site, callback) {

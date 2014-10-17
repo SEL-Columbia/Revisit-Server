@@ -214,7 +214,7 @@ describe('API Extra Routes', function(done) {
 
 
                     res.body.facilities.should.be.ok;
-                    res.body.facilities.should.have.lengthOf(100);
+                    res.body.facilities.should.have.lengthOf(25);
                     done();
                 });
 
@@ -283,7 +283,7 @@ describe('API Extra Routes', function(done) {
                     }
 
                     res.body.facilities.should.be.ok;
-                    res.body.facilities.should.have.lengthOf(56);
+                    res.body.facilities.should.have.lengthOf(25);
                     done();
                 });
 

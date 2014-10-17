@@ -7,6 +7,7 @@ var mkdirp = require('mkdirp');
 var database = require('../models/dbcontroller.js');
 var replies = require('./responses.js');
 var log = require('./../log/logger.js').log;
+var parser = require('../controller/parser.js');
 
 function near(req, res, next) {
     req.log.info("GET near facility REQUEST", {"req": req.params})
@@ -30,7 +31,16 @@ function near(req, res, next) {
         return replies.apiBadRequest(res, "TODO: This message is not used!");
     }
 
-    database.SiteModel.findNear(lng, lat, rad, earthRad, function(err, sites) {
+    // query obj 
+    var near = database.SiteModel.findNear(lng, lat, rad, earthRad);
+
+    // determine if we have any limits to add
+    parser.genLimitQuery({
+                            "limit": req.params.limit, 
+                            "offset": req.params.offset
+                        }, near);
+
+    near.exec( function(err, sites) {
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
@@ -92,7 +102,15 @@ function within(req, res, next) {
         return replies.apiBadRequest(res, "TODO: This message is not used!");
     }
 
-    database.SiteModel.findWithin(slat, wlng, nlat, elng, function(err, sites) {
+    var within = database.SiteModel.findWithin(slat, wlng, nlat, elng);
+
+    // determine if we have any limits to add
+    parser.genLimitQuery({
+                            "limit": req.params.limit, 
+                            "offset": req.params.offset
+                        }, within);
+
+    within.exec( function(err, sites) {
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
@@ -128,9 +146,16 @@ function withinSector(req, res, next) {
         return;
     }
 
+    var withinSector = database.SiteModel.findWithinSector(slat, wlng, nlat, elng, sector);
 
-    database.SiteModel.findWithinSector(slat, wlng, nlat, elng, sector, function(err, sites) {
-        if (err) {
+    // determine if we have any limits to add
+    parser.genLimitQuery({
+                            "limit": req.params.limit, 
+                            "offset": req.params.offset
+                        }, withinSector);
+
+    withinSector.exec( function(err, sites) {
+    if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
         }

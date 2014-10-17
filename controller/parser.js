@@ -180,3 +180,4 @@ var genAddOnsQuery = function(params, filters) {
 
 exports.parseParams = parseParams;
 exports.parseBody = parseBody;
+exports.genLimitQuery = genLimitQuery;
