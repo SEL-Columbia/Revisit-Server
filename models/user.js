@@ -22,6 +22,11 @@ var UserModel = new Schema({
         salt: {
             type: String,
             required: true
+        },
+
+        role: {
+            type: String,
+            default: "simple"
         }
     },
     
@@ -31,7 +36,7 @@ var UserModel = new Schema({
 UserModel.set('toJSON', {
     transform: function(doc, ret, options) {
         delete ret._id;
-        delete ret._v;
+        delete ret.__v;
     }
 });
 
@@ -91,6 +96,19 @@ UserModel.statics.login = function(username, pass, callback) {
     console.log("fields empty");
     callback(false);
     return;
+};
+
+UserModel.statics.updatePassword = function(username, pass, callback) {
+    // should verify that the requester can login as username before this is called
+    var new_salt = genSalt();
+    var new_hash = genHash(pass, new_salt);
+
+    return this.findOneAndUpdate(
+        {'username': username},
+        {'salt': new_salt, 'password': new_hash},
+        callback
+    );
+
 };
 
 UserModel.statics.addUser = function(username, pass, callback) {

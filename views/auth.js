@@ -23,7 +23,11 @@ function login(req, res, next) {
     database.UserModel.login(req.params.username, req.params.password,
         function(success) {
             //console.log(">>> User logged in?: ",  success);
-            res.send("User logged in? " + success);
+            if (!success) {
+                return replies.apiBadRequest(res, "Something about password");
+            } 
+
+            res.send(req.params.username + " logged succesfully");
         });
 
     return next();
@@ -66,7 +70,72 @@ function getUser(req, res, next) {
     return next();
 }
 
+function updateAndVerify(req, res, next) {
+    console.log("Updating User pass/role:", req.params);
+
+    var pass = req.params.password;
+    var user = req.params.username;
+    var oldPass = req.params.oldPassword;
+
+    if (!user || !pass || !oldPass)
+        replies.apiBadRequest(res, "Not using this string yet");
+
+    database.UserModel.login(user, oldPass, function(success) {
+        if (!success) {
+            return replies.apiBadRequest(res, "Something about password");
+        }
+
+        database.UserModel.updatePassword(user, pass, function(err, user) {
+
+            if (err) {
+                req.log.error(err);
+                return replies.dbErrorReply(res, err);
+            }
+
+            if (!user) {
+                // User not found (not possible cause of login above would catch it)
+                return replies.apiBadRequest(res, "Not using this string yet");
+            }
+
+            replies.jsonReply(res, user);
+        });
+
+    });
+
+    return next();
+}
+
+function updatePass(req, res, next) {
+    console.log("Updating User pass:", req.params);
+
+    var pass = req.params.password;
+    var user = req.params.username;
+    var oldPass = req.params.oldPassword;
+
+    if (!user || !pass || !oldPass)
+        replies.apiBadRequest(res, "Not using this string yet");
+
+    database.UserModel.updatePassword(user, pass, function(err, user) {
+
+        if (err) {
+            req.log.error(err);
+            return replies.dbErrorReply(res, err);
+        }
+
+        // User not found, would not err out 
+        if (!user) {
+            return replies.apiBadRequest(res, "Not using this string yet");
+        }
+
+        replies.jsonReply(res, user);
+    });
+
+    return next();
+}
+
 exports.addUser = addUser;
 exports.login = login;
 exports.getUser = getUser;
 exports.getUsers = getUsers;
+exports.updateAndVerify = updateAndVerify;
+exports.updatePass = updatePass;
