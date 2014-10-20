@@ -75,18 +75,19 @@ function updateAndVerify(req, res, next) {
 
     var pass = req.params.password;
     var user = req.params.username;
+    var role = req.params.role;
     var oldPass = req.params.oldPassword;
 
-    if (!user || !pass || !oldPass)
-        replies.apiBadRequest(res, "Not using this string yet");
+    // user must be there and either pass/oldpass or role must be there
+    if (!user || (!(pass && oldPass) && !role) || !oldPass)
+        return replies.apiBadRequest(res, "Not using this string yet");
 
     database.UserModel.login(user, oldPass, function(success) {
         if (!success) {
             return replies.apiBadRequest(res, "Something about password");
         }
 
-        database.UserModel.updatePassword(user, pass, function(err, user) {
-
+        database.UserModel.update(user, pass, role, function(err, user) {
             if (err) {
                 req.log.error(err);
                 return replies.dbErrorReply(res, err);
@@ -94,29 +95,29 @@ function updateAndVerify(req, res, next) {
 
             if (!user) {
                 // User not found (not possible cause of login above would catch it)
-                return replies.apiBadRequest(res, "Not using this string yet");
+                return replies.apiBadRequPassest(res, "Not using this string yet");
             }
 
             replies.jsonReply(res, user);
         });
-
     });
 
     return next();
 }
 
+// super update, bypasses login requirement of above, not used currently
+// TODO:find endpoint for this guy: (need middle man function routing btwn the two)
 function updatePass(req, res, next) {
     console.log("Updating User pass:", req.params);
 
     var pass = req.params.password;
     var user = req.params.username;
-    var oldPass = req.params.oldPassword;
+    var role = req.params.role;
 
-    if (!user || !pass || !oldPass)
-        replies.apiBadRequest(res, "Not using this string yet");
+    if (!user || (!pass && !role))
+        return replies.apiBadRequest(res, "Not using this string yet");
 
-    database.UserModel.updatePassword(user, pass, function(err, user) {
-
+    database.UserModel.update(user, pass, role, function(err, user) {
         if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);

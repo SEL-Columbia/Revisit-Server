@@ -98,14 +98,21 @@ UserModel.statics.login = function(username, pass, callback) {
     return;
 };
 
-UserModel.statics.updatePassword = function(username, pass, callback) {
+UserModel.statics.update = function(username, pass, role, callback) {
     // should verify that the requester can login as username before this is called
-    var new_salt = genSalt();
-    var new_hash = genHash(pass, new_salt);
 
+    var update = {};
+    if (pass) {
+        update['salt'] = genSalt();
+        update['password']  = genHash(pass, update['salt']);
+    }
+
+    if (role) {
+        update['role'] = role;
+    }
     return this.findOneAndUpdate(
         {'username': username},
-        {'salt': new_salt, 'password': new_hash},
+        update,
         callback
     );
 
