@@ -9,6 +9,8 @@ var replies = require('./responses.js');
 
 function addUser(req, res, next) {
     console.log("New user:", req.params);
+    //TODO: Put way of setting the role on creation? 
+    //Should that always be done seperatly?
     database.UserModel.addUser(req.params.username, req.params.password,
         function(success) {
             console.log(">>> User created?: ", success);
