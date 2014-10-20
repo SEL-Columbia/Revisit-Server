@@ -6,22 +6,32 @@ var mongoose = require('mongoose'),
 
 var Schema = mongoose.Schema;
 var UserModel = new Schema({
-    username: {
-        type: String,
-        index: {
-            unique: true
+        username: {
+            type: String,
+            index: {
+                unique: true
+            },
+            required: true
         },
-        required: true
+    
+        password: {
+            type: String,
+            required: true
+        },
+    
+        salt: {
+            type: String,
+            required: true
+        }
     },
+    
+    { id: false }
+);
 
-    password: {
-        type: String,
-        required: true
-    },
-
-    salt: {
-        type: String,
-        required: true
+UserModel.set('toJSON', {
+    transform: function(doc, ret, options) {
+        delete ret._id;
+        delete ret._v;
     }
 });
 
@@ -93,6 +103,7 @@ UserModel.statics.addUser = function(username, pass, callback) {
         password: hash,
         salt: salt
     });
+
     userObj.save(function(err, user) {
         if (err) {
             console.log(err);
@@ -105,6 +116,15 @@ UserModel.statics.addUser = function(username, pass, callback) {
     });
 
     return;
+};
+
+UserModel.statics.getAllUsers = function(callback) {
+    //TODO: Hide salt/pass always?
+    return this.find({}, callback);
+};
+
+UserModel.statics.getUser = function(username, callback) {
+    return this.find({"username": username}, callback);
 };
 
 // Avoid recompilation

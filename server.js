@@ -155,24 +155,13 @@ server.get(conf.prePath + '/facilities/near.json', extras.near); // search near 
 server.get(conf.prePath + '/facilities/within.json', extras.within); // search within box and/or sector
 
 // users
+server.get(conf.prePath + '/users', auth.getUsers); // just for testing, should be in admin console
+server.get(conf.prePath + '/users/:username', auth.getUser); // just for testing, should be in admin console
 server.post(conf.prePath + '/users/add/', auth.addUser); // just for testing, should be in admin console
 server.post(conf.prePath + '/users/login/', auth.login); // just for testing, done during basic auth
 
 exports.server = server;
 exports.db = db;
-
-// exports.enableAuth = function(enable) {
-//     config.USE_AUTH = !!enable;
-// };
-// exports.allowGet = function(allow) {
-//     config.ALLOW_GET = !!allow;
-// };
-// exports.allowPut = function(allow) {
-//     config.ALLOW_PUT = !!allow;
-// };
-// exports.allowPost = function(allow) {
-//     config.ALLOW_POST = !!allow;
-// };
 
 /**
  * Listen for SIGTERM signal, close the server if it's running.
@@ -186,4 +175,3 @@ process.on('SIGTERM', function() {
     });
 });
 
-console.log(restify.ResourceNotFoundError)

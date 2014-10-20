@@ -53,11 +53,10 @@ describe('Authentication Tests', function(done) {
         done();
     });
 
-    //TODO: switch slug and facilities
     describe('User Creation', function() {
         it('should create a new user on the server', function(done) {
             request(server)
-                .post(conf.prePath + '/users/add/?user=Bob&pass=test')
+                .post(conf.prePath + '/users/add/?username=Bob&password=test')
                 .expect('Content-Type', /json/)
                 .expect(200)
                 .end(function(err, res) {
@@ -179,7 +178,6 @@ describe('Authentication Tests', function(done) {
                 .send({
                     "name": new_name
                 })
-                .expect('Content-Type', /json/)
                 .expect('Content-Type', /json/)
                 .expect(401)
                 .end(function(err, res) {
