@@ -25,7 +25,20 @@ var sites = function (req, res, next) {
             return replies.dbErrorReply(res, err);
         }
 
-        query.limit(0).skip(0).count().exec(function(err, count) {
+        // I need to prevent projections to do count
+        delete req.params.allProperties;
+        delete req.params.fields;
+        delete req.params.sortAsc;
+        delete req.params.sortDesc;
+
+        console.log(req.params);
+        console.log(req.params);
+        console.log(req.params);
+        console.log(req.params);
+        console.log(req.params);
+
+        count_query = parser.parseParams(req.params, database.SiteModel); 
+        count_query.limit(0).skip(0).count().exec(function(err, count) {
 
             if (err) {
                 req.log.error(err);

@@ -18,6 +18,7 @@ var jsonArrayReply = function(res, sites, code, hidden, extras) {
             res.write(", ");
         }
     });
+    res.write(']');
 
     if (extras) {
         res.write(', "length": ' + extras.length)
@@ -25,7 +26,7 @@ var jsonArrayReply = function(res, sites, code, hidden, extras) {
         res.write(', "total": ' + extras.total)
     }
 
-    res.write(']}');
+    res.write('}');
     res.end()
     log.info("JSON ARRAY reply sent", {"code": code});
 }    
