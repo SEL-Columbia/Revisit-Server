@@ -115,18 +115,24 @@ var parseBody = function(body) {
 
 // Limit the number of tuples to be returned
 var genLimitQuery = function(params, query) {
-    if (params.limit == null ) {
-        params.limit = 25; 
-    } else if (params.limit == "off") {
+
+    var off = 0;
+    var lim = 25;
+
+    if (params.limit === "off") {
         //params.limit = 0;
         params.limit = 1000;
     } 
 
-    if (params.offset == null) {
-        params.offset = 0;
+    if (!isNaN(params.limit)) {
+        lim = params.limit;
     } 
 
-    return query.skip(params.offset).limit(params.limit)  
+    if (!isNaN(params.offset)) {
+        off = params.offset;
+    } 
+
+    return query.skip(off).limit(lim)  
 }
 
 // Include or not include properties

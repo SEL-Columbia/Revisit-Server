@@ -31,12 +31,6 @@ var sites = function (req, res, next) {
         delete req.params.sortAsc;
         delete req.params.sortDesc;
 
-        console.log(req.params);
-        console.log(req.params);
-        console.log(req.params);
-        console.log(req.params);
-        console.log(req.params);
-
         count_query = parser.parseParams(req.params, database.SiteModel); 
         count_query.limit(0).skip(0).count().exec(function(err, count) {
 

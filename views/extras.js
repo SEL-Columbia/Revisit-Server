@@ -46,22 +46,33 @@ function near(req, res, next) {
             return replies.dbErrorReply(res, err);
         }
 
-        if (sites !== null && sites.length > 0) {
-            // check if a site is empty in JSON form (it can never be empty otherwise
-            var a_site = JSON.stringify(sites[0].toJSON());
-            if (a_site !== "{}") { 
-                replies.jsonArrayReply(res, sites, 200);
+        near.limit(0).skip(0).count().exec(function(err, count) {
+            if (err) {
+                req.log.error(err);
+                return replies.dbErrorReply(res, err);
+            }
+
+            if (sites !== null && sites.length > 0) {
+                // check if a site is empty in JSON form (it can never be empty otherwise
+                var a_site = JSON.stringify(sites[0].toJSON());
+
+                var off = req.params.offset || 0;
+                var extras = {"length": sites.length, "offset": off, "total": count};
+                if (a_site !== "{}") { 
+                    replies.jsonArrayReply(res, sites, 200, null, extras);
+                } else {
+                    replies.dbEmptyReturn(res);
+                }
             } else {
                 replies.dbEmptyReturn(res);
             }
-        } else {
-            replies.dbEmptyReturn(res);
-        }
 
-        return next(); 
+        });
+    });
 
-    });       
-}
+    return next();
+
+};
 
 function nearID(req, res, next) {
     req.log.info("GET near facility with id REQUEST", {"req": req.params})
@@ -116,21 +127,33 @@ function within(req, res, next) {
             return replies.dbErrorReply(res, err);
         }
 
-        if (sites !== null && sites.length > 0) {
-            // check if a site is empty in JSON form (it can never be empty otherwise
-            var a_site = JSON.stringify(sites[0].toJSON());
-            if (a_site !== "{}") { 
-                replies.jsonArrayReply(res, sites, 200);
+        within.limit(0).skip(0).count().exec(function(err, count) {
+            if (err) {
+                req.log.error(err);
+                return replies.dbErrorReply(res, err);
+            }
+
+            if (sites !== null && sites.length > 0) {
+                // check if a site is empty in JSON form (it can never be empty otherwise
+                var a_site = JSON.stringify(sites[0].toJSON());
+
+                var off = req.params.offset || 0;
+                var extras = {"length": sites.length, "offset": off, "total": count};
+                if (a_site !== "{}") { 
+                    replies.jsonArrayReply(res, sites, 200, null, extras);
+                } else {
+                    replies.dbEmptyReturn(res);
+                }
             } else {
                 replies.dbEmptyReturn(res);
             }
-        } else {
-            replies.dbEmptyReturn(res);
-        }
 
-        return next(); 
+        });
     });
-}
+
+    return next();
+
+};
 
 function withinSector(req, res, next) {
     req.log.info("GET within sector facility REQUEST", {"req": req.params})
@@ -155,26 +178,39 @@ function withinSector(req, res, next) {
                         }, withinSector);
 
     withinSector.exec( function(err, sites) {
-    if (err) {
+        if (err) {
             req.log.error(err);
             return replies.dbErrorReply(res, err);
         }
 
-        if (sites !== null && sites.length > 0) {
-            // check if a site is empty in JSON form (it can never be empty otherwise
-            var a_site = JSON.stringify(sites[0].toJSON());
-            if (a_site !== "{}") { 
-                replies.jsonArrayReply(res, sites, 200);
+
+        withinSector.limit(0).skip(0).count().exec(function(err, count) {
+            if (err) {
+                req.log.error(err);
+                return replies.dbErrorReply(res, err);
+            }
+
+            if (sites !== null && sites.length > 0) {
+                // check if a site is empty in JSON form (it can never be empty otherwise
+                var a_site = JSON.stringify(sites[0].toJSON());
+
+                var off = req.params.offset || 0;
+                var extras = {"length": sites.length, "offset": off, "total": count};
+                if (a_site !== "{}") { 
+                    replies.jsonArrayReply(res, sites, 200, null, extras);
+                } else {
+                    replies.dbEmptyReturn(res);
+                }
             } else {
                 replies.dbEmptyReturn(res);
             }
-        } else {
-            replies.dbEmptyReturn(res);
-        }
 
-        return next(); 
+        });
     });
-}
+
+    return next();
+
+};
 
 //TODO: Refactor, does too much work 
 exports.uploadPhoto = function (req, res, next) {
