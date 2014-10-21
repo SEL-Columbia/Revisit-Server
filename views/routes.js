@@ -1,3 +1,7 @@
+// dependancies
+var async = require('async');
+var fs = require('fs');
+
 // local includes
 var database = require('../models/dbcontroller.js');
 var parser = require('../controller/parser.js');
@@ -89,8 +93,7 @@ var update = function (req, res, next) {
 
     var success = parser.parseBody(req.params);
     if (!success) {
-        replies.apiBadRequest(res, success);
-        return;
+        return replies.apiBadRequest(res, success);
     }
     
     database.SiteModel.updateById(id, req.params, function(err, site) {
@@ -109,24 +112,158 @@ var update = function (req, res, next) {
 var add = function ( req, res, next) {
     req.log.info("POST add facility REQUEST", {"req": req.params});
 
+    // enforces certain fields are not in body
     var success = parser.parseBody(req.params);
     if (!success) {
-        replies.apiBadRequest(res, success);
-        return;
+        return replies.apiBadRequest(res, success);
     }
 
+
+    // TODO: set up parser function for this in controller
+    var name = req.params.name;
+    var prop = req.params.properites;
+
+    
     var site = new database.SiteModel(req.params);
-    site.save(function(err, site) {
+    site.validate(function (err) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.apiBadRequest(res, success);
         }
 
-        replies.jsonReply(res, site, 201);
+
+        site.save(function(err, site) {
+            if (err) {
+                req.log.error(err);
+                return replies.dbErrorReply(res, err.message);
+            }
+
+            replies.jsonReply(res, site, 201);
 
         });
 
+    });
+
     return next();
+};
+
+var bulk = function( req, res, next) {
+    req.log.info("POST add MULTIPLE facility REQUEST (from json)", {"req": req.params});
+
+    // body can be undefined ... strange this is the only place where its possible
+    if (!req.body) {
+        return replies.apiBadRequest(res, "Should used this at some point");
+    }
+
+    // expects content type to be json
+    var facilities = req.body.facilities;
+    var debug = req.params.debug;
+
+    if (!facilities) {
+        return replies.apiBadRequest(res, "Should used this at some point");
+    }
+
+    var num_inserted = 0;
+    var num_failed = 0;
+    var num_supplied = facilities.length;
+    var errors = [];
+
+    var fac_saver = function(facility, callback) {
+       var fac_model = new database.SiteModel(facility);
+       fac_model.validate(function (err) {
+           if (err) {
+               // update error obj with facility, then record
+               err["facility"] = facility
+               errors[num_failed++] = err;
+
+               facility = null; // nulify facility if err'd
+           }
+
+           callback(null, facility);
+
+       });
+    }
+
+    async.map(facilities, fac_saver, function(err, result) {
+        // those that failed to validate were nullifyed
+        // XXX: shouldnt async provide a way to only return non error'd objs?
+        result = result.filter(function(obj) { return obj !== null });
+
+        // handle special case of all data failing to validate
+        if (result.length === 0) {
+            var response =  {   
+                               "recieved": num_supplied, 
+                               "inserted": num_inserted, 
+                               "failed": num_failed
+                            };
+
+            if (debug === "true") { 
+                response["errors"] = errors;
+            }
+
+            return replies.jsonReply(res, response, 201);
+        }
+
+        // bulk insert
+        database.SiteModel.collection.insert(result, function(err, sites) {
+            if (err) {
+                req.log.error(err);
+                return replies.dbErrorReply(res, message);
+            }
+
+            num_inserted = sites.length;
+            var response = {    
+                            "recieved": num_supplied, 
+                            "inserted": num_inserted, 
+                            "failed": num_failed
+                           };
+
+            if (debug === "true") { 
+                response["errors"] = errors;
+            }
+
+            replies.jsonReply(res, response, 201);
+
+
+        });
+    });
+
+    return next();
+};
+
+var bulkFile = function( req, res, next) {
+    req.log.info("POST add MULTIPLE facility REQUEST (from file)", {"req": req.files});
+
+    // body can be undefined ... strange this is the only place where its possible
+    if (!req.files || typeof req.files.facilities === 'undefined') {
+        return replies.apiBadRequest(res, "Should used this at some point");
+    }
+
+    var debug = req.params.debug;
+    fs.readFile(req.files.facilities.path, 'utf8', function(err, facility_string) {
+        if (err) {
+            req.log.err(err);
+            return replies.dbErrorReply(res, "Could not read file?");
+        }
+
+        if (!facility_string || facility_string.length === 0) {
+            return replies.apiBadRequest(res, "Should used this at some point");
+        }
+
+        try { // JSON parse is a headache
+
+            var facility_object = JSON.parse(facility_string);
+            req.body = {};
+            req.body.facilities = facility_object.facilities;
+            return bulk(req, res, next);
+
+        } catch(err) { 
+            return replies.apiBadRequest(res, "JSON is malformed");
+        }
+    });
+    
+    return next();
+
 };
 
 var del = function (req, res, next) {
@@ -156,5 +293,7 @@ exports.sites = sites;
 exports.site = site;
 exports.update = update;
 exports.add = add;
+exports.bulk = bulk;
+exports.bulkFile = bulkFile;
 exports.del = del;
 

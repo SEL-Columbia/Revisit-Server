@@ -46,7 +46,7 @@ var dbErrorReply = function(res, err) {
     res.send( new restify.RestError({
         statusCode: 500, 
         restCode: "Internal Server Error", 
-        message: JSON.stringify(err)
+        message: err
     }));
 
     //log.info("DB ERROR reply sent", {"code": 500});

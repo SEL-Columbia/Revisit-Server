@@ -138,6 +138,8 @@ var id_path = new RegExp(conf.prePath + "/facilities/(\\w{24})\.json$");
 // main
 server.get(conf.prePath + "/facilities.json", routes.sites); // all sites
 server.post(conf.prePath + "/facilities.json", routes.add); // new site
+server.post(conf.prePath + "/facilities/bulk.json", routes.bulk); // new site
+server.post(conf.prePath + "/facilities/bulk", routes.bulkFile); // new site
 server.get(id_path, routes.site); // site by id
 server.del(id_path, routes.del); // delete by id
 server.put(id_path, routes.update); // update site by id

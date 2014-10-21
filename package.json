@@ -19,12 +19,13 @@
     "url": "git@github.com:SEL-Columbia/Revisit-Server.git"
   },
   "dependencies": {
+    "async": "^0.9.0",
+    "bunyan": "^1.1.0",
     "daemon": "^1.1.0",
     "jshashes": "^1.0.5",
     "lodash-node": "^2.4.1",
     "mkdirp": "^0.5.0",
     "mongoose": "^3.8.17",
-    "restify": "^2.8.2",
-    "bunyan": "^1.1.0"
+    "restify": "^2.8.2"
   }
 }

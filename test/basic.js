@@ -422,15 +422,12 @@ describe('API Routes', function(done) {
         });
     });
 
-    
-    // TODO - tests that ensure all required fields are present
-    
     describe('#createFacility', function(done) {
     
         it('should create a facility with name="Toronto"', function(done) {
             request(server)
                 .post(conf.prePath + "/facilities.json")
-                .send({"name": "Toronto"})
+                .send({"name": "Toronto", "properties": {"sector": "test"}})
                 .expect('Content-Type', /json/)
                 .expect(201) 
                 .end(function(err, res) {
@@ -474,6 +471,63 @@ describe('API Routes', function(done) {
                 });
 
         });
+    });
+
+    describe('#bulkCreateFacility', function(done) {
+    
+        it('should bulk upload two facilities', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send({"facilities":[
+                        {"name": "Toronto", "properties": {"sector": "test"}}, 
+                        {"name": "Kyoto", "properties": {"sector": "test"}}, 
+                        {"name": "Brookyln", "properties": {"sector": "test"}}
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    } 
+                    res.body.recieved.should.equal(3);
+                    res.body.inserted.should.equal(3);
+                    res.body.failed.should.equal(0);
+                    done();
+                });
+        });
+
+        it('should fail to upload empty post', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send()
+                .expect('Content-Type', /json/)
+                .expect(400) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("Bad Request");
+                    done();
+                });
+        });
+
+        it('should fail to upload empty facility', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send({"facilities": []})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.recieved.should.equal(0);
+                    res.body.inserted.should.equal(0);
+                    res.body.failed.should.equal(0);
+                    done();
+                });
+        });
+
     });
 
     describe('#deleteFacility', function(done) {

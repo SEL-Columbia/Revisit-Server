@@ -232,9 +232,7 @@ describe('Authentication Tests', function(done) {
 
             request(server)
                 .post(conf.prePath + "/facilities.json")
-                .send({
-                    "name": "Toronto"
-                })
+                .send({"name": "Toronto", "properties": {"sector": "test"}})
                 .expect('Content-Type', /json/)
                 .expect(201)
                 .end(function(err, res) {
@@ -254,9 +252,7 @@ describe('Authentication Tests', function(done) {
 
             request(server)
                 .post(conf.prePath + "/facilities.json")
-                .send({
-                    "name": "Toronto"
-                })
+                .send({"name": "Toronto", "properties": {"sector": "test"}})
                 .expect('Content-Type', /json/)
                 .expect(401)
                 .end(function(err, res) {
@@ -280,9 +276,7 @@ describe('Authentication Tests', function(done) {
                 request(server)
                     .post(conf.prePath + "/facilities.json")
                     .auth('Bob', 'test')
-                    .send({
-                        "name": "Toronto"
-                    })
+                    .send({"name": "Toronto", "properties": {"sector": "test"}})
                     .expect('Content-Type', /json/)
                     .expect(201)
                     .end(function(err, res) {
