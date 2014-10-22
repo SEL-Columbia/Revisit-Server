@@ -5,6 +5,7 @@ var fs = require('fs');
 // local includes
 var database = require('../models/dbcontroller.js');
 var parser = require('../controller/parser.js');
+var facilityBuilder = require('../controller/facilityBuilder.js');
 var replies = require('./responses.js');
 
 // echo
@@ -13,15 +14,35 @@ var respond = function (req, res, next) {
       return next();
 };
 
+
+// check if a site is empty in JSON form (it can never be empty otherwise)
+var isEmpty = function(sites, hidden_str) {
+    if (sites === null || sites === undefined || sites.length <= 0) {
+        return true;
+    }
+
+    var a_site = JSON.stringify(sites[0].toJSON({ hide: hidden_str, transform: true}));
+    if (a_site === "{}") { 
+        return true;
+    }
+
+    return false;
+}
+
+// check if only a single site was returned in query
+var isOnlySite = function(sites) {
+    if (sites !== null && sites.length == 1) {
+        return true;
+    }
+    return false;
+}
+
 // views
 var sites = function (req, res, next) {
     req.log.info("GET all facilities REQUEST", {"req": req.params});
     
     // parse query
-    var hidden = {}; // virt fields must be handled seperatly 
-    query = parser.parseParams(req.params, database.SiteModel, hidden);
-    var hidden_str = Object.keys(hidden).join(',');
-
+    query = parser.parseParams(req.params, database.SiteModel);
     query.exec(function(err, sites) {
 
         if (err) {
@@ -43,19 +64,19 @@ var sites = function (req, res, next) {
                 return replies.dbErrorReply(res, err);
             }
 
-            if (sites !== null && sites.length > 0) {
-                // check if a site is empty in JSON form (it can never be empty otherwise
-                var a_site = JSON.stringify(sites[0].toJSON({ hide: hidden_str, transform: true}));
-                var off = req.params.offset || 0;
-                var extras = {"length": sites.length, "offset": off, "total": count};
-                if (a_site !== "{}") { 
-                    replies.jsonArrayReply(res, sites, 200, hidden_str, extras);
-                } else {
-                    replies.dbEmptyReturn(res);
-                }
-            } else {
-                replies.dbEmptyReturn(res);
+            var hidden_str = parser.parseForVirts(req.params);
+            if (isEmpty(sites, hidden_str)) {
+                return replies.dbEmptyReturn(res);
             }
+
+            var off = req.params.offset || 0;
+            var extras = {"length": sites.length, "offset": off, "total": count};
+
+            facilityBuilder
+                .buildFacility(sites, hidden_str)
+                .addExtras(extras);
+
+            replies.jsonReply(res, facilityBuilder.toObject(), 200);
 
         });
     });
@@ -72,13 +93,11 @@ var site = function (req, res, next) {
             return replies.dbErrorReply(res, err);
         }
 
-        if (sites !== null && sites.length == 1) {
-            site = sites[0]; // should only be one
-            replies.jsonReply(res, site);
-
-        } else {
-            replies.dbEmptyReturn(res);
+        if (!isOnlySite(sites)) {
+            return replies.dbEmptyReturn(res);
         }
+
+        replies.jsonReply(res, sites[0]);
 
     });
 
@@ -117,27 +136,22 @@ var add = function ( req, res, next) {
     if (!success) {
         return replies.apiBadRequest(res, success);
     }
-
-
-    // TODO: set up parser function for this in controller
-    var name = req.params.name;
-    var prop = req.params.properites;
-
     
     var site = new database.SiteModel(req.params);
+    // check if site passes mongoose validation
     site.validate(function (err) {
         if (err) {
             req.log.error(err);
             return replies.apiBadRequest(res, success);
         }
 
-
+        // write to db
         site.save(function(err, site) {
             if (err) {
                 req.log.error(err);
                 return replies.dbErrorReply(res, err.message);
             }
-
+            // respond with newly added site
             replies.jsonReply(res, site, 201);
 
         });
@@ -168,14 +182,14 @@ var bulk = function( req, res, next) {
     var num_supplied = facilities.length;
     var errors = [];
 
-    var fac_saver = function(facility, callback) {
+    // define function to be mapped
+    var fac_validator = function(facility, callback) {
        var fac_model = new database.SiteModel(facility);
        fac_model.validate(function (err) {
            if (err) {
                // update error obj with facility, then record
                err["facility"] = facility
                errors[num_failed++] = err;
-
                facility = null; // nulify facility if err'd
            }
 
@@ -184,7 +198,8 @@ var bulk = function( req, res, next) {
        });
     }
 
-    async.map(facilities, fac_saver, function(err, result) {
+    // apply fac_validator to all facilities, build result array
+    async.map(facilities, fac_validator, function(err, result) {
         // those that failed to validate were nullifyed
         // XXX: shouldnt async provide a way to only return non error'd objs?
         result = result.filter(function(obj) { return obj !== null });
@@ -197,6 +212,7 @@ var bulk = function( req, res, next) {
                                "failed": num_failed
                             };
 
+            // only return error's array when requested
             if (debug === "true") { 
                 response["errors"] = errors;
             }
@@ -204,6 +220,7 @@ var bulk = function( req, res, next) {
             return replies.jsonReply(res, response, 201);
         }
 
+        // At this point a subset of the data will be recorded
         // bulk insert
         database.SiteModel.collection.insert(result, function(err, sites) {
             if (err) {
@@ -239,7 +256,7 @@ var bulkFile = function( req, res, next) {
         return replies.apiBadRequest(res, "Should used this at some point");
     }
 
-    var debug = req.params.debug;
+    // read file, validate, pass to bulk insert
     fs.readFile(req.files.facilities.path, 'utf8', function(err, facility_string) {
         if (err) {
             req.log.err(err);
@@ -258,6 +275,7 @@ var bulkFile = function( req, res, next) {
             return bulk(req, res, next);
 
         } catch(err) { 
+            // assume that jsonparse failed due to user error
             return replies.apiBadRequest(res, "JSON is malformed");
         }
     });

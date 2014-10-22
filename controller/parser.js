@@ -14,7 +14,7 @@ knownKeys = [
             ]
                     
 // consumes params builds query, returns for view to exec
-var parseParams = function(params, query, hidden) {
+var parseParams = function(params, query) {
 
     var projections = {};     
     var filters = {};
@@ -34,18 +34,10 @@ var parseParams = function(params, query, hidden) {
 
     // projections
     if (params.fields) {
-        hidden.uuid = 0;
-        hidden.href = 0;
         field_names = params.fields.split(",");
         field_names.forEach(function(field) {
             field = field.replace(":", ".");
-            if (field == "uuid") {
-                delete hidden.uuid
-            } else if (field == "href") {
-                delete hidden.href
-            } else {
-                projections[field] = 1;
-            }
+            projections[field] = 1;
         });
     }
 
@@ -75,11 +67,35 @@ var parseParams = function(params, query, hidden) {
     // Print what I think I sent
     log.debug("Parsed Params", { "filters" : filters, 
                                 "projections": projections, 
-                                "hidden": hidden, 
                                 "sorts" : sorts });
 
     return query;
  
+}
+
+var parseForVirts = function(params) {
+
+    // Assume No fields will be hidden
+    var hidden = {};
+
+    // uuid, href are only virt fields (and probably will stay that way)
+    if (params.fields) {
+        // Fields => uuid and href mostly likey hidden
+        hidden = {"uuid" : 0, "href": 0 };
+        field_names = params.fields.split(",");
+        field_names.forEach(function(field) {
+            field = field.replace(":", ".");
+            // remove virt fields found
+            if (field == "uuid") {
+                delete hidden.uuid
+            } else if (field == "href") {
+                delete hidden.href
+            } 
+        });
+    }
+
+    return Object.keys(hidden).join(',');
+
 }
 
 var badKeys = [
@@ -187,4 +203,5 @@ var genAddOnsQuery = function(params, filters) {
 
 exports.parseParams = parseParams;
 exports.parseBody = parseBody;
+exports.parseForVirts = parseForVirts;
 exports.genLimitQuery = genLimitQuery;
