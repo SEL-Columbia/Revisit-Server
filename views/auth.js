@@ -40,7 +40,7 @@ function getUsers(req, res, next) {
     database.UserModel.getAllUsers(function(err, users) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         replies.jsonReply(res, users)
@@ -57,7 +57,7 @@ function getUser(req, res, next) {
     database.UserModel.getUser(req.params.username, function(err, users) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         if (users !== null && users.length == 1) {
@@ -92,7 +92,7 @@ function updateAndVerify(req, res, next) {
         database.UserModel.update(user, pass, role, function(err, user) {
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, err);
+                return replies.internalErrorReply(res, err);
             }
 
             if (!user) {
@@ -122,7 +122,7 @@ function updatePass(req, res, next) {
     database.UserModel.update(user, pass, role, function(err, user) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         // User not found, would not err out 

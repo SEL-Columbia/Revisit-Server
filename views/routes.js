@@ -47,7 +47,7 @@ var sites = function (req, res, next) {
 
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         // I need to prevent projections to do count
@@ -61,7 +61,7 @@ var sites = function (req, res, next) {
 
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, err);
+                return replies.internalErrorReply(res, err);
             }
 
             var hidden_str = parser.parseForVirts(req.params);
@@ -90,7 +90,7 @@ var site = function (req, res, next) {
     database.SiteModel.findById(req.params[0], function(err, sites) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         if (!isOnlySite(sites)) {
@@ -112,14 +112,15 @@ var update = function (req, res, next) {
 
     var success = parser.parseBody(req.params);
     if (!success) {
-        return replies.apiBadRequest(res, success);
+        return replies.apiBadRequest(res, 
+                "Refer to API for allowed update fields.");
     }
     
     database.SiteModel.updateById(id, req.params, function(err, site) {
         if (err) {
             // findbyid raises an error when id is not found, diff then actual err
             req.log.error(err);
-            return replies.dbEmptyReturn(res, site);
+            return replies.dbEmptyReturn(res);
         }
 
         replies.jsonReply(res, site);
@@ -134,7 +135,8 @@ var add = function ( req, res, next) {
     // enforces certain fields are not in body
     var success = parser.parseBody(req.params);
     if (!success) {
-        return replies.apiBadRequest(res, success);
+        return replies.apiBadRequest(res,
+                "Refer to API for allowed fields.");
     }
     
     var site = new database.SiteModel(req.params);
@@ -142,14 +144,15 @@ var add = function ( req, res, next) {
     site.validate(function (err) {
         if (err) {
             req.log.error(err);
-            return replies.apiBadRequest(res, success);
+            return replies.apiBadRequest(res,
+                "Refer to API for required fields.");
         }
 
         // write to db
         site.save(function(err, site) {
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, err.message);
+                return replies.internalErrorReply(res, err);
             }
             // respond with newly added site
             replies.jsonReply(res, site, 201);
@@ -166,7 +169,7 @@ var bulk = function( req, res, next) {
 
     // body can be undefined ... strange this is the only place where its possible
     if (!req.body) {
-        return replies.apiBadRequest(res, "Should used this at some point");
+        return replies.apiBadRequest(res);
     }
 
     // expects content type to be json
@@ -174,7 +177,7 @@ var bulk = function( req, res, next) {
     var debug = req.params.debug;
 
     if (!facilities) {
-        return replies.apiBadRequest(res, "Should used this at some point");
+        return replies.apiBadRequest(res);
     }
 
     var num_inserted = 0;
@@ -225,7 +228,7 @@ var bulk = function( req, res, next) {
         database.SiteModel.collection.insert(result, function(err, sites) {
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, message);
+                return replies.internalErrorReply(res, err);
             }
 
             num_inserted = sites.length;
@@ -253,18 +256,18 @@ var bulkFile = function( req, res, next) {
 
     // body can be undefined ... strange this is the only place where its possible
     if (!req.files || typeof req.files.facilities === 'undefined') {
-        return replies.apiBadRequest(res, "Should used this at some point");
+        return replies.apiBadRequest(res);
     }
 
     // read file, validate, pass to bulk insert
     fs.readFile(req.files.facilities.path, 'utf8', function(err, facility_string) {
         if (err) {
             req.log.err(err);
-            return replies.dbErrorReply(res, "Could not read file?");
+            return replies.internalErrorReply(res, err);
         }
 
         if (!facility_string || facility_string.length === 0) {
-            return replies.apiBadRequest(res, "Should used this at some point");
+            return replies.apiBadRequest(res);
         }
 
         try { // JSON parse is a headache
@@ -276,7 +279,7 @@ var bulkFile = function( req, res, next) {
 
         } catch(err) { 
             // assume that jsonparse failed due to user error
-            return replies.apiBadRequest(res, "JSON is malformed");
+            return replies.apiBadRequest(res, "JSON is malformed.");
         }
     });
     
@@ -291,7 +294,7 @@ var del = function (req, res, next) {
     database.SiteModel.deleteById(id, function(err, nRemoved, writeStatus) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         if (nRemoved === 0) {

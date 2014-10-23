@@ -109,7 +109,7 @@ describe('Authentication Tests', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("Unauthorized");
+                    res.body.code.should.match("401 Unauthorized");
                     done();
                 });
         });
@@ -185,7 +185,7 @@ describe('Authentication Tests', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("Unauthorized");
+                    res.body.code.should.match("401 Unauthorized");
                     done();
                 });
         });
@@ -260,7 +260,7 @@ describe('Authentication Tests', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("Unauthorized");
+                    res.body.code.should.match("401 Unauthorized");
                     done();
                 });
         });
@@ -325,7 +325,7 @@ describe('Authentication Tests', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("Unauthorized");
+                    res.body.code.should.match("401 Unauthorized");
                     done();
                 });
         });

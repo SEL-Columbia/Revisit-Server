@@ -86,18 +86,19 @@ server.use(function authenticate(req, res, next) {
     });
     if (req.username === 'anonymous' || typeof req.authorization.basic === 'undefined') {
         log.info("Basic auth failed");
-        return replies.apiUnauthorized(res, "No basic auth information provided");
+        return replies.apiUnauthorized(res, null, "No basic auth information provided");
     }
 
-    dbcontroller.UserModel.login(req.username, req.authorization.basic.password, function(success) {
-        if (!success) {
-            log.info("Basic auth failed");
-            return replies.apiUnauthorized(res, req.username);
-        }
+    dbcontroller.UserModel.login(req.username, req.authorization.basic.password,
+    function(success) {
+            if (!success) {
+                log.info("Basic auth failed");
+                return replies.apiUnauthorized(res, req.username);
+            }
 
-        log.debug(">>> User success!");
-        log.info("Basic auth passed");
-        return next();
+            log.debug(">>> User success!");
+            log.info("Basic auth passed");
+            return next();
     });
 });
 
@@ -107,19 +108,11 @@ server.on('after', restify.auditLogger({
 
 // Overwrite default error msgs for internal errors and missing endpoints
 server.on('uncaughtException', function (req, res, route, err) {
-    res.send( new restify.RestError({
-        statusCode: 500, 
-        restCode: "Internal Server Error", 
-        message: JSON.stringify(err)
-    }));
+    replies.internalErrorReply(res, err);
 });
 
 server.on('NotFound', function (req, res, cb) {
-    res.send( new restify.RestError({
-        statusCode: 404, 
-        restCode: "Not Found",
-        message: req.url + " was not found."
-    }));
+    replies.dbEmptyReturn(res, req.url + " was not found.");
 });
 
 server.listen(conf.port, function() {
@@ -157,10 +150,10 @@ server.get(conf.prePath + '/facilities/near.json', extras.near); // search near 
 server.get(conf.prePath + '/facilities/within.json', extras.within); // search within box and/or sector
 
 // users
-server.get(conf.prePath + '/users', auth.getUsers); // just for testing, should be in admin console
-server.get(conf.prePath + '/users/:username', auth.getUser); // just for testing, should be in admin console
-server.put(conf.prePath + '/users/:username', auth.updateAndVerify); // just for testing, should be in admin console
-server.post(conf.prePath + '/users/add/', auth.addUser); // just for testing, should be in admin console
+server.get(conf.prePath + '/users', auth.getUsers); // dumps user collection 
+server.get(conf.prePath + '/users/:username', auth.getUser); // dumps user 
+server.put(conf.prePath + '/users/:username', auth.updateAndVerify); // logs in then updates user 
+server.post(conf.prePath + '/users/add/', auth.addUser); // post name, pass, [role] 
 server.post(conf.prePath + '/users/login/', auth.login); // just for testing, done during basic auth
 
 exports.server = server;
@@ -177,4 +170,3 @@ process.on('SIGTERM', function() {
         process.disconnect && process.disconnect();
     });
 });
-

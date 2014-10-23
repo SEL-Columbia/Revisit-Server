@@ -66,13 +66,13 @@ function near(req, res, next) {
     near.exec( function(err, sites) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         near.limit(0).skip(0).count().exec(function(err, count) {
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, err);
+                return replies.internalErrorReply(res, err);
             }
 
             if (isEmpty(sites)) {
@@ -102,7 +102,7 @@ function nearID(req, res, next) {
     database.SiteModel.findById(req.params[0], function(err, sites) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         if (!isOnlySite(sites)) {
@@ -146,13 +146,13 @@ function within(req, res, next) {
     within.exec( function(err, sites) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         within.limit(0).skip(0).count().exec(function(err, count) {
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, err);
+                return replies.internalErrorReply(res, err);
             }
 
             if (isEmpty(sites)) {
@@ -201,14 +201,14 @@ function withinSector(req, res, next) {
     withinSector.exec( function(err, sites) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
 
         withinSector.limit(0).skip(0).count().exec(function(err, count) {
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, err);
+                return replies.internalErrorReply(res, err);
             }
 
             if (isEmpty(sites)) {

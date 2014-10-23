@@ -344,7 +344,7 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("Not Found");
+                    res.body.code.should.match("404 Not Found");
                     done();
                 });
 
@@ -359,7 +359,7 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("Not Found");
+                    res.body.code.should.match("404 Not Found");
                     done();
                 });
         });
@@ -400,7 +400,7 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("Bad Request");
+                    res.body.code.should.match("400 Bad Request");
                     done();
                 });
 
@@ -416,7 +416,7 @@ describe('API Routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("Bad Request");
+                    res.body.code.should.match("400 Bad Request");
                     done();
                 });
         });
@@ -451,7 +451,7 @@ describe('API Routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("Bad Request");
+                    res.body.code.should.match("400 Bad Request");
                     done();
                 });
         });
@@ -466,7 +466,7 @@ describe('API Routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("Bad Request");
+                    res.body.code.should.match("400 Bad Request");
                     done();
                 });
 
@@ -506,7 +506,7 @@ describe('API Routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("Bad Request");
+                    res.body.code.should.match("400 Bad Request");
                     done();
                 });
         });
@@ -569,7 +569,7 @@ describe('API Routes', function(done) {
                             if (err) {
                                 throw err;
                             }
-                            res.body.code.should.match("Not Found");
+                            res.body.code.should.match("404 Not Found");
                             done();
                         });
                 });
