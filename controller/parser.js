@@ -25,7 +25,6 @@ var badKeys = [
                 'updatedAt'
                ];
 
-
 // consumes params builds query, returns for view to exec
 var parseParams = function(params, query) {
 
