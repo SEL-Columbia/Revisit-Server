@@ -61,7 +61,7 @@ var apiForbidden = function(res, user, data) {
     //log.info("API FORBIDDEN reply sent", {"code": 403});
 };
 
-var dbEmptyReturn = function(res, data) {
+var nothingFoundReply = function(res, data) {
     var msg = data || "Resource was not found.";
     res.send( new restify.RestError({
         statusCode: 404, 
@@ -85,7 +85,16 @@ var apiNotAllowed = function(res, data) {
 };
 
 
-// 409 Conflict (somehow causing collision in db or other conflicts?)
+var conflictReply = function(res, data) {
+    var msg = data || "Operation conflicts with registry requirements.";
+    res.send( new restify.RestError({
+        statusCode: 409, 
+        restCode: "409 Conflict",
+        message: msg
+    }));
+    
+     //log.info("CONFLICT reply sent", {"code": 405});
+};
 
 var dbMissingData = function(res, data) {
     // data is unused
@@ -106,7 +115,9 @@ exports.jsonReply = jsonReply;
 // errors
 exports.apiBadRequest = apiBadRequest;
 exports.internalErrorReply = internalErrorReply;
-exports.dbEmptyReturn = dbEmptyReturn;
+exports.nothingFoundReply = nothingFoundReply;
 exports.apiUnauthorized = apiUnauthorized;
 exports.apiForbidden = apiForbidden;
+exports.apiNotAllowed = apiNotAllowed;
+exports.conflictReply = conflictReply;
 exports.dbMissingData = dbMissingData;

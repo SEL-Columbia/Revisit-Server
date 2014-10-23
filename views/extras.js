@@ -76,7 +76,7 @@ function near(req, res, next) {
             }
 
             if (isEmpty(sites)) {
-                return replies.dbEmptyReturn(res);
+                return replies.nothingFoundReply(res);
             }
 
             var off = req.params.offset || 0;
@@ -106,7 +106,7 @@ function nearID(req, res, next) {
         }
 
         if (!isOnlySite(sites)) {
-            return replies.dbEmptyReturn(res);
+            return replies.nothingFoundReply(res);
 
         } else {
             site = sites[0]; // should only be one
@@ -156,7 +156,7 @@ function within(req, res, next) {
             }
 
             if (isEmpty(sites)) {
-                return replies.dbEmptyReturn(res);
+                return replies.nothingFoundReply(res);
             }
 
             var off = req.params.offset || 0;
@@ -212,7 +212,7 @@ function withinSector(req, res, next) {
             }
 
             if (isEmpty(sites)) {
-                return replies.dbEmptyReturn(res);
+                return replies.nothingFoundReply(res);
             }
 
             var off = req.params.offset || 0;

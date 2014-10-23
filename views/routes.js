@@ -66,7 +66,7 @@ var sites = function (req, res, next) {
 
             var hidden_str = parser.parseForVirts(req.params);
             if (isEmpty(sites, hidden_str)) {
-                return replies.dbEmptyReturn(res);
+                return replies.nothingFoundReply(res);
             }
 
             var off = req.params.offset || 0;
@@ -94,7 +94,7 @@ var site = function (req, res, next) {
         }
 
         if (!isOnlySite(sites)) {
-            return replies.dbEmptyReturn(res);
+            return replies.nothingFoundReply(res);
         }
 
         replies.jsonReply(res, sites[0]);
@@ -120,7 +120,7 @@ var update = function (req, res, next) {
         if (err) {
             // findbyid raises an error when id is not found, diff then actual err
             req.log.error(err);
-            return replies.dbEmptyReturn(res);
+            return replies.nothingFoundReply(res);
         }
 
         replies.jsonReply(res, site);
@@ -298,7 +298,7 @@ var del = function (req, res, next) {
         }
 
         if (nRemoved === 0) {
-            return replies.dbEmptyReturn(res);
+            return replies.nothingFoundReply(res);
         }
         
         replies.jsonReply(res, {"id": id, "message": "Resource deleted"});

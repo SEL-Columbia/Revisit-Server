@@ -112,7 +112,7 @@ server.on('uncaughtException', function (req, res, route, err) {
 });
 
 server.on('NotFound', function (req, res, cb) {
-    replies.dbEmptyReturn(res, req.url + " was not found.");
+    replies.nothingFoundReply(res, req.url + " was not found.");
 });
 
 server.listen(conf.port, function() {

@@ -65,7 +65,7 @@ function getUser(req, res, next) {
             replies.jsonReply(res, user);
 
         } else {
-            replies.dbEmptyReturn(res);
+            replies.nothingFoundReply(res);
         }
     });
 
