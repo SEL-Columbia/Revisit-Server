@@ -108,20 +108,19 @@ var parseForVirts = function(params) {
 
 var parseBody = function(body) {
 
+    var state = true;
     if (!body || Object.keys(body).length == 0) {
         return false;
     }
 
     // nullifiy body if it contains any of our bad keys
-    if (badKeys.some(function(badKey) {
-        return Boolean(body[badKey]);
-    })) 
-    {
-        return false;
-    }
-
+    badKeys.forEach(function(badKey) {
+        state = (!Boolean(body[badKey])) && state; // stays false if ever false 
+        delete body[badKey];
+    });
+    
     body.updatedAt = Date();
-    return true;
+    return state;
 }
 
 /* Parsing helper functions */

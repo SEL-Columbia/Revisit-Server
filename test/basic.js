@@ -380,11 +380,9 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                    console.log(res.body);
                     res.body.should.be.ok;
                     res.body.uuid.should.match(the_uuid);
                     res.body.name.should.match(new_name);
-                    console.log(res.body);
                     done();
                 });
         });
@@ -401,6 +399,26 @@ describe('API Routes', function(done) {
                     }
 
                     res.body.code.should.match("400 Bad Request");
+                    done();
+                });
+
+        });
+
+        it("should fail to update facility's _id field but still update name", 
+        function(done) {
+            request(server)
+                .put(conf.prePath + "/facilities/" + the_uuid + ".json")
+                .send({"_id": the_uuid, "name": "hello"})
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.should.be.ok;
+                    res.body.uuid.should.match(the_uuid);
+                    res.body.name.should.match("hello");
                     done();
                 });
 

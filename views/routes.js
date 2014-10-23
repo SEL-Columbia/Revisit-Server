@@ -111,9 +111,11 @@ var update = function (req, res, next) {
     delete req.params[0];
 
     var success = parser.parseBody(req.params);
-    if (!success) {
+
+    if (!success && (Object.keys(req.params).length < 2)) {
+        // No longer shutdown updates for having a few bad fields
         return replies.apiBadRequest(res, 
-                "Refer to API for allowed update fields.");
+            "Refer to API for allowed update fields.");
     }
     
     database.SiteModel.updateById(id, req.params, function(err, site) {
