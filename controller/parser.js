@@ -12,7 +12,20 @@ knownKeys = [
                 'active',
                 'updatedSince'
             ]
-                    
+
+//TODO: maybe turn all the 400's sent cause of this into 409s?            
+var badKeys = [
+                '_id',
+                'uuid',
+                'url',
+                'createdAt',
+                'id',
+                'href',
+                '__v',
+                'updatedAt'
+               ];
+
+
 // consumes params builds query, returns for view to exec
 var parseParams = function(params, query) {
 
@@ -93,17 +106,6 @@ var parseForVirts = function(params) {
     return Object.keys(hidden).join(',');
 
 }
-
-var badKeys = [
-                '_id',
-                'uuid',
-                'url',
-                'createdAt',
-                'id',
-                'href',
-                '__v',
-                'updatedAt'
-               ];
 
 var parseBody = function(body) {
 
