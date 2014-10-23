@@ -34,11 +34,7 @@ var parseParams = function(params, query) {
 
     // projections
     if (params.fields) {
-        field_names = params.fields.split(",");
-        field_names.forEach(function(field) {
-            field = field.replace(":", ".");
-            projections[field] = 1;
-        });
+        genProjectionQuery(projections, params.fields);
     }
 
     if (params.allProperties) {
@@ -163,6 +159,15 @@ var genPropQuery = function(projections, prop) {
     if (prop === 'true' && JSON.stringify(projections) !== '{}') {
         projections["properties"] = 1;
     } 
+}
+
+// Project only fields in fields
+var genProjectionQuery = function(projections, fields) {
+    field_names = fields.split(",");
+    field_names.forEach(function(field) {
+        field = field.replace(":", ".");
+        projections[field] = 1;
+    });
 }
 
 // Sorting by a specific field
