@@ -11,7 +11,7 @@ var db_controller = require('./../models/dbcontroller.js');
 var SiteModel = require('../models/dbcontroller').SiteModel;
 var sites = require('./fixturez.js');
 
-describe('API Extra Routes', function(done) {
+describe('Facility geolocation queries API routes', function(done) {
 
     var the_uuid = null;
     before(function(done) {

@@ -10,7 +10,7 @@ var server = require('./../server.js').server;
 var sites = require('./fixturez.js');
 var SiteModel = require('../models/dbcontroller').SiteModel;
 
-describe('API Routes', function(done) {
+describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
     var the_uuid = null;
     before(function(done) {
