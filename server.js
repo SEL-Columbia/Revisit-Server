@@ -152,7 +152,8 @@ server.get(conf.prePath + '/facilities/within.json', extras.within); // search w
 // users
 server.get(conf.prePath + '/users', auth.getUsers); // dumps user collection 
 server.get(conf.prePath + '/users/:username', auth.getUser); // dumps user 
-server.put(conf.prePath + '/users/:username', auth.updateAndVerify); // logs in then updates user 
+//server.put(conf.prePath + '/users/:username', auth.updateAndVerify); // logs in then updates user 
+server.put(conf.prePath + '/users/:username', auth.updatePass); // logs in then updates user 
 server.del(conf.prePath + '/users/:username', auth.removeUser); // logs in then updates user 
 server.post(conf.prePath + '/users/add/', auth.addUser); // post name, pass, [role] 
 server.post(conf.prePath + '/users/login/', auth.login); // just for testing, done during basic auth

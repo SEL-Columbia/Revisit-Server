@@ -25,7 +25,7 @@ function addUser(req, res, next) {
             }
 
             //TODO: what is a proper json reply on success???
-            replies.jsonReply(res, {"user": req.params.username, "created": true});
+            replies.jsonReply(res, {"username": req.params.username, "created": true});
         });
     return next();
 }
@@ -39,7 +39,7 @@ function login(req, res, next) {
                 return replies.apiBadRequest(res, "username/password incorrect");
             } 
 
-            replies.jsonReply(res, {"user": req.params.username, "login": true});
+            replies.jsonReply(res, {"username": req.params.username, "login": true});
         });
 
     return next();
@@ -82,6 +82,7 @@ function getUser(req, res, next) {
     return next();
 }
 
+// TODO:find endpoint for this guy: (need middle man function routing btwn the two)
 function updateAndVerify(req, res, next) {
     req.log.info("Updating User pass/role:", {"req": req.params});
 
@@ -118,7 +119,6 @@ function updateAndVerify(req, res, next) {
 }
 
 // super update, bypasses login requirement of above, not used currently
-// TODO:find endpoint for this guy: (need middle man function routing btwn the two)
 function updatePass(req, res, next) {
     req.log.info("Updating User pass:", {"req": req.params});
 
