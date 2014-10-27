@@ -48,6 +48,9 @@ describe('API Routes', function(done) {
                     }
 
                     res.body.facilities.should.have.length(25);
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
                     done();
                 });
         });
@@ -75,10 +78,9 @@ describe('API Routes', function(done) {
                             res.body.facilities.should.have.length(25);
                             // just checks if overlaps fully
                             res.body.facilities.should.not.containDeep(first_set.facilities);
-                            //res.body.facilities.should.not.match(
-                            //    function(it) {
-                            //        return first_set.facilities.indexOf(it) > -1
-                            //    });
+                            res.body.length.should.equal(25);
+                            res.body.offset.should.equal(25);
+                            res.body.total.should.equal(100);
                             done();
                         });
                 });
@@ -95,6 +97,9 @@ describe('API Routes', function(done) {
                     }
 
                    res.body.facilities.should.have.length(100);
+                   res.body.length.should.equal(100);
+                   res.body.offset.should.equal(0);
+                   res.body.total.should.equal(100);
                    done();
                 });
 
@@ -115,6 +120,10 @@ describe('API Routes', function(done) {
                             facility.should.have.property('name', 
                                     'Brooklyn Hospital Center');
                         });
+
+                    res.body.length.should.equal(1);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(1);
                     done();
                 });
         });
@@ -141,6 +150,10 @@ describe('API Routes', function(done) {
                             prop_keys.should.be.equal = ['sector'];
 
                         });
+
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
                     done();
                 });
         });
@@ -159,6 +172,10 @@ describe('API Routes', function(done) {
                         function(facility) {
                             facility.properties.should.have.property('sector', 'health');
                         });
+                    
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(56);
                     done();
                 });
         });
@@ -179,6 +196,11 @@ describe('API Routes', function(done) {
                             (new Date(facility.updatedAt)).should.be.above(minDate);
                             //fac_date.should.be.above(minDate);
                         });
+                    
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+
                     done();
                 });
         });
@@ -197,6 +219,10 @@ describe('API Routes', function(done) {
                         function(facility) {
                             facility.should.have.property('active', true);
                         });
+                    
+                   res.body.length.should.equal(25);
+                   res.body.offset.should.equal(0);
+                   res.body.total.should.equal(100);
 
                    done();
                 });
@@ -220,6 +246,9 @@ describe('API Routes', function(done) {
                             facility.should.not.have.property('properties');
                         });
 
+                   res.body.length.should.equal(25);
+                   res.body.offset.should.equal(0);
+                   res.body.total.should.equal(100);
                    done();
                 });
         });
@@ -237,6 +266,7 @@ describe('API Routes', function(done) {
                     
                     //TODO: not very readable 
                     // TODO - check string sort order via < >
+                    // TODO: use a built in sort of somekind
                     var facilities = _.cloneDeep(res.body.facilities)
                     facilities.sort(function(a,b){
                        if (a.name < b.name) 
@@ -250,6 +280,10 @@ describe('API Routes', function(done) {
                     for (i = 0; i < 25; i++) {
                         res.body.facilities[i].should.match(facilities[i])
                     }
+                   
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
 
                     done();
                 });
@@ -281,6 +315,10 @@ describe('API Routes', function(done) {
                         res.body.facilities[i].should.be.match(facilities[i])
                     }
 
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+
                     done();
                 });
         });
@@ -311,6 +349,10 @@ describe('API Routes', function(done) {
                         });
 
                     assert(seen[0] + seen[1] == 2, "Did not see both facility names.");
+
+                    res.body.length.should.equal(2);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(2);
                     done();
                 });
 
@@ -529,12 +571,12 @@ describe('API Routes', function(done) {
                 });
         });
 
-        it('should fail to upload empty facility', function(done) {
+        it('should fail to upload facilities but not respond with an error', function(done) {
             request(server)
                 .post(conf.prePath + "/facilities/bulk.json")
                 .send({"facilities": []})
                 .expect('Content-Type', /json/)
-                .expect(201) 
+                .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;

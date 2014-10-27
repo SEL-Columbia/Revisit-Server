@@ -79,7 +79,7 @@ function near(req, res, next) {
                 return replies.nothingFoundReply(res);
             }
 
-            var off = req.params.offset || 0;
+            var off = parseInt(req.params.offset) || 0;
             var extras = {"length": sites.length, "offset": off, "total": count};
 
             facilityBuilder
@@ -159,7 +159,7 @@ function within(req, res, next) {
                 return replies.nothingFoundReply(res);
             }
 
-            var off = req.params.offset || 0;
+            var off = parseInt(req.params.offset) || 0;
             var extras = {"length": sites.length, "offset": off, "total": count};
 
             facilityBuilder
@@ -215,7 +215,7 @@ function withinSector(req, res, next) {
                 return replies.nothingFoundReply(res);
             }
 
-            var off = req.params.offset || 0;
+            var off = parseInt(req.params.offset) || 0;
             var extras = {"length": sites.length, "offset": off, "total": count};
 
             facilityBuilder

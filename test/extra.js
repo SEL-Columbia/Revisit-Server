@@ -36,7 +36,6 @@ describe('API Extra Routes', function(done) {
         });
     });
 
-    //TODO: switch slug and facilities
     describe('#near', function() {
         it('should return facilties with 1km', function(done) {
             request(server)
@@ -52,6 +51,9 @@ describe('API Extra Routes', function(done) {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(10);
+                    res.body.length.should.equal(10);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(10);
                     done();
                 });
         });
@@ -70,6 +72,9 @@ describe('API Extra Routes', function(done) {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(12);
+                    res.body.length.should.equal(12);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(12);
                     done();
                 });
 
@@ -80,7 +85,6 @@ describe('API Extra Routes', function(done) {
                 .get(conf.prePath + "/facilities/near.json"
                         + "?lat=40.7645704&lng=-73.9570783")
                 .expect('Content-Type', /json/)
-                .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
                     if (err) {
@@ -90,6 +94,9 @@ describe('API Extra Routes', function(done) {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(1);
+                    res.body.length.should.equal(1);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(1);
                     done();
                 });
         });
@@ -126,6 +133,48 @@ describe('API Extra Routes', function(done) {
                 });
         });
 
+        it('should return facilities within 1mi with offset 2', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities/near.json"
+                        + "?lat=40.7645704&lng=-73.9570783&rad=1&units=mi&offset=2")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.be.ok;
+                    res.body.facilities.should.have.lengthOf(10);
+                    res.body.length.should.equal(10);
+                    res.body.offset.should.equal(2);
+                    res.body.total.should.equal(12);
+                    done();
+                });
+
+        });
+
+        it('should return facilities within 1mi with limit 2', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities/near.json"
+                        + "?lat=40.7645704&lng=-73.9570783&rad=1&units=mi&limit=2")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.be.ok;
+                    res.body.facilities.should.have.lengthOf(2);
+                    res.body.length.should.equal(2);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(12);
+                    done();
+                });
+
+        });
+
     });
 
     describe('#nearID', function() {
@@ -142,6 +191,9 @@ describe('API Extra Routes', function(done) {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(10);
+                    res.body.length.should.equal(10);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(10);
                     done();
                 });
         });
@@ -158,6 +210,9 @@ describe('API Extra Routes', function(done) {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(12);
+                    res.body.length.should.equal(12);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(12);
                     done();
                 });
 
@@ -177,6 +232,9 @@ describe('API Extra Routes', function(done) {
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(1);
                     res.body.facilities[0].uuid.should.match(the_uuid);
+                    res.body.length.should.equal(1);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(1);
                     done();
                 });
         });
@@ -215,6 +273,9 @@ describe('API Extra Routes', function(done) {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(25);
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
                     done();
                 });
 
@@ -234,6 +295,9 @@ describe('API Extra Routes', function(done) {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(1);
+                    res.body.length.should.equal(1);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(1);
                     done();
                 });
         });
@@ -267,6 +331,55 @@ describe('API Extra Routes', function(done) {
                     done();
                 });
         });
+
+        it('should return facilties within box defined by x,y and x",y" with offset=2', 
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities/within.json"
+                        +"?slat=0&wlng=-180&nlat=90&elng=0&offset=2")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+
+                    res.body.facilities.should.be.ok;
+                    res.body.facilities.should.have.lengthOf(25);
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(2);
+                    res.body.total.should.equal(100);
+                    done();
+                });
+
+        });
+
+        it('should return facilties within box defined by x,y and x",y" with limit=5', 
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities/within.json"
+                        +"?slat=0&wlng=-180&nlat=90&elng=0&limit=5")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+
+                    res.body.facilities.should.be.ok;
+                    res.body.facilities.should.have.lengthOf(5);
+                    res.body.length.should.equal(5);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+                    done();
+                });
+
+        });
+
+
+
     });
 
     describe('#withinSector', function() {
@@ -284,6 +397,9 @@ describe('API Extra Routes', function(done) {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(25);
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(56);
                     done();
                 });
 
@@ -303,6 +419,9 @@ describe('API Extra Routes', function(done) {
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(1);
+                    res.body.length.should.equal(1);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(1);
                     done();
                 });
         });

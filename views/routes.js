@@ -69,7 +69,8 @@ var sites = function (req, res, next) {
                 return replies.nothingFoundReply(res);
             }
 
-            var off = req.params.offset || 0;
+            
+            var off = parseInt(req.params.offset) || 0;
             var extras = {"length": sites.length, "offset": off, "total": count};
 
             facilityBuilder
@@ -222,7 +223,7 @@ var bulk = function( req, res, next) {
                 response["errors"] = errors;
             }
 
-            return replies.jsonReply(res, response, 201);
+            return replies.jsonReply(res, response, 200);
         }
 
         // At this point a subset of the data will be recorded
