@@ -29,18 +29,15 @@ describe('Authentication Tests', function(done) {
                 if (err) throw (err);
 
                 // get an example uuid with specific coords
-                SiteModel.findOne({
-                        'coordinates': [-73.9570783, 40.7645704]
-                    },
-                    function(err, site) {
-                        if (err) throw (err);
-                        the_uuid = site.uuid;
+                SiteModel.findOne({}, function(err, site) {
+                    if (err) throw (err);
+                    the_uuid = site.uuid;
 
-                        // clear out users
-                        UserModel.find({}).remove(function(err, result) {
-                            done();
-                        });
+                    // clear out users
+                    UserModel.find({}).remove(function(err, result) {
+                        done();
                     });
+                });
             });
         });
     });
@@ -51,30 +48,6 @@ describe('Authentication Tests', function(done) {
         conf.allowPost(false);
         conf.allowPut(false);
         done();
-    });
-
-    describe('User Creation', function() {
-        it('should create a new user on the server', function(done) {
-            request(server)
-                .post(conf.prePath + '/users/add/?username=Bob&password=test')
-                .expect('Content-Type', /json/)
-                .expect(200)
-                .end(function(err, res) {
-                    if (err) {
-                        throw err;
-                    }
-                    UserModel.findOne({
-                            'username': 'Bob'
-                        },
-                        function(err, user) {
-                            if (err) {
-                                throw (err);
-                            } else {
-                                done();
-                            }
-                        });
-                });
-        });
     });
 
     describe('Accessing Data', function() {
