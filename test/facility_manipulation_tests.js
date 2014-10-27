@@ -590,6 +590,8 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
     });
 
+    //TODO: More bulk tests for _id, href uuid etc.
+
     describe('#deleteFacility', function(done) {
         it('should delete the facility"', function(done) {
 
