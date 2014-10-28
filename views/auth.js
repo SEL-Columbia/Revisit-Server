@@ -50,7 +50,12 @@ function getUsers(req, res, next) {
 }
 
 function getUser(req, res, next) {
+<<<<<<< Updated upstream
     console.log("Getting User:", req.params);
+=======
+    req.log.info("Getting User:", {"req": req.params});
+    req.params.username = req.params[0];
+>>>>>>> Stashed changes
     if (!req.params.username)
         replies.apiBadRequest(res, "Not using this string yet");
 
@@ -75,6 +80,7 @@ function getUser(req, res, next) {
 function updateAndVerify(req, res, next) {
     console.log("Updating User pass/role:", req.params);
 
+    req.params.username = req.params[0];
     var pass = req.params.password;
     var user = req.params.username;
     var role = req.params.role;
@@ -112,6 +118,7 @@ function updateAndVerify(req, res, next) {
 function updatePass(req, res, next) {
     console.log("Updating User pass:", req.params);
 
+    req.params.username = req.params[0];
     var pass = req.params.password;
     var user = req.params.username;
     var role = req.params.role;
@@ -136,6 +143,29 @@ function updatePass(req, res, next) {
     return next();
 }
 
+var removeUser = function (req, res, next) {
+    req.log.info("DEL on user", {"req": req.params});
+    req.params.username = req.params[0];
+    var username = req.params.username;
+
+    database.UserModel.deleteByName(username, function(err, nRemoved, writeStatus) {
+        if (err) {
+            req.log.error(err);
+            return replies.internalErrorReply(res, err);
+        }
+
+        if (nRemoved === 0) {
+            return replies.nothingFoundReply(res);
+        }
+        
+        replies.jsonReply(res, {"username": username, "deleted": true }); 
+
+    });
+
+
+}
+
+exports.removeUser = removeUser;         
 exports.addUser = addUser;
 exports.login = login;
 exports.getUser = getUser;

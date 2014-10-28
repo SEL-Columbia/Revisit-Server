@@ -134,6 +134,7 @@ server.listen(conf.port, function() {
 
 // Gotta create an regexp object when working with string variables
 var id_path = new RegExp(conf.prePath + "/facilities/(\\w{24})\.json$");
+var user_path = new RegExp(conf.prePath + "/users/(\\w+)\.json$");
 
 // main
 server.get(conf.prePath + "/facilities.json", routes.sites); // all sites
@@ -155,10 +156,13 @@ server.get(conf.prePath + '/facilities/near.json', extras.near); // search near 
 server.get(conf.prePath + '/facilities/within.json', extras.within); // search within box and/or sector
 
 // users
-server.get(conf.prePath + '/users', auth.getUsers); // just for testing, should be in admin console
-server.get(conf.prePath + '/users/:username', auth.getUser); // just for testing, should be in admin console
-server.put(conf.prePath + '/users/:username', auth.updateAndVerify); // just for testing, should be in admin console
-server.post(conf.prePath + '/users/add/', auth.addUser); // just for testing, should be in admin console
+server.get(conf.prePath + '/users.json', auth.getUsers); // dumps user collection 
+server.post(conf.prePath + '/users.json', auth.addUser); // post name, pass, [role] 
+server.get(user_path, auth.getUser); // dumps user 
+//server.put(conf.prePath + '/users/:username', auth.updateAndVerify); // logs in then updates user 
+server.put(user_path, auth.updatePass); // logs in then updates user 
+server.del(user_path, auth.removeUser); // logs in then updates user 
+
 server.post(conf.prePath + '/users/login/', auth.login); // just for testing, done during basic auth
 
 exports.server = server;
