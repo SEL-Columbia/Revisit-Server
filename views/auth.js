@@ -6,41 +6,51 @@ var database = require('../models/dbcontroller.js');
 var replies = require('./responses.js');
 
 //TODO: NONE OF THESE ENDPOINTS SHOULD BE ALLOWED WITHOUT BEING AUTHORIZED!!!
-
 function addUser(req, res, next) {
-    console.log("New user:", req.params);
+    req.log.info("New user:", {"req": req.params}); //TODO: logging password??!?
     //TODO: Put way of setting the role on creation? 
     //Should that always be done seperatly?
+
+    if (!req.params.username || !req.params.password) {
+        return replies.apiBadRequest(res, 
+            "Cannot create user:" + req.params.username);
+    }
+
     database.UserModel.addUser(req.params.username, req.params.password,
         function(success) {
-            console.log(">>> User created?: ", success);
-            res.send("User Created? " + success);
-        });
+            if (!success) {
+                req.log.error("Failed to create user");
+                return replies.apiBadRequest(res, 
+                        "Cannot create user:" + req.params.username);
+            }
 
+            //TODO: what is a proper json reply on success???
+            replies.jsonReply(res, {"username": req.params.username, "created": true});
+        });
     return next();
 }
 
 function login(req, res, next) {
-    console.log("User:", req.params);
+    req.log.info("User:", {"req": req.params});
     database.UserModel.login(req.params.username, req.params.password,
         function(success) {
-            //console.log(">>> User logged in?: ",  success);
+            req.log.error("Failed to login user");
             if (!success) {
-                return replies.apiBadRequest(res, "Something about password");
+                return replies.apiBadRequest(res, "username/password incorrect");
             } 
 
-            res.send(req.params.username + " logged succesfully");
+            replies.jsonReply(res, {"username": req.params.username, "login": true});
         });
 
     return next();
 }
 
 function getUsers(req, res, next) {
-    console.log("Getting all Users");
+    req.log.info("Getting all Users");
     database.UserModel.getAllUsers(function(err, users) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         replies.jsonReply(res, users)
@@ -50,19 +60,15 @@ function getUsers(req, res, next) {
 }
 
 function getUser(req, res, next) {
-<<<<<<< Updated upstream
-    console.log("Getting User:", req.params);
-=======
     req.log.info("Getting User:", {"req": req.params});
     req.params.username = req.params[0];
->>>>>>> Stashed changes
     if (!req.params.username)
-        replies.apiBadRequest(res, "Not using this string yet");
+        replies.apiBadRequest(res, "No username supplied");
 
     database.UserModel.getUser(req.params.username, function(err, users) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         if (users !== null && users.length == 1) {
@@ -70,15 +76,16 @@ function getUser(req, res, next) {
             replies.jsonReply(res, user);
 
         } else {
-            replies.dbEmptyReturn(res);
+            replies.nothingFoundReply(res);
         }
     });
 
     return next();
 }
 
+// TODO:find endpoint for this guy: (need middle man function routing btwn the two)
 function updateAndVerify(req, res, next) {
-    console.log("Updating User pass/role:", req.params);
+    req.log.info("Updating User pass/role:", {"req": req.params});
 
     req.params.username = req.params[0];
     var pass = req.params.password;
@@ -98,7 +105,7 @@ function updateAndVerify(req, res, next) {
         database.UserModel.update(user, pass, role, function(err, user) {
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, err);
+                return replies.internalErrorReply(res, err);
             }
 
             if (!user) {
@@ -114,9 +121,8 @@ function updateAndVerify(req, res, next) {
 }
 
 // super update, bypasses login requirement of above, not used currently
-// TODO:find endpoint for this guy: (need middle man function routing btwn the two)
 function updatePass(req, res, next) {
-    console.log("Updating User pass:", req.params);
+    req.log.info("Updating User pass:", {"req": req.params});
 
     req.params.username = req.params[0];
     var pass = req.params.password;
@@ -129,7 +135,7 @@ function updatePass(req, res, next) {
     database.UserModel.update(user, pass, role, function(err, user) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         // User not found, would not err out 

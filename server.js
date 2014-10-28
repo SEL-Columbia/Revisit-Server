@@ -86,18 +86,19 @@ server.use(function authenticate(req, res, next) {
     });
     if (req.username === 'anonymous' || typeof req.authorization.basic === 'undefined') {
         log.info("Basic auth failed");
-        return replies.apiUnauthorized(res, "No basic auth information provided");
+        return replies.apiUnauthorized(res, null, "No basic auth information provided");
     }
 
-    dbcontroller.UserModel.login(req.username, req.authorization.basic.password, function(success) {
-        if (!success) {
-            log.info("Basic auth failed");
-            return replies.apiUnauthorized(res, req.username);
-        }
+    dbcontroller.UserModel.login(req.username, req.authorization.basic.password,
+    function(success) {
+            if (!success) {
+                log.info("Basic auth failed");
+                return replies.apiUnauthorized(res, req.username);
+            }
 
-        log.debug(">>> User success!");
-        log.info("Basic auth passed");
-        return next();
+            log.debug(">>> User success!");
+            log.info("Basic auth passed");
+            return next();
     });
 });
 
@@ -107,19 +108,11 @@ server.on('after', restify.auditLogger({
 
 // Overwrite default error msgs for internal errors and missing endpoints
 server.on('uncaughtException', function (req, res, route, err) {
-    res.send( new restify.RestError({
-        statusCode: 500, 
-        restCode: "Internal Server Error", 
-        message: JSON.stringify(err)
-    }));
+    replies.internalErrorReply(res, err);
 });
 
 server.on('NotFound', function (req, res, cb) {
-    res.send( new restify.RestError({
-        statusCode: 404, 
-        restCode: "Not Found",
-        message: req.url + " was not found."
-    }));
+    replies.nothingFoundReply(res, req.url + " was not found.");
 });
 
 server.listen(conf.port, function() {
@@ -139,6 +132,8 @@ var user_path = new RegExp(conf.prePath + "/users/(\\w+)\.json$");
 // main
 server.get(conf.prePath + "/facilities.json", routes.sites); // all sites
 server.post(conf.prePath + "/facilities.json", routes.add); // new site
+server.post(conf.prePath + "/facilities/bulk.json", routes.bulk); // new site
+server.post(conf.prePath + "/facilities/bulk", routes.bulkFile); // new site
 server.get(id_path, routes.site); // site by id
 server.del(id_path, routes.del); // delete by id
 server.put(id_path, routes.update); // update site by id
@@ -156,6 +151,7 @@ server.get(conf.prePath + '/facilities/near.json', extras.near); // search near 
 server.get(conf.prePath + '/facilities/within.json', extras.within); // search within box and/or sector
 
 // users
+<<<<<<< HEAD
 server.get(conf.prePath + '/users.json', auth.getUsers); // dumps user collection 
 server.post(conf.prePath + '/users.json', auth.addUser); // post name, pass, [role] 
 server.get(user_path, auth.getUser); // dumps user 
@@ -163,6 +159,14 @@ server.get(user_path, auth.getUser); // dumps user
 server.put(user_path, auth.updatePass); // logs in then updates user 
 server.del(user_path, auth.removeUser); // logs in then updates user 
 
+=======
+server.get(conf.prePath + '/users', auth.getUsers); // dumps user collection 
+server.get(conf.prePath + '/users/:username', auth.getUser); // dumps user 
+//server.put(conf.prePath + '/users/:username', auth.updateAndVerify); // logs in then updates user 
+server.put(conf.prePath + '/users/:username', auth.updatePass); // logs in then updates user 
+server.del(conf.prePath + '/users/:username', auth.removeUser); // logs in then updates user 
+server.post(conf.prePath + '/users/add/', auth.addUser); // post name, pass, [role] 
+>>>>>>> 0b889a525a9c3e0446aac02e93b7677d7ea51840
 server.post(conf.prePath + '/users/login/', auth.login); // just for testing, done during basic auth
 
 exports.server = server;
@@ -179,4 +183,3 @@ process.on('SIGTERM', function() {
         process.disconnect && process.disconnect();
     });
 });
-

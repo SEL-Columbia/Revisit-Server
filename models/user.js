@@ -152,6 +152,9 @@ UserModel.statics.getUser = function(username, callback) {
     return this.find({"username": username}, callback);
 };
 
+UserModel.statics.deleteByName = function(username, callback) {
+    return this.remove({"username": username }).exec(callback);
+}
 // Avoid recompilation
 var UserModel;
 if (mongoose.models.UserModel) {

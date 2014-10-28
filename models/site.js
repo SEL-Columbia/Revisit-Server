@@ -47,6 +47,7 @@ var SiteModel = new Schema({
             },
             sector: {
                 type: String,
+                required: true,
                 index: true
             },
             visits: {

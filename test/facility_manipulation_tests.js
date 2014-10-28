@@ -10,7 +10,7 @@ var server = require('./../server.js').server;
 var sites = require('./fixturez.js');
 var SiteModel = require('../models/dbcontroller').SiteModel;
 
-describe('API Routes', function(done) {
+describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
     var the_uuid = null;
     before(function(done) {
@@ -48,6 +48,9 @@ describe('API Routes', function(done) {
                     }
 
                     res.body.facilities.should.have.length(25);
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
                     done();
                 });
         });
@@ -75,10 +78,9 @@ describe('API Routes', function(done) {
                             res.body.facilities.should.have.length(25);
                             // just checks if overlaps fully
                             res.body.facilities.should.not.containDeep(first_set.facilities);
-                            //res.body.facilities.should.not.match(
-                            //    function(it) {
-                            //        return first_set.facilities.indexOf(it) > -1
-                            //    });
+                            res.body.length.should.equal(25);
+                            res.body.offset.should.equal(25);
+                            res.body.total.should.equal(100);
                             done();
                         });
                 });
@@ -95,6 +97,9 @@ describe('API Routes', function(done) {
                     }
 
                    res.body.facilities.should.have.length(100);
+                   res.body.length.should.equal(100);
+                   res.body.offset.should.equal(0);
+                   res.body.total.should.equal(100);
                    done();
                 });
 
@@ -115,6 +120,10 @@ describe('API Routes', function(done) {
                             facility.should.have.property('name', 
                                     'Brooklyn Hospital Center');
                         });
+
+                    res.body.length.should.equal(1);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(1);
                     done();
                 });
         });
@@ -141,6 +150,10 @@ describe('API Routes', function(done) {
                             prop_keys.should.be.equal = ['sector'];
 
                         });
+
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
                     done();
                 });
         });
@@ -159,6 +172,10 @@ describe('API Routes', function(done) {
                         function(facility) {
                             facility.properties.should.have.property('sector', 'health');
                         });
+                    
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(56);
                     done();
                 });
         });
@@ -179,6 +196,11 @@ describe('API Routes', function(done) {
                             (new Date(facility.updatedAt)).should.be.above(minDate);
                             //fac_date.should.be.above(minDate);
                         });
+                    
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+
                     done();
                 });
         });
@@ -197,6 +219,10 @@ describe('API Routes', function(done) {
                         function(facility) {
                             facility.should.have.property('active', true);
                         });
+                    
+                   res.body.length.should.equal(25);
+                   res.body.offset.should.equal(0);
+                   res.body.total.should.equal(100);
 
                    done();
                 });
@@ -220,6 +246,9 @@ describe('API Routes', function(done) {
                             facility.should.not.have.property('properties');
                         });
 
+                   res.body.length.should.equal(25);
+                   res.body.offset.should.equal(0);
+                   res.body.total.should.equal(100);
                    done();
                 });
         });
@@ -237,6 +266,7 @@ describe('API Routes', function(done) {
                     
                     //TODO: not very readable 
                     // TODO - check string sort order via < >
+                    // TODO: use a built in sort of somekind
                     var facilities = _.cloneDeep(res.body.facilities)
                     facilities.sort(function(a,b){
                        if (a.name < b.name) 
@@ -250,6 +280,10 @@ describe('API Routes', function(done) {
                     for (i = 0; i < 25; i++) {
                         res.body.facilities[i].should.match(facilities[i])
                     }
+                   
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
 
                     done();
                 });
@@ -281,6 +315,10 @@ describe('API Routes', function(done) {
                         res.body.facilities[i].should.be.match(facilities[i])
                     }
 
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+
                     done();
                 });
         });
@@ -311,6 +349,10 @@ describe('API Routes', function(done) {
                         });
 
                     assert(seen[0] + seen[1] == 2, "Did not see both facility names.");
+
+                    res.body.length.should.equal(2);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(2);
                     done();
                 });
 
@@ -344,7 +386,7 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("Not Found");
+                    res.body.code.should.match("404 Not Found");
                     done();
                 });
 
@@ -359,7 +401,7 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("Not Found");
+                    res.body.code.should.match("404 Not Found");
                     done();
                 });
         });
@@ -380,11 +422,9 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                    console.log(res.body);
                     res.body.should.be.ok;
                     res.body.uuid.should.match(the_uuid);
                     res.body.name.should.match(new_name);
-                    console.log(res.body);
                     done();
                 });
         });
@@ -400,7 +440,27 @@ describe('API Routes', function(done) {
                         throw err;
                     }
 
-                    res.body.code.should.match("Bad Request");
+                    res.body.code.should.match("400 Bad Request");
+                    done();
+                });
+
+        });
+
+        it("should fail to update facility's _id field but still update name", 
+        function(done) {
+            request(server)
+                .put(conf.prePath + "/facilities/" + the_uuid + ".json")
+                .send({"_id": the_uuid, "name": "hello"})
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.should.be.ok;
+                    res.body.uuid.should.match(the_uuid);
+                    res.body.name.should.match("hello");
                     done();
                 });
 
@@ -416,21 +476,18 @@ describe('API Routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("Bad Request");
+                    res.body.code.should.match("400 Bad Request");
                     done();
                 });
         });
     });
 
-    
-    // TODO - tests that ensure all required fields are present
-    
     describe('#createFacility', function(done) {
     
         it('should create a facility with name="Toronto"', function(done) {
             request(server)
                 .post(conf.prePath + "/facilities.json")
-                .send({"name": "Toronto"})
+                .send({"name": "Toronto", "properties": {"sector": "test"}})
                 .expect('Content-Type', /json/)
                 .expect(201) 
                 .end(function(err, res) {
@@ -454,7 +511,7 @@ describe('API Routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("Bad Request");
+                    res.body.code.should.match("400 Bad Request");
                     done();
                 });
         });
@@ -469,12 +526,71 @@ describe('API Routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("Bad Request");
+                    res.body.code.should.match("400 Bad Request");
                     done();
                 });
 
         });
     });
+
+    describe('#bulkCreateFacility', function(done) {
+    
+        it('should bulk upload two facilities', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send({"facilities":[
+                        {"name": "Toronto", "properties": {"sector": "test"}}, 
+                        {"name": "Kyoto", "properties": {"sector": "test"}}, 
+                        {"name": "Brookyln", "properties": {"sector": "test"}}
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    } 
+                    res.body.recieved.should.equal(3);
+                    res.body.inserted.should.equal(3);
+                    res.body.failed.should.equal(0);
+                    done();
+                });
+        });
+
+        it('should fail to upload empty post', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send()
+                .expect('Content-Type', /json/)
+                .expect(400) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("400 Bad Request");
+                    done();
+                });
+        });
+
+        it('should fail to upload facilities but not respond with an error', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send({"facilities": []})
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.recieved.should.equal(0);
+                    res.body.inserted.should.equal(0);
+                    res.body.failed.should.equal(0);
+                    done();
+                });
+        });
+
+    });
+
+    //TODO: More bulk tests for _id, href uuid etc.
 
     describe('#deleteFacility', function(done) {
         it('should delete the facility"', function(done) {
@@ -515,7 +631,7 @@ describe('API Routes', function(done) {
                             if (err) {
                                 throw err;
                             }
-                            res.body.code.should.match("Not Found");
+                            res.body.code.should.match("404 Not Found");
                             done();
                         });
                 });

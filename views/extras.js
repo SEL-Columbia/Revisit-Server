@@ -8,6 +8,29 @@ var database = require('../models/dbcontroller.js');
 var replies = require('./responses.js');
 var log = require('./../log/logger.js').log;
 var parser = require('../controller/parser.js');
+var facilityBuilder = require('../controller/facilityBuilder.js');
+
+// check if a site is empty in JSON form (it can never be empty otherwise)
+var isEmpty = function(sites) {
+    if (sites === null || sites === undefined || sites.length <= 0) {
+        return true;
+    }
+
+    var a_site = JSON.stringify(sites[0].toJSON());
+    if (a_site === "{}") { 
+        return true;
+    }
+
+    return false;
+}
+
+// check if only a single site was returned in query
+var isOnlySite = function(sites) {
+    if (sites !== null && sites.length == 1) {
+        return true;
+    }
+    return false;
+}
 
 function near(req, res, next) {
     req.log.info("GET near facility REQUEST", {"req": req.params})
@@ -43,29 +66,28 @@ function near(req, res, next) {
     near.exec( function(err, sites) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         near.limit(0).skip(0).count().exec(function(err, count) {
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, err);
+                return replies.internalErrorReply(res, err);
             }
 
-            if (sites !== null && sites.length > 0) {
-                // check if a site is empty in JSON form (it can never be empty otherwise
-                var a_site = JSON.stringify(sites[0].toJSON());
-
-                var off = req.params.offset || 0;
-                var extras = {"length": sites.length, "offset": off, "total": count};
-                if (a_site !== "{}") { 
-                    replies.jsonArrayReply(res, sites, 200, null, extras);
-                } else {
-                    replies.dbEmptyReturn(res);
-                }
-            } else {
-                replies.dbEmptyReturn(res);
+            if (isEmpty(sites)) {
+                return replies.nothingFoundReply(res);
             }
+
+            var off = parseInt(req.params.offset) || 0;
+            var extras = {"length": sites.length, "offset": off, "total": count};
+
+            facilityBuilder
+                .buildFacility(sites, null)
+                .addExtras(extras);
+
+            replies.jsonReply(res, facilityBuilder.toObject(), 200);
+
 
         });
     });
@@ -80,11 +102,11 @@ function nearID(req, res, next) {
     database.SiteModel.findById(req.params[0], function(err, sites) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
-        if (sites === null || sites.length != 1) {
-            return replies.dbEmptyReturn(res);
+        if (!isOnlySite(sites)) {
+            return replies.nothingFoundReply(res);
 
         } else {
             site = sites[0]; // should only be one
@@ -124,29 +146,28 @@ function within(req, res, next) {
     within.exec( function(err, sites) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
         within.limit(0).skip(0).count().exec(function(err, count) {
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, err);
+                return replies.internalErrorReply(res, err);
             }
 
-            if (sites !== null && sites.length > 0) {
-                // check if a site is empty in JSON form (it can never be empty otherwise
-                var a_site = JSON.stringify(sites[0].toJSON());
-
-                var off = req.params.offset || 0;
-                var extras = {"length": sites.length, "offset": off, "total": count};
-                if (a_site !== "{}") { 
-                    replies.jsonArrayReply(res, sites, 200, null, extras);
-                } else {
-                    replies.dbEmptyReturn(res);
-                }
-            } else {
-                replies.dbEmptyReturn(res);
+            if (isEmpty(sites)) {
+                return replies.nothingFoundReply(res);
             }
+
+            var off = parseInt(req.params.offset) || 0;
+            var extras = {"length": sites.length, "offset": off, "total": count};
+
+            facilityBuilder
+                .buildFacility(sites, null)
+                .addExtras(extras);
+
+            replies.jsonReply(res, facilityBuilder.toObject(), 200);
+
 
         });
     });
@@ -180,30 +201,28 @@ function withinSector(req, res, next) {
     withinSector.exec( function(err, sites) {
         if (err) {
             req.log.error(err);
-            return replies.dbErrorReply(res, err);
+            return replies.internalErrorReply(res, err);
         }
 
 
         withinSector.limit(0).skip(0).count().exec(function(err, count) {
             if (err) {
                 req.log.error(err);
-                return replies.dbErrorReply(res, err);
+                return replies.internalErrorReply(res, err);
             }
 
-            if (sites !== null && sites.length > 0) {
-                // check if a site is empty in JSON form (it can never be empty otherwise
-                var a_site = JSON.stringify(sites[0].toJSON());
-
-                var off = req.params.offset || 0;
-                var extras = {"length": sites.length, "offset": off, "total": count};
-                if (a_site !== "{}") { 
-                    replies.jsonArrayReply(res, sites, 200, null, extras);
-                } else {
-                    replies.dbEmptyReturn(res);
-                }
-            } else {
-                replies.dbEmptyReturn(res);
+            if (isEmpty(sites)) {
+                return replies.nothingFoundReply(res);
             }
+
+            var off = parseInt(req.params.offset) || 0;
+            var extras = {"length": sites.length, "offset": off, "total": count};
+
+            facilityBuilder
+                .buildFacility(sites, null)
+                .addExtras(extras);
+
+            replies.jsonReply(res, facilityBuilder.toObject(), 200);
 
         });
     });

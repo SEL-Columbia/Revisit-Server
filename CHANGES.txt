@@ -1,0 +1,75 @@
+This file contains differences between our api and the FRED specs minus the geo
+queries which ofcourse are not part of the FRED spec altogether 
+
+Facility Add:
+    Currently rejects a post with the following fields:
+
+    var badKeys = [
+                '_id',
+                'uuid',
+                'url',
+                'createdAt',
+                'id',
+                'href',
+                '__v',
+                'updatedAt'
+               ];
+
+
+    It also requires you to provide a sector and a name for the facility.
+
+    FRED allows uuid
+    FRED does not reject any field
+    FRED implies name is required but does not enforce it.
+    FRED does not enforce sector.
+
+Facility Update:
+
+    Currently wipes the following fields from the request:
+
+    var badKeys = [
+                '_id',
+                'uuid',
+                'url',
+                'createdAt',
+                'id',
+                'href',
+                '__v',
+                'updatedAt'
+               ];
+
+    FRED does not allow "id" "createdAt" and "updatedAt"
+
+Facility GET:
+
+    Like FRED we respond with a facility object however we do not allow for
+    limit = off to actually be off. limit = off is now limit = 1000.
+
+    To give the user some idea of how many results there in the db the following
+    three fields were added to the faciliies json reply:
+
+        - total: total #results in db for this query
+        - length: current number returned
+        - offset: current offset in total available   
+
+    FRED does none of this, instead provides limit=off to actually return
+    everything.
+
+Facility Bulk:
+
+    We provide a way to do bulk uploads from a file (and as a json array but
+    that endpoint is currently not exposed)
+
+    It takes in a facility object like the one outputed by the main get
+    endpoint. 
+
+    It does validation against the site model and does not do the validation
+    that update/add do. I.e you can provide all the fields in the badkey list
+    but you cannot omit required fields (sector and name). This makes sense
+    since fields like createdAt are probably useful to keep around in this case.
+
+    If you provide your own uuid it will be ignored in the reply. However it
+    will be stored in the db. The way we reply causes uuid to be replaced by a
+    virtual field created based on the generated _id. same goes with href.
+
+    I'm actually not sure what happens if you provide __v or _id...

@@ -12,9 +12,21 @@ knownKeys = [
                 'active',
                 'updatedSince'
             ]
-                    
+
+//TODO: maybe turn all the 400's sent cause of this into 409s?            
+var badKeys = [
+                '_id',
+                'uuid',
+                'url',
+                'createdAt',
+                'id',
+                'href',
+                '__v',
+                'updatedAt'
+               ];
+
 // consumes params builds query, returns for view to exec
-var parseParams = function(params, query, hidden) {
+var parseParams = function(params, query) {
 
     var projections = {};     
     var filters = {};
@@ -34,19 +46,7 @@ var parseParams = function(params, query, hidden) {
 
     // projections
     if (params.fields) {
-        hidden.uuid = 0;
-        hidden.href = 0;
-        field_names = params.fields.split(",");
-        field_names.forEach(function(field) {
-            field = field.replace(":", ".");
-            if (field == "uuid") {
-                delete hidden.uuid
-            } else if (field == "href") {
-                delete hidden.href
-            } else {
-                projections[field] = 1;
-            }
-        });
+        genProjectionQuery(projections, params.fields);
     }
 
     if (params.allProperties) {
@@ -75,40 +75,52 @@ var parseParams = function(params, query, hidden) {
     // Print what I think I sent
     log.debug("Parsed Params", { "filters" : filters, 
                                 "projections": projections, 
-                                "hidden": hidden, 
                                 "sorts" : sorts });
 
     return query;
  
 }
 
-var badKeys = [
-                '_id',
-                'uuid',
-                'url',
-                'createdAt',
-                'id',
-                'href',
-                '__v',
-                'updatedAt'
-               ];
+var parseForVirts = function(params) {
+
+    // Assume No fields will be hidden
+    var hidden = {};
+
+    // uuid, href are only virt fields (and probably will stay that way)
+    if (params.fields) {
+        // Fields => uuid and href mostly likey hidden
+        hidden = {"uuid" : 0, "href": 0 };
+        field_names = params.fields.split(",");
+        field_names.forEach(function(field) {
+            field = field.replace(":", ".");
+            // remove virt fields found
+            if (field == "uuid") {
+                delete hidden.uuid
+            } else if (field == "href") {
+                delete hidden.href
+            } 
+        });
+    }
+
+    return Object.keys(hidden).join(',');
+
+}
 
 var parseBody = function(body) {
 
+    var state = true;
     if (!body || Object.keys(body).length == 0) {
         return false;
     }
 
     // nullifiy body if it contains any of our bad keys
-    if (badKeys.some(function(badKey) {
-        return Boolean(body[badKey]);
-    })) 
-    {
-        return false;
-    }
-
+    badKeys.forEach(function(badKey) {
+        state = (!Boolean(body[badKey])) && state; // stays false if ever false 
+        delete body[badKey];
+    });
+    
     body.updatedAt = Date();
-    return true;
+    return state;
 }
 
 /* Parsing helper functions */
@@ -149,6 +161,15 @@ var genPropQuery = function(projections, prop) {
     } 
 }
 
+// Project only fields in fields
+var genProjectionQuery = function(projections, fields) {
+    field_names = fields.split(",");
+    field_names.forEach(function(field) {
+        field = field.replace(":", ".");
+        projections[field] = 1;
+    });
+}
+
 // Sorting by a specific field
 var genAscQuery = function(sorts, asc) {
    sorts[asc]=1;
@@ -187,4 +208,5 @@ var genAddOnsQuery = function(params, filters) {
 
 exports.parseParams = parseParams;
 exports.parseBody = parseBody;
+exports.parseForVirts = parseForVirts;
 exports.genLimitQuery = genLimitQuery;
