@@ -63,38 +63,32 @@ var genSalt = function() {
 
 UserModel.statics.login = function(username, pass, callback) {
     if (username && pass) {
-        console.log(">>> Trying:", username, pass);
         this.findOne({
             "username": username
         }).exec(function(err, user) {
             //console.log("Querying:", user);
             if (err || !user) {
-                console.log("User not found");
-                callback(false);
+                callback(false, "");
                 return;
             }
 
             var salt = user.salt;
             var hashed = user.password;
             var new_hash = genHash(pass, salt);
-            console.log("Found: hash,salt,new", hashed, salt, new_hash);
 
             if (hashed != new_hash) {
-                console.log("Incorrect password");
-                callback(false);
+                callback(false, "");
                 return;
             }
 
-            console.log("Success!");
-            callback(true);
+            callback(true, user.role);
             return;
         });
 
         return;
     }
 
-    console.log("fields empty");
-    callback(false);
+    callback(false, "");
     return;
 };
 

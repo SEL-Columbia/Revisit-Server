@@ -62,9 +62,52 @@ server.use(restify.requestLogger({
 
 // always use auth middleware, inside determine whether to enforce
 // TODO - move auth middleware to auth module
+
+var any_user_path = new RegExp(conf.prePath + "/users.*$");
 server.use(function authenticate(req, res, next) {
+
+    function login(req, callback) {
+        var logged = false;
+        log.info("Basic auth verification", {
+            "user": res.username,
+            "auth": req.authorization
+        });
+
+        if (req.username === 'anonymous' || typeof req.authorization.basic === 'undefined') {
+            req.log.info("Basic auth failed");
+            callback(false, "No basic auth information provided"); 
+            return;
+        }
+
+        dbcontroller.UserModel.login(req.username, 
+                req.authorization.basic.password, 
+                function(success, role) {
+                    callback(success, "", role);
+                } 
+        );
+    }
+
     if (!conf.useAuth()) {
         return next();
+    }
+
+    // Branch off for user auth
+    if (conf.blockUsers() && any_user_path.test(req.url)) {
+        login(req, function(logged, msg, role) {
+            if(!logged) {
+                req.log.info("User end point not auth'd");
+                return replies.apiForbidden(res, req.username);
+            }
+
+            if(role !== "admin") {
+                req.log.info("User end point not auth'd");
+                return replies.apiForbidden(res, req.username);
+            }
+
+            return next();
+        });
+
+        return;
     }
 
     if (conf.allowGet() && req.method === 'GET') {
@@ -80,26 +123,17 @@ server.use(function authenticate(req, res, next) {
     }
 
     // Delete should always be authenticated 
-    log.info("Basic auth verification", {
-        "user": res.username,
-        "auth": req.authorization
-    });
-    if (req.username === 'anonymous' || typeof req.authorization.basic === 'undefined') {
-        log.info("Basic auth failed");
-        return replies.apiUnauthorized(res, null, "No basic auth information provided");
-    }
+    login(req, function(logged, msg) {
+        if (!logged) {
+            req.log.info("Basic auth failed");
+            return replies.apiUnauthorized(res, req.username, msg);
+        }
 
-    dbcontroller.UserModel.login(req.username, req.authorization.basic.password,
-    function(success) {
-            if (!success) {
-                log.info("Basic auth failed");
-                return replies.apiUnauthorized(res, req.username);
-            }
+        req.log.info("Basic auth passed");
+        return next();
 
-            log.debug(">>> User success!");
-            log.info("Basic auth passed");
-            return next();
     });
+
 });
 
 server.on('after', restify.auditLogger({

@@ -8,12 +8,13 @@ var config = {};
 config.app_name = "revisit-server";
 config.version = '0.1.0';
 
-config.USE_AUTH = false;
+config.USE_AUTH = true;
 config.ALLOW_GET = true;
 config.ALLOW_POST = false;
 config.ALLOW_PUT = false;
+config.BLOCK_USERS = true;
 
-config.prePath = '/api/v0';
+config.prePath = '';
 config.host = "localhost";
 config.port = '3000';
 
@@ -63,5 +64,11 @@ config.allowPost = function(allow) {
 	return config.ALLOW_POST;
 };
 
+config.blockUsers = function(allow) {
+	if (typeof allow === "boolean") {
+		config.BLOCK_USERS = allow;
+	}
+	return config.BLOCK_USERS;
+};
 // export combined configuration for this environment
 module.exports = config;
