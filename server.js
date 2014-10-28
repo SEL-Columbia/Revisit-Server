@@ -151,7 +151,6 @@ server.get(conf.prePath + '/facilities/near.json', extras.near); // search near 
 server.get(conf.prePath + '/facilities/within.json', extras.within); // search within box and/or sector
 
 // users
-<<<<<<< HEAD
 server.get(conf.prePath + '/users.json', auth.getUsers); // dumps user collection 
 server.post(conf.prePath + '/users.json', auth.addUser); // post name, pass, [role] 
 server.get(user_path, auth.getUser); // dumps user 
@@ -159,14 +158,6 @@ server.get(user_path, auth.getUser); // dumps user
 server.put(user_path, auth.updatePass); // logs in then updates user 
 server.del(user_path, auth.removeUser); // logs in then updates user 
 
-=======
-server.get(conf.prePath + '/users', auth.getUsers); // dumps user collection 
-server.get(conf.prePath + '/users/:username', auth.getUser); // dumps user 
-//server.put(conf.prePath + '/users/:username', auth.updateAndVerify); // logs in then updates user 
-server.put(conf.prePath + '/users/:username', auth.updatePass); // logs in then updates user 
-server.del(conf.prePath + '/users/:username', auth.removeUser); // logs in then updates user 
-server.post(conf.prePath + '/users/add/', auth.addUser); // post name, pass, [role] 
->>>>>>> 0b889a525a9c3e0446aac02e93b7677d7ea51840
 server.post(conf.prePath + '/users/login/', auth.login); // just for testing, done during basic auth
 
 exports.server = server;
