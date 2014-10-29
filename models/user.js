@@ -112,7 +112,7 @@ UserModel.statics.update = function(username, pass, role, callback) {
 
 };
 
-UserModel.statics.addUser = function(username, pass, callback) {
+UserModel.statics.addUser = function(username, pass, role, callback) {
     console.log("Adding User:", username);
     var salt = genSalt();
     var hash = genHash(pass, salt);
@@ -120,6 +120,7 @@ UserModel.statics.addUser = function(username, pass, callback) {
     var userObj = new this({
         username: username,
         password: hash,
+        role: role,
         salt: salt
     });
 

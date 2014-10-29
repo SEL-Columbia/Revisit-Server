@@ -5,18 +5,16 @@ var restify = require('restify');
 var database = require('../models/dbcontroller.js');
 var replies = require('./responses.js');
 
-//TODO: NONE OF THESE ENDPOINTS SHOULD BE ALLOWED WITHOUT BEING AUTHORIZED!!!
 function addUser(req, res, next) {
     req.log.info("New user:", {"req": req.params}); //TODO: logging password??!?
-    //TODO: Put way of setting the role on creation? 
-    //Should that always be done seperatly?
 
     if (!req.params.username || !req.params.password) {
         return replies.apiBadRequest(res, 
             "Cannot create user:" + req.params.username);
     }
 
-    database.UserModel.addUser(req.params.username, req.params.password,
+    // TODO: should role be configurable on creation? 
+    database.UserModel.addUser(req.params.username, req.params.password, "simple",
         function(success) {
             if (!success) {
                 req.log.error("Failed to create user");
@@ -25,7 +23,7 @@ function addUser(req, res, next) {
             }
 
             //TODO: what is a proper json reply on success???
-            replies.jsonReply(res, {"username": req.params.username, "created": true});
+            replies.jsonReply(res, {"username": req.params.username, "created": true}, 201);
         });
     return next();
 }

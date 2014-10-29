@@ -4,12 +4,13 @@ var restify = require('restify');
 // local includes
 var routes = require('./views/routes.js');
 var extras = require('./views/extras.js');
-var auth = require('./views/auth.js');
+var users = require('./views/users.js');
 var replies = require('./views/responses.js');
 var dbcontroller = require('./models/dbcontroller.js');
 var db = dbcontroller.connect();
 var conf = require('./config/app/config.js');
 var log = require('./log/logger.js').log;
+var authenticate = require('./controller/authentication.js').authenticate;
 
 // server
 var server = restify.createServer({
@@ -60,81 +61,8 @@ server.use(restify.requestLogger({
     // properties: {}
 }));
 
-// always use auth middleware, inside determine whether to enforce
-// TODO - move auth middleware to auth module
-
-var any_user_path = new RegExp(conf.prePath + "/users.*$");
-server.use(function authenticate(req, res, next) {
-
-    function login(req, callback) {
-        var logged = false;
-        log.info("Basic auth verification", {
-            "user": res.username,
-            "auth": req.authorization
-        });
-
-        if (req.username === 'anonymous' || typeof req.authorization.basic === 'undefined') {
-            req.log.info("Basic auth failed");
-            callback(false, "No basic auth information provided"); 
-            return;
-        }
-
-        dbcontroller.UserModel.login(req.username, 
-                req.authorization.basic.password, 
-                function(success, role) {
-                    callback(success, "", role);
-                } 
-        );
-    }
-
-    if (!conf.useAuth()) {
-        return next();
-    }
-
-    // Branch off for user auth
-    if (conf.blockUsers() && any_user_path.test(req.url)) {
-        login(req, function(logged, msg, role) {
-            if(!logged) {
-                req.log.info("User end point not auth'd");
-                return replies.apiForbidden(res, req.username);
-            }
-
-            if(role !== "admin") {
-                req.log.info("User end point not auth'd");
-                return replies.apiForbidden(res, req.username);
-            }
-
-            return next();
-        });
-
-        return;
-    }
-
-    if (conf.allowGet() && req.method === 'GET') {
-        return next();
-    }
-
-    if (conf.allowPost() && req.method === 'POST') {
-        return next();
-    }
-
-    if (conf.allowPut() && req.method === 'PUT') {
-        return next();
-    }
-
-    // Delete should always be authenticated 
-    login(req, function(logged, msg) {
-        if (!logged) {
-            req.log.info("Basic auth failed");
-            return replies.apiUnauthorized(res, req.username, msg);
-        }
-
-        req.log.info("Basic auth passed");
-        return next();
-
-    });
-
-});
+// auth code in controller, configurable in conf/app/*
+server.use(authenticate);
 
 server.on('after', restify.auditLogger({
     log: log
@@ -185,14 +113,14 @@ server.get(conf.prePath + '/facilities/near.json', extras.near); // search near 
 server.get(conf.prePath + '/facilities/within.json', extras.within); // search within box and/or sector
 
 // users
-server.get(conf.prePath + '/users.json', auth.getUsers); // dumps user collection 
-server.post(conf.prePath + '/users.json', auth.addUser); // post name, pass, [role] 
-server.get(user_path, auth.getUser); // dumps user 
-//server.put(conf.prePath + '/users/:username', auth.updateAndVerify); // logs in then updates user 
-server.put(user_path, auth.updatePass); // logs in then updates user 
-server.del(user_path, auth.removeUser); // logs in then updates user 
+server.get(conf.prePath + '/users.json', users.getUsers); // dumps user collection 
+server.post(conf.prePath + '/users.json', users.addUser); // post name, pass, [role] 
+server.get(user_path, users.getUser); // dumps user 
+//server.put(conf.prePath + '/users/:username', users.updateAndVerify); // logs in then updates user 
+server.put(user_path, users.updatePass); // logs in then updates user 
+server.del(user_path, users.removeUser); // logs in then updates user 
 
-server.post(conf.prePath + '/users/login/', auth.login); // just for testing, done during basic auth
+server.post(conf.prePath + '/users/login/', users.login); // just for testing, done during basic auth
 
 exports.server = server;
 exports.db = db;

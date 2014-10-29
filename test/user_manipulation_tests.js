@@ -55,7 +55,7 @@ describe('User endpoint tests', function(done) {
             request(server)
                 .post(conf.prePath + '/users.json?username=Bob&password=test')
                 .expect('Content-Type', /json/)
-                .expect(200)
+                .expect(201)
                 .end(function(err, res) {
                     if (err) {
                         throw err;
@@ -74,7 +74,7 @@ describe('User endpoint tests', function(done) {
         });
 
         it('should fail to create a duplicate user', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 // second request
                 request(server)
@@ -126,7 +126,7 @@ describe('User endpoint tests', function(done) {
 
     describe('User Deletion', function() {
         it('should delete user Bob', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 // second request
                 request(server)
@@ -156,7 +156,7 @@ describe('User endpoint tests', function(done) {
         });
 
         it('should fail to delete user Joe', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 // second request
                 request(server)
@@ -190,10 +190,10 @@ describe('User endpoint tests', function(done) {
    
     describe('Get Users', function() {
         it('should retrieve two users', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 // second request
-                UserModel.addUser("Joe", "test", function(success) {
+                UserModel.addUser("Joe", "test", "simple", function(success) {
                     assert(success);
 
                     // get request
@@ -220,7 +220,7 @@ describe('User endpoint tests', function(done) {
 
     describe('Get User', function() {
         it('should retrieve Bob user', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 // second request
                 request(server)
@@ -240,7 +240,7 @@ describe('User endpoint tests', function(done) {
         });
 
         it('should fail to retrieve Joe user', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 // second request
                 request(server)
@@ -261,7 +261,7 @@ describe('User endpoint tests', function(done) {
 
     describe('Login', function() {
         it('should login as Bob user', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 // second request
                 request(server)
@@ -282,7 +282,7 @@ describe('User endpoint tests', function(done) {
         });
 
         it('should fail to log in as Bob user with incorrect password', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 // second request
                 request(server)
@@ -301,7 +301,7 @@ describe('User endpoint tests', function(done) {
        });
 
         it('should fail to log in as Joe user', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 // second request
                 request(server)
@@ -320,7 +320,7 @@ describe('User endpoint tests', function(done) {
        });
 
         it('should fail to log with no supplied user', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 // second request
                 request(server)
@@ -341,7 +341,7 @@ describe('User endpoint tests', function(done) {
 
     describe('update User', function() {
         it('should update password of user Bob', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 var un = "Bob";
                 var old_role = "simple";
@@ -377,7 +377,7 @@ describe('User endpoint tests', function(done) {
         });
 
         it('should update password of user Bob', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 var un = "Bob";
                 var old_role = "simple";
@@ -400,7 +400,7 @@ describe('User endpoint tests', function(done) {
         });
  
         it('should fail to update user Joe', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 var un = "Bob";
                 var old_role = "simple";
@@ -422,7 +422,7 @@ describe('User endpoint tests', function(done) {
         });    
 
         it('should update password and role of user Bob', function(done) {
-            UserModel.addUser("Bob", "test", function(success) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 var un = "Bob";
                 var old_role = "simple";

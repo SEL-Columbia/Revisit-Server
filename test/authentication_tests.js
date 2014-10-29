@@ -93,7 +93,8 @@ describe('Authentication Tests', function(done) {
             conf.allowGet(false);
 
             // insert user
-            UserModel.addUser('Bob', 'test', function(err, user) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
                 request(server)
                     .get(conf.prePath + "/facilities.json")
                     .auth('Bob', 'test')
@@ -170,7 +171,8 @@ describe('Authentication Tests', function(done) {
 
             var new_name = "" + Math.random();
             // insert user
-            UserModel.addUser('Bob', 'test', function(err, user) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
                 request(server)
                     .put(conf.prePath + "/facilities/" + the_uuid + ".json")
                     .auth('Bob', 'test')
@@ -245,7 +247,8 @@ describe('Authentication Tests', function(done) {
 
             var new_name = "" + Math.random();
             // insert user
-            UserModel.addUser('Bob', 'test', function(err, user) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
                 request(server)
                     .post(conf.prePath + "/facilities.json")
                     .auth('Bob', 'test')
@@ -309,7 +312,8 @@ describe('Authentication Tests', function(done) {
 
             var new_name = "" + Math.random();
             // insert user
-            UserModel.addUser('Bob', 'test', function(err, user) {
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
                 request(server)
                     .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                     .auth('Bob', 'test')
@@ -321,6 +325,285 @@ describe('Authentication Tests', function(done) {
                         }
                         res.body.id.should.match(the_uuid);
                         res.body.message.should.match("Resource deleted");
+                        done();
+                    });
+            });
+        });
+    });
+
+    describe('Accessing User endpoints as an UNAUTHORIZED user', function() {
+
+        it('should allow endpoint /user.json requests from an UNAUTHORIZED user', function(done) {
+
+            // authorization off, allow deletes
+            conf.useAuth(false);
+
+            request(server)
+                .post(conf.prePath + "/users.json?username=new&password=user")
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.username.should.match("new");
+                    res.body.created.should.match(true);
+                    done();
+                });
+        });
+
+        it('should allow endpoint /user/username.json requests from an UNAUTHORIZED user', function(done) {
+
+            // authorization off, allow deletes
+            conf.useAuth(false);
+
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
+                request(server)
+                    .put(conf.prePath + "/users/Bob.json?role=admin")
+                    .expect('Content-Type', /json/)
+                    .expect(200) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.username.should.match("Bob");
+                        res.body.role.should.match("admin");
+                        done();
+                    });
+            });
+        });
+
+        it('should allow endpoint /users/login requests from an UNAUTHORIZED user', function(done) {
+
+            // authorization off, allow deletes
+            conf.useAuth(false);
+
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
+                request(server)
+                    .post(conf.prePath + "/users/login/?username=Bob&password=test")
+                    .expect('Content-Type', /json/)
+                    .expect(200) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.username.should.match("Bob");
+                        res.body.login.should.match(true);
+                        done();
+                    });
+            });
+        });
+    });
+
+    describe('Accessing User endpoints as an AUTHORIZED user with INCORRECT role', function() {
+
+        it('should NOT allow endpoint /user.json requests from an AUTHORIZED user with INCORRECT role', function(done) {
+
+            conf.useAuth(true);
+            conf.blockUsers(true); // on by default
+
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
+                request(server)
+                    .post(conf.prePath + "/users.json?username=new&password=user")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(403) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.code.should.match("403 Forbidden");
+                        done();
+                    });
+            });
+        });
+
+        it('should NOT allow endpoint /user/username.json requests from an AUTHORIZED user with INCORRECT role', function(done) {
+
+            conf.useAuth(true);
+            conf.blockUsers(true); // on by default
+
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
+                request(server)
+                    .put(conf.prePath + "/users/Bob.json?role=admin")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(403) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.code.should.match("403 Forbidden");
+                        done();
+                    });
+            });
+        });
+
+        it('should NOT allow endpoint /users/login requests from an AUTHORIZED user with INCORRECT role', function(done) {
+
+            conf.useAuth(true);
+            conf.blockUsers(true); // on by default
+
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
+                request(server)
+                    .post(conf.prePath + "/users/login/?username=Bob&password=test")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(403) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.code.should.match("403 Forbidden");
+                        done();
+                    });
+            });
+        });
+    });
+
+    describe('Accessing User endpoints as an AUTHORIZED user with CORRECT role', function() {
+
+        it('should allow endpoint /user.json requests from an AUTHORIZED user with CORRECT role', function(done) {
+
+            conf.useAuth(true);
+            conf.blockUsers(true); // on by default
+
+            UserModel.addUser("Bob", "test", "admin", function(success) {
+                assert(success);
+                request(server)
+                    .post(conf.prePath + "/users.json?username=new&password=user with CORRECT role")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(201) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.username.should.match("new");
+                        res.body.created.should.match(true);
+                        done();
+                    });
+            });
+        });
+
+        it('should allow endpoint /user/username.json requests from an AUTHORIZED user with CORRECT role', function(done) {
+
+            conf.useAuth(true);
+            conf.blockUsers(true); // on by default
+
+            UserModel.addUser("Bob", "test", "admin", function(success) {
+                assert(success);
+                request(server)
+                    .put(conf.prePath + "/users/Bob.json?role=somethingelse")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(200) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.username.should.match("Bob");
+                        res.body.role.should.match("somethingelse");
+                        done();
+                    });
+            });
+        });
+
+        it('should allow endpoint /users/login requests from an AUTHORIZED user with CORRECT role', function(done) {
+
+            conf.useAuth(true);
+            conf.blockUsers(true); // on by default
+
+            UserModel.addUser("Bob", "test", "admin", function(success) {
+                assert(success);
+                request(server)
+                    .post(conf.prePath + "/users/login/?username=Bob&password=test")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(200) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.username.should.match("Bob");
+                        res.body.login.should.match(true);
+                        done();
+                    });
+            });
+        });
+    });
+    
+    describe('Accessing User endpoints as an AUTHORIZED user with INCORRECT role and endpoint checking OFF', function() {
+
+        it('should allow endpoint /user.json requests from an AUTHORIZED user with endpoint checking OFF', function(done) {
+
+            conf.useAuth(true);
+            conf.blockUsers(false); // on by default
+
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
+                request(server)
+                    .post(conf.prePath + "/users.json?username=new&password=user")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(201) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.username.should.match("new");
+                        res.body.created.should.match(true);
+                        done();
+                    });
+            });
+        });
+
+        it('should allow endpoint /user/username.json requests from an AUTHORIZED user with endpoint checking OFF', function(done) {
+
+            conf.useAuth(true);
+            conf.blockUsers(false); // on by default
+
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
+                request(server)
+                    .put(conf.prePath + "/users/Bob.json?role=somethingelse")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(200) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.username.should.match("Bob");
+                        res.body.role.should.match("somethingelse");
+                        done();
+                    });
+            });
+        });
+
+        it('should allow endpoint /users/login requests from an AUTHORIZED user with endpoint checking OFF', function(done) {
+
+            conf.useAuth(true);
+            conf.blockUsers(false); // on by default
+
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
+                request(server)
+                    .post(conf.prePath + "/users/login/?username=Bob&password=test")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(200) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.username.should.match("Bob");
+                        res.body.login.should.match(true);
                         done();
                     });
             });
