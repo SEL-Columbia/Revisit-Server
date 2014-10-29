@@ -14,7 +14,7 @@ config.ALLOW_POST = false;
 config.ALLOW_PUT = false;
 config.BLOCK_USERS = true;
 
-config.prePath = '';
+config.prePath = '/api/v0';
 config.host = "localhost";
 config.port = '3000';
 
