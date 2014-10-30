@@ -50,6 +50,9 @@ var sites = function (req, res, next) {
             return replies.internalErrorReply(res, err);
         }
 
+        // get hidden field before parseing
+        var hidden_str = parser.parseForVirts(req.params);
+
         // I need to prevent projections to do count
         delete req.params.allProperties;
         delete req.params.fields;
@@ -64,7 +67,6 @@ var sites = function (req, res, next) {
                 return replies.internalErrorReply(res, err);
             }
 
-            var hidden_str = parser.parseForVirts(req.params);
             if (isEmpty(sites, hidden_str)) {
                 return replies.nothingFoundReply(res);
             }

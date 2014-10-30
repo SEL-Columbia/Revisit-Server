@@ -95,7 +95,7 @@ SiteModel.set('toJSON', {
         }
 
         delete obj._id;
-        delete obj.__v;
+        //delete obj.__v;
         return obj
     }
 });
