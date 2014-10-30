@@ -143,11 +143,10 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     //TODO: Not very readable ...
                     res.body.facilities.forEach(
                         function(facility) {
-                            var fac_keys = Object.keys(facility);
-                            var prop_keys = Object.keys(facility.properties);
-
-                            fac_keys.should.be.equal = ['uuid', 'active', 'properties'];
-                            prop_keys.should.be.equal = ['sector'];
+                            
+                            facility.should.have.properties(['uuid', 'active', 'properties']);
+                            facility.properties.should.have.property('sector');
+                            facility.should.not.have.properties(['name', 'createdAt', 'updatedAt', 'href']);
 
                         });
 
@@ -157,6 +156,34 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     done();
                 });
         });
+
+
+        it('should return facilities with only the field name, no virtual fields should show up' 
+                + ' fields', function(done) {
+
+            request(server)
+                .get(conf.prePath + "/facilities.json?fields=name")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.forEach(
+                        function(facility) {
+                            facility.should.have.property('name');
+                            facility.should.not.have.properties(['href', 'uuid', 'createdAt', 'properties']);
+
+                        });
+
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+                    done();
+                });
+        });
+
 
         it('should return facilities with properties:sector = "health"', 
         function(done) {
