@@ -51,7 +51,7 @@ function getUsers(req, res, next) {
             return replies.internalErrorReply(res, err);
         }
 
-        replies.jsonReply(res, users)
+        replies.jsonReply(res, {users: users, length: users.length})
     });
     
     return next();
