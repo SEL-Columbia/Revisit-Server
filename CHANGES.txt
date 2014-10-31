@@ -87,3 +87,6 @@ Facility Bulk:
     Interestingly bulk inserts in mongo do not roll back on error. So if theres
     a uuid/id collision, a partial commit will have happened. Will look into
     this soon.
+
+    bulk has two flags, debug and allOrNothing. They do what you would expect
+    based on their names. Set to true to use.
