@@ -636,7 +636,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
     describe('#bulkCreateFacility', function(done) {
     
-        it('should bulk upload two facilities', function(done) {
+        it('should bulk upload three facilities', function(done) {
             request(server)
                 .post(conf.prePath + "/facilities/bulk.json")
                 .send({"facilities":[
@@ -653,6 +653,95 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     res.body.recieved.should.equal(3);
                     res.body.inserted.should.equal(3);
                     res.body.failed.should.equal(0);
+                    res.body.should.not.have.property("errors");
+                    done();
+                });
+        });
+
+        it('should bulk upload three facilities with allOrNothing=true', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json?allOrNothing=true")
+                .send({"facilities":[
+                        {"name": "Toronto", "properties": {"sector": "test"}}, 
+                        {"name": "Kyoto", "properties": {"sector": "test"}}, 
+                        {"name": "Brookyln", "properties": {"sector": "test"}}
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    } 
+                    res.body.recieved.should.equal(3);
+                    res.body.inserted.should.equal(3);
+                    res.body.failed.should.equal(0);
+                    res.body.should.not.have.property("errors");
+                    done();
+                });
+        });
+
+        it('should bulk upload two of three facilities', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send({"facilities":[
+                        {"name": "Toronto", "properties": {"sector": "test"}}, 
+                        {"name": "Kyoto"}, 
+                        {"name": "Brookyln", "properties": {"sector": "test"}}
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    } 
+                    res.body.recieved.should.equal(3);
+                    res.body.inserted.should.equal(2);
+                    res.body.failed.should.equal(1);
+                    res.body.should.not.have.property("errors");
+                    done();
+                });
+        });
+
+        it('should bulk upload two of three facilities with error info', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json?debug=true")
+                .send({"facilities":[
+                        {"name": "Toronto", "properties": {"sector": "test"}}, 
+                        {"name": "Kyoto"}, 
+                        {"name": "Brookyln", "properties": {"sector": "test"}}
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    } 
+                    res.body.recieved.should.equal(3);
+                    res.body.inserted.should.equal(2);
+                    res.body.failed.should.equal(1);
+                    res.body.should.have.property("errors");
+                    done();
+                });
+        });
+
+        it('should bulk upload zero of three with malformed facility and allOrNothing=true', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json?allOrNothing=true")
+                .send({"facilities":[
+                        {"name": "Toronto", "properties": {"sector": "test"}}, 
+                        {"name": "Kyoto"}, 
+                        {"name": "Brookyln", "properties": {"sector": "test"}}
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    } 
+                    res.body.recieved.should.equal(3);
+                    res.body.inserted.should.equal(0);
+                    res.body.failed.should.equal(1);
+                    res.body.should.not.have.property("errors");
                     done();
                 });
         });
@@ -716,7 +805,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
-        it('should upload fail to upload facility with colliding uuid', function(done) {
+        it('should fail to upload facility with colliding uuid', function(done) {
             var tid = "111111111111111111111111";
             var kid = "012345678912345678901234";
             var bid = "111111111111111111111111";
@@ -748,7 +837,6 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
         });
     });
 
-    //TODO: More bulk tests for _id, href uuid etc.
     describe('#deleteFacility', function(done) {
         it('should delete the facility"', function(done) {
 

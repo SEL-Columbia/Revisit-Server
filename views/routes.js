@@ -203,6 +203,8 @@ var bulk = function( req, res, next) {
     var num_supplied = facilities.length;
     var errors = [];
 
+    var batchOnly = req.params.allOrNothing;
+
     // define function to be mapped
     var fac_validator = function(facility, callback) {
         // keep the _id if they provide one
@@ -233,6 +235,7 @@ var bulk = function( req, res, next) {
         });
     }   
 
+
     // apply fac_validator to all facilities, build result array
     async.map(facilities, fac_validator, function(err, result) {
         // those that failed to validate were nullifyed
@@ -240,10 +243,12 @@ var bulk = function( req, res, next) {
         result = result.filter(function(obj) { return obj !== null });
 
         // handle special case of all data failing to validate
-        if (result.length === 0) {
+        if ((result.length === 0) 
+            // handle batch or not commit
+            || (batchOnly === "true" && result.length != num_supplied)) {
             var response =  {   
                                "recieved": num_supplied, 
-                               "inserted": num_inserted, 
+                               "inserted": 0, 
                                "failed": num_failed
                             };
 
