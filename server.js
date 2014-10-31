@@ -73,8 +73,12 @@ server.on('uncaughtException', function (req, res, route, err) {
     replies.internalErrorReply(res, err);
 });
 
-server.on('NotFound', function (req, res, cb) {
+server.on('NotFound', function (req, res, next) {
     replies.nothingFoundReply(res, req.url + " was not found.");
+});
+
+server.on('MethodNotAllowed', function (req, res, next) {
+    replies.apiNotAllowed(res);;
 });
 
 server.listen(conf.port, function() {
