@@ -5,6 +5,7 @@ var fs = require('fs');
 // local includes
 var database = require('../models/dbcontroller.js');
 var parser = require('../controller/parser.js');
+var customID = require('../controller/customID.js');
 var facilityBuilder = require('../controller/facilityBuilder.js');
 var replies = require('./responses.js');
 
@@ -113,6 +114,7 @@ var update = function (req, res, next) {
     var id = req.params[0];
     delete req.params[0];
 
+    // parser wipes bad fields
     var success = parser.parseBody(req.params);
 
     if (!success && (Object.keys(req.params).length < 2)) {
@@ -137,18 +139,35 @@ var update = function (req, res, next) {
 var add = function ( req, res, next) {
     req.log.info("POST add facility REQUEST", {"req": req.params});
 
+    // keep the _id if they provide one
+    var custom_id = customID(req.params.uuid);
+    
     // enforces certain fields are not in body
     var success = parser.parseBody(req.params);
-    if (!success) {
-        return replies.apiBadRequest(res,
-                "Refer to API for allowed fields.");
+    //if (!success) {
+    //   // return replies.apiBadRequest(res,
+    //   //         "Refer to API for allowed fields.");
+    //}
+
+    // store it
+    if (custom_id) {
+        req.params._id = custom_id;
     }
-    
+
+    console.log(req.params);
+    console.log(req.params);
+    console.log(req.params);
+    console.log(req.params);
+
     var site = new database.SiteModel(req.params);
     // check if site passes mongoose validation
     site.validate(function (err) {
         if (err) {
             req.log.error(err);
+            // _id collided
+            //if (err.code = 11000 && err.name !== "ValidationError") {
+            //    return replies.conflictReply(res, err);
+            //}
             return replies.apiBadRequest(res,
                 "Refer to API for required fields.");
         }
@@ -157,6 +176,12 @@ var add = function ( req, res, next) {
         site.save(function(err, site) {
             if (err) {
                 req.log.error(err);
+
+                // _id collided
+                if (err.code = 11000 && err.name !== "ValidationError") {
+                    return replies.conflictReply(res, err);
+                }
+               
                 return replies.internalErrorReply(res, err);
             }
             // respond with newly added site
@@ -192,19 +217,32 @@ var bulk = function( req, res, next) {
 
     // define function to be mapped
     var fac_validator = function(facility, callback) {
-       var fac_model = new database.SiteModel(facility);
-       fac_model.validate(function (err) {
-           if (err) {
-               // update error obj with facility, then record
-               err["facility"] = facility
-               errors[num_failed++] = err;
-               facility = null; // nulify facility if err'd
-           }
+        // keep the _id if they provide one
+        var custom_id = customID(facility.uuid);
+        
+        // enforces certain fields are not in body
+        //var success = parser.parseBody(facility);
 
-           callback(null, facility);
+        // store it
+        if (custom_id !== false) {
+            facility._id = custom_id;
+        }
 
-       });
-    }
+        //XXX: Sort out way to detect id collisions?
+        
+        var fac_model = new database.SiteModel(facility);
+        fac_model.validate(function (err) {
+            if (err) {
+                // update error obj with facility, then record
+                err["facility"] = facility
+                errors[num_failed++] = err;
+                facility = null; // nulify facility if err'd
+            }
+
+            callback(null, facility);
+
+        });
+    }   
 
     // apply fac_validator to all facilities, build result array
     async.map(facilities, fac_validator, function(err, result) {
@@ -233,7 +271,11 @@ var bulk = function( req, res, next) {
         database.SiteModel.collection.insert(result, function(err, sites) {
             if (err) {
                 req.log.error(err);
-                return replies.internalErrorReply(res, err);
+                if (err.code = 11000) {
+                    return replies.conflictReply(res, err);
+                } else {
+                    return replies.internalErrorReply(res, err);
+                }
             }
 
             num_inserted = sites.length;

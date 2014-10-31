@@ -9,6 +9,7 @@ var exec = require('child_process').exec;
 var server = require('./../server.js').server;
 var sites = require('./fixturez.js');
 var SiteModel = require('../models/dbcontroller').SiteModel;
+var ObjectId = require("mongoose").Types.ObjectId;
 
 describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
@@ -527,11 +528,84 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
-        it('should fail to create a facility with createdAt field passed in', 
+        it('should fail to include custom createdAt field passed in', 
+        function(done) {
+            var date = new Date(1999, 11, 30);
+            request(server)
+                .post(conf.prePath + "/facilities.json")
+                .send({"name": "Toronto", "createdAt": date, "properties": {"sector": "test"}})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.createdAt.toString().should.not.match(date.toString());
+                    done();
+                });
+        });
+
+        it('should include custom uuid field passed in', 
+        function(done) {
+            var uuid = "111111111111111111111111";
+            request(server)
+                .post(conf.prePath + "/facilities.json")
+                .send({"name": "Toronto", "uuid": uuid, "properties": {"sector": "test"}})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.uuid.should.match(uuid);
+                    done();
+                });
+        });
+
+        it('should fail to insert obj with colliding uuid passed in', 
+        function(done) {
+            var uuid = the_uuid;
+            request(server)
+                .post(conf.prePath + "/facilities.json")
+                .send({"name": "Toronto", "uuid": uuid, "properties": {"sector": "test"}})
+                .expect('Content-Type', /json/)
+                .expect(409) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.code.should.match("409 Conflict");
+                    done();
+                });
+        });
+
+        it('should fail to insert with id from _id field passed in but should still create facility', 
+        function(done) {
+            var _id = "111111111111111111111111";
+            request(server)
+                .post(conf.prePath + "/facilities.json")
+                .send({"name": "Toronto", "_id": _id, "properties": {"sector": "test"}})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.name.should.match("Toronto");
+                    res.body.uuid.should.not.match(_id); // uuid == _id internally so this is a fair check
+                    done();
+                });
+        });
+
+
+        it('should fail to create without sector field passed in', 
         function(done) {
             request(server)
                 .post(conf.prePath + "/facilities.json")
-                .send({"name": "Toronto", "createdAt": new Date(1999, 11, 30)})
+                .send({"name": "Toronto"})
                 .expect('Content-Type', /json/)
                 .expect(400) 
                 .end(function(err, res) {
@@ -615,10 +689,66 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should upload facilities with CUSTOM uuids', function(done) {
+            var tid = "111111111111111111111111";
+            var kid = "012345678912345678901234";
+            var bid = "111111111111711171111111";
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send({"facilities":[
+                        {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
+                        {"uuid" : kid, "name": "Kyoto", "properties": {"sector": "test"}}, 
+                        {"uuid" : bid, "name": "Bklyn", "properties": {"sector": "test"}},
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    SiteModel.find({name: {"$in" : ["Tdot", "Kyoto", "Bklyn"]}}, function(err, sites) {
+                        sites.should.have.length(3);
+                        sites.forEach(function(facility) {
+                            assert([tid, kid, bid].indexOf(facility.uuid) > -1);
+                        });
+                        done();
+                    });
+                });
+        });
+
+        it('should upload fail to upload facility with colliding uuid', function(done) {
+            var tid = "111111111111111111111111";
+            var kid = "012345678912345678901234";
+            var bid = "111111111111111111111111";
+            //XXX: Batch insert does not work the way it should ... does not move on to next site after conflict
+            //i,e order of uploaded sites matter
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send({"facilities":[
+                        {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
+                        {"uuid" : kid, "name": "Kyoto", "properties": {"sector": "test"}}, 
+                        {"uuid" : bid, "name": "Bklyn", "properties": {"sector": "test"}},
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(409) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("409 Conflict");
+
+                    SiteModel.find({name: {"$in" : ["Tdot", "Kyoto", "Bklyn"]}}, function(err, sites) {
+                        sites.should.have.length(2);
+                        sites.forEach(function(facility) {
+                            assert([tid, kid, bid].indexOf(facility.uuid) > -1);
+                        });
+                        done();
+                    });
+                });
+        });
     });
 
     //TODO: More bulk tests for _id, href uuid etc.
-
     describe('#deleteFacility', function(done) {
         it('should delete the facility"', function(done) {
 
