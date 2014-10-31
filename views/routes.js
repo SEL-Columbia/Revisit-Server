@@ -144,30 +144,18 @@ var add = function ( req, res, next) {
     
     // enforces certain fields are not in body
     var success = parser.parseBody(req.params);
-    //if (!success) {
-    //   // return replies.apiBadRequest(res,
-    //   //         "Refer to API for allowed fields.");
-    //}
 
     // store it
     if (custom_id) {
         req.params._id = custom_id;
     }
 
-    console.log(req.params);
-    console.log(req.params);
-    console.log(req.params);
-    console.log(req.params);
-
     var site = new database.SiteModel(req.params);
+
     // check if site passes mongoose validation
     site.validate(function (err) {
         if (err) {
             req.log.error(err);
-            // _id collided
-            //if (err.code = 11000 && err.name !== "ValidationError") {
-            //    return replies.conflictReply(res, err);
-            //}
             return replies.apiBadRequest(res,
                 "Refer to API for required fields.");
         }
@@ -222,6 +210,7 @@ var bulk = function( req, res, next) {
         
         // enforces certain fields are not in body
         //var success = parser.parseBody(facility);
+        delete facility._id; // we only want to wipe one field in bulk upload.
 
         // store it
         if (custom_id !== false) {

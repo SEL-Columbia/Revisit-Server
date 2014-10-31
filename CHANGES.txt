@@ -2,7 +2,8 @@ This file contains differences between our api and the FRED specs minus the geo
 queries which ofcourse are not part of the FRED spec altogether 
 
 Facility Add:
-    Currently rejects a post with the following fields:
+
+    Currently wipes the following fields from the post:
 
     var badKeys = [
                 '_id',
@@ -15,13 +16,18 @@ Facility Add:
                 'updatedAt'
                ];
 
+    uuid however is saved and turned into an objectID internally. 
+    The user however will not see this, in the end if they post a valid uuid,
+    they will see their uuid in the response. uuid MUST be a 24 char hex or a 12
+    byte string.
 
     It also requires you to provide a sector and a name for the facility.
 
-    FRED allows uuid
+    FRED allows id to be passed in (in any format to either id/uuid not sure)
     FRED does not reject any field
     FRED implies name is required but does not enforce it.
     FRED does not enforce sector.
+
 
 Facility Update:
 
@@ -40,6 +46,8 @@ Facility Update:
 
     FRED does not allow "id" "createdAt" and "updatedAt"
 
+    Theres no reason to allow for updating id/uuid.
+
 Facility GET:
 
     Like FRED we respond with a facility object however we do not allow for
@@ -55,6 +63,8 @@ Facility GET:
     FRED does none of this, instead provides limit=off to actually return
     everything.
 
+    TODO: Jon update this with pagination details!
+
 Facility Bulk:
 
     We provide a way to do bulk uploads from a file (and as a json array but
@@ -68,8 +78,12 @@ Facility Bulk:
     but you cannot omit required fields (sector and name). This makes sense
     since fields like createdAt are probably useful to keep around in this case.
 
-    If you provide your own uuid it will be ignored in the reply. However it
-    will be stored in the db. The way we reply causes uuid to be replaced by a
-    virtual field created based on the generated _id. same goes with href.
+    _id is removed, just incase.
 
-    I'm actually not sure what happens if you provide __v or _id...
+    However if you provide a uuid, like add this field is saved as _id and shows
+    in the response as a uuid. It once again expects the format to be a 24 char
+    string.
+
+    Interestingly bulk inserts in mongo do not roll back on error. So if theres
+    a uuid/id collision, a partial commit will have happened. Will look into
+    this soon.
