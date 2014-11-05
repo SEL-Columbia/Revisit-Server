@@ -86,4 +86,4 @@ function authenticate(req, res, next) {
 }
 
 // middleware
-exports.authenticate = authenticate;
+module.exports = authenticate;
