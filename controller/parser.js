@@ -10,7 +10,9 @@ knownKeys = [
                 'limit',
                 'offset',
                 'active',
-                'updatedSince'
+                'updatedSince',
+                'page',
+                'per_page'
             ]
 
 //TODO: maybe turn all the 400's sent cause of this into 409s?            
@@ -129,7 +131,9 @@ var parseBody = function(body) {
 var genLimitQuery = function(params, query) {
 
     var off = 0;
-    var lim = 25;
+    var page = 1;
+    var lim, per_page;
+    lim = per_page = 25;
 
     if (params.limit === "off") {
         //params.limit = 0;
@@ -138,14 +142,28 @@ var genLimitQuery = function(params, query) {
 
     if (!isNaN(params.limit)) {
         lim = params.limit;
-    } 
+    } else {
+        params.limit = lim;
+    }
 
     if (!isNaN(params.offset)) {
         off = params.offset;
-    } 
+    }
 
-    return query.skip(off).limit(lim)  
-}
+    // per_page param overrides limit
+    if (!isNaN(params.per_page)) {
+        lim = params.per_page;
+    }
+
+    // page param overrides offset
+    if (!isNaN(params.page)) {
+        off = (params.page - 1) * lim;
+    }
+
+    log.debug('pagination', off);
+
+    return query.skip(off).limit(lim);
+};
 
 // Include or not include properties
 var genPropQuery = function(projections, prop) {

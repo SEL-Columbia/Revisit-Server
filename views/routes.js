@@ -69,9 +69,26 @@ var sites = function (req, res, next) {
                 return replies.nothingFoundReply(res);
             }
 
+            var extras = {},
+                limit = sites.length,
+                page,
+                offset,
+                totalPages;
             
-            var off = parseInt(req.params.offset) || 0;
-            var extras = {"length": sites.length, "offset": off, "total": count};
+            // if page param present and is an int, return pagination state
+            if (req.params.page !== undefined && !isNaN(parseInt(req.params.page))) {
+                extras.page = parseInt(req.params.page);
+                extras.per_page = parseInt(req.params.per_page) || parseInt(req.params.limit);
+                extras.total_entries = count;
+                extras.total_pages = Math.floor(count / extras.per_page);
+            } else {
+                // page NOT set, return limit/offset state
+                // extras.offset = parseInt(req.params.offset) || 0;
+                // extras.limit = limit;
+                // extras.total = count;
+            }
+
+            // var extras = {"length": length, "offset": off, "page": page, "total": count};
 
             facilityBuilder
                 .buildFacility(sites, hidden_str)
