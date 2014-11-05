@@ -1,5 +1,6 @@
 // dependancies
 var mongoose = require('mongoose');
+var rollback = require('mongoose-rollback');
 
 // local deps
 var conf = require('./../../config/app/config.js');
@@ -69,6 +70,8 @@ SiteModel.index({
     coordinates: "2d",
     'properties.sector': 1
 });
+
+SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities'});
 
 // Create virtual for UUID from ID
 SiteModel.virtual('uuid').get(function() {
@@ -162,9 +165,21 @@ SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector
 };
 
 SiteModel.statics.updateById = function(id, site, callback) {
-    return this.findByIdAndUpdate(id, {
-        "$set": site
-    }, callback);
+    this.findOne({'_id': id }, function(err, model) {
+        if (err) {
+            return callback(err, null);
+        }
+        
+        Object.keys(site).forEach(function(key) {
+            model[key] = site[key];
+        });
+
+        model.save(callback);
+    });
+
+    //return this.findByIdAndUpdate(id, {
+    //    "$set": site
+    //}, callback);
 };
 
 SiteModel.statics.deleteById = function(id, callback) {
