@@ -85,12 +85,11 @@ var apiNotAllowed = function(res, data) {
 };
 
 
-var conflictReply = function(res, data) {
-    var msg = data || "Operation conflicts with registry requirements.";
+var conflictReply = function(res, err) {
     res.send( new restify.RestError({
         statusCode: 409, 
         restCode: "409 Conflict",
-        message: msg
+        message: JSON.stringify(err)
     }));
     
      //log.info("CONFLICT reply sent", {"code": 405});

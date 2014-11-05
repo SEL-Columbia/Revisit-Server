@@ -206,11 +206,12 @@ describe('User endpoint tests', function(done) {
                                 throw err;
                             }
 
+                            res.body.users.length.should.equal(2);
+                            res.body.users[0].username.should.be.ok;
+                            res.body.users[0].role.should.be.ok;
+                            res.body.users[1].username.should.be.ok;
+                            res.body.users[1].role.should.be.ok;
                             res.body.length.should.equal(2);
-                            res.body[0].username.should.be.ok;
-                            res.body[0].role.should.be.ok;
-                            res.body[1].username.should.be.ok;
-                            res.body[1].role.should.be.ok;
                             done();
                         });
                   });

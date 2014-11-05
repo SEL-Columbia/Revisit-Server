@@ -9,6 +9,7 @@ var exec = require('child_process').exec;
 var server = require('./../server.js').server;
 var sites = require('./fixturez.js');
 var SiteModel = require('../models/dbcontroller').SiteModel;
+var ObjectId = require("mongoose").Types.ObjectId;
 
 describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
@@ -143,11 +144,10 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     //TODO: Not very readable ...
                     res.body.facilities.forEach(
                         function(facility) {
-                            var fac_keys = Object.keys(facility);
-                            var prop_keys = Object.keys(facility.properties);
-
-                            fac_keys.should.be.equal = ['uuid', 'active', 'properties'];
-                            prop_keys.should.be.equal = ['sector'];
+                            
+                            facility.should.have.properties(['uuid', 'active', 'properties']);
+                            facility.properties.should.have.property('sector');
+                            facility.should.not.have.properties(['name', 'createdAt', 'updatedAt', 'href']);
 
                         });
 
@@ -157,6 +157,34 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     done();
                 });
         });
+
+
+        it('should return facilities with only the field name, no virtual fields should show up' 
+                + ' fields', function(done) {
+
+            request(server)
+                .get(conf.prePath + "/facilities.json?fields=name")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.forEach(
+                        function(facility) {
+                            facility.should.have.property('name');
+                            facility.should.not.have.properties(['href', 'uuid', 'createdAt', 'properties']);
+
+                        });
+
+                    res.body.length.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+                    done();
+                });
+        });
+
 
         it('should return facilities with properties:sector = "health"', 
         function(done) {
@@ -500,11 +528,84 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
-        it('should fail to create a facility with createdAt field passed in', 
+        it('should fail to include custom createdAt field passed in', 
+        function(done) {
+            var date = new Date(1999, 11, 30);
+            request(server)
+                .post(conf.prePath + "/facilities.json")
+                .send({"name": "Toronto", "createdAt": date, "properties": {"sector": "test"}})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.createdAt.toString().should.not.match(date.toString());
+                    done();
+                });
+        });
+
+        it('should include custom uuid field passed in', 
+        function(done) {
+            var uuid = "111111111111111111111111";
+            request(server)
+                .post(conf.prePath + "/facilities.json")
+                .send({"name": "Toronto", "uuid": uuid, "properties": {"sector": "test"}})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.uuid.should.match(uuid);
+                    done();
+                });
+        });
+
+        it('should fail to insert obj with colliding uuid passed in', 
+        function(done) {
+            var uuid = the_uuid;
+            request(server)
+                .post(conf.prePath + "/facilities.json")
+                .send({"name": "Toronto", "uuid": uuid, "properties": {"sector": "test"}})
+                .expect('Content-Type', /json/)
+                .expect(409) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.code.should.match("409 Conflict");
+                    done();
+                });
+        });
+
+        it('should fail to insert with id from _id field passed in but should still create facility', 
+        function(done) {
+            var _id = "111111111111111111111111";
+            request(server)
+                .post(conf.prePath + "/facilities.json")
+                .send({"name": "Toronto", "_id": _id, "properties": {"sector": "test"}})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.name.should.match("Toronto");
+                    res.body.uuid.should.not.match(_id); // uuid == _id internally so this is a fair check
+                    done();
+                });
+        });
+
+
+        it('should fail to create without sector field passed in', 
         function(done) {
             request(server)
                 .post(conf.prePath + "/facilities.json")
-                .send({"name": "Toronto", "createdAt": new Date(1999, 11, 30)})
+                .send({"name": "Toronto"})
                 .expect('Content-Type', /json/)
                 .expect(400) 
                 .end(function(err, res) {
@@ -535,7 +636,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
     describe('#bulkCreateFacility', function(done) {
     
-        it('should bulk upload two facilities', function(done) {
+        it('should bulk upload three facilities', function(done) {
             request(server)
                 .post(conf.prePath + "/facilities/bulk.json")
                 .send({"facilities":[
@@ -552,6 +653,95 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     res.body.recieved.should.equal(3);
                     res.body.inserted.should.equal(3);
                     res.body.failed.should.equal(0);
+                    res.body.should.not.have.property("errors");
+                    done();
+                });
+        });
+
+        it('should bulk upload three facilities with allOrNothing=true', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json?allOrNothing=true")
+                .send({"facilities":[
+                        {"name": "Toronto", "properties": {"sector": "test"}}, 
+                        {"name": "Kyoto", "properties": {"sector": "test"}}, 
+                        {"name": "Brookyln", "properties": {"sector": "test"}}
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    } 
+                    res.body.recieved.should.equal(3);
+                    res.body.inserted.should.equal(3);
+                    res.body.failed.should.equal(0);
+                    res.body.should.not.have.property("errors");
+                    done();
+                });
+        });
+
+        it('should bulk upload two of three facilities', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send({"facilities":[
+                        {"name": "Toronto", "properties": {"sector": "test"}}, 
+                        {"name": "Kyoto"}, 
+                        {"name": "Brookyln", "properties": {"sector": "test"}}
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    } 
+                    res.body.recieved.should.equal(3);
+                    res.body.inserted.should.equal(2);
+                    res.body.failed.should.equal(1);
+                    res.body.should.not.have.property("errors");
+                    done();
+                });
+        });
+
+        it('should bulk upload two of three facilities with error info', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json?debug=true")
+                .send({"facilities":[
+                        {"name": "Toronto", "properties": {"sector": "test"}}, 
+                        {"name": "Kyoto"}, 
+                        {"name": "Brookyln", "properties": {"sector": "test"}}
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    } 
+                    res.body.recieved.should.equal(3);
+                    res.body.inserted.should.equal(2);
+                    res.body.failed.should.equal(1);
+                    res.body.should.have.property("errors");
+                    done();
+                });
+        });
+
+        it('should bulk upload zero of three with malformed facility and allOrNothing=true', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json?allOrNothing=true")
+                .send({"facilities":[
+                        {"name": "Toronto", "properties": {"sector": "test"}}, 
+                        {"name": "Kyoto"}, 
+                        {"name": "Brookyln", "properties": {"sector": "test"}}
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    } 
+                    res.body.recieved.should.equal(3);
+                    res.body.inserted.should.equal(0);
+                    res.body.failed.should.equal(1);
+                    res.body.should.not.have.property("errors");
                     done();
                 });
         });
@@ -588,9 +778,64 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
-    });
+        it('should upload facilities with CUSTOM uuids', function(done) {
+            var tid = "111111111111111111111111";
+            var kid = "012345678912345678901234";
+            var bid = "111111111111711171111111";
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send({"facilities":[
+                        {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
+                        {"uuid" : kid, "name": "Kyoto", "properties": {"sector": "test"}}, 
+                        {"uuid" : bid, "name": "Bklyn", "properties": {"sector": "test"}},
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(201) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    SiteModel.find({name: {"$in" : ["Tdot", "Kyoto", "Bklyn"]}}, function(err, sites) {
+                        sites.should.have.length(3);
+                        sites.forEach(function(facility) {
+                            assert([tid, kid, bid].indexOf(facility.uuid) > -1);
+                        });
+                        done();
+                    });
+                });
+        });
 
-    //TODO: More bulk tests for _id, href uuid etc.
+        it('should fail to upload facility with colliding uuid', function(done) {
+            var tid = "111111111111111111111111";
+            var kid = "012345678912345678901234";
+            var bid = "111111111111111111111111";
+            //XXX: Batch insert does not work the way it should ... does not move on to next site after conflict
+            //i,e order of uploaded sites matter
+            request(server)
+                .post(conf.prePath + "/facilities/bulk.json")
+                .send({"facilities":[
+                        {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
+                        {"uuid" : kid, "name": "Kyoto", "properties": {"sector": "test"}}, 
+                        {"uuid" : bid, "name": "Bklyn", "properties": {"sector": "test"}},
+                    ]})
+                .expect('Content-Type', /json/)
+                .expect(409) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("409 Conflict");
+
+                    SiteModel.find({name: {"$in" : ["Tdot", "Kyoto", "Bklyn"]}}, function(err, sites) {
+                        sites.should.have.length(2);
+                        sites.forEach(function(facility) {
+                            assert([tid, kid, bid].indexOf(facility.uuid) > -1);
+                        });
+                        done();
+                    });
+                });
+        });
+    });
 
     describe('#deleteFacility', function(done) {
         it('should delete the facility"', function(done) {
