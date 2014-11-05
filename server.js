@@ -1,18 +1,17 @@
-// dependancies 
+// dependencies 
 var restify = require('restify');
 
 // local includes
-var routes = require('./views/routes.js');
-var extras = require('./views/extras.js');
-var users = require('./views/users.js');
-var replies = require('./views/responses.js');
-var dbcontroller = require('./models/dbcontroller.js');
-var db = dbcontroller.connect();
-var conf = require('./config/app/config.js');
-var log = require('./log/logger.js').log;
-var authenticate = require('./controller/authentication.js').authenticate;
+var routes = require('./controller/routes.js'),
+    responses = require('./view/responses.js'),
+    db = require('./core/db.js').connect(),
+    conf = require('./config/app/config.js'),
+    log = require('./core/logger.js').log,
+    authenticate = require('./core/authentication.js').authenticate;
 
-// server
+
+
+// Instantiate server 
 var server = restify.createServer({
     name: conf.app_name,
     log: log,
@@ -22,7 +21,12 @@ var server = restify.createServer({
     version: conf.version
 });
 
-// server modules
+
+
+/**
+ * SERVER MIDDLEWARE
+ */
+
 server.pre(restify.CORS({
     origins: ['*'],
     headers: ['x-request-within']
@@ -64,21 +68,30 @@ server.use(restify.requestLogger({
 // auth code in controller, configurable in conf/app/*
 server.use(authenticate);
 
+
+
+
+
+
+/**
+ * SERVER EVENTS
+ */
+
 server.on('after', restify.auditLogger({
     log: log
 }));
 
 // Overwrite default error msgs for internal errors and missing endpoints
 server.on('uncaughtException', function (req, res, route, err) {
-    replies.internalErrorReply(res, err);
+    responses.internalErrorReply(res, err);
 });
 
 server.on('NotFound', function (req, res, next) {
-    replies.nothingFoundReply(res, req.url + " was not found.");
+    responses.nothingFoundReply(res, req.url + " was not found.");
 });
 
 server.on('MethodNotAllowed', function (req, res, next) {
-    replies.apiNotAllowed(res);;
+    responses.apiNotAllowed(res);
 });
 
 server.listen(conf.port, function() {
@@ -91,43 +104,59 @@ server.listen(conf.port, function() {
     }
 });
 
+
+
+
+
+
+/**
+ * SETUP ROUTES
+ */
+
+
 // Gotta create an regexp object when working with string variables
 var id_path = new RegExp(conf.prePath + "/facilities/(\\w{24})\.json$");
 var user_path = new RegExp(conf.prePath + "/users/(\\w+)\.json$");
 
 // main
-server.get(conf.prePath + "/facilities.json", routes.sites); // all sites
-server.post(conf.prePath + "/facilities.json", routes.add); // new site
-server.post(conf.prePath + "/facilities/bulk.json", routes.bulk); // new site
-server.post(conf.prePath + "/facilities/bulk", routes.bulkFile); // new site
-server.get(id_path, routes.site); // site by id
-server.del(id_path, routes.del); // delete by id
-server.put(id_path, routes.update); // update site by id
+server.get(conf.prePath + "/facilities.json", routes.sites.sites); // all sites
+server.post(conf.prePath + "/facilities.json", routes.sites.add); // new site
+server.post(conf.prePath + "/facilities/bulk.json", routes.sites.bulk); // new site
+server.post(conf.prePath + "/facilities/bulk", routes.sites.bulkFile); // new site
+server.get(id_path, routes.sites.site); // site by id
+server.del(id_path, routes.sites.del); // delete by id
+server.put(id_path, routes.sites.update); // update site by id
+server.get(new RegExp(conf.prePath +
+    "/facilities/near/(\\w{24})\.json\$"), routes.sites.nearID); // near site by id with units
+server.get(conf.prePath + '/facilities/near.json', routes.sites.near); // search near coord
+server.get(conf.prePath + '/facilities/within.json', routes.sites.within); // search within box and/or sector
 
 // photos
-server.post(conf.prePath + '/facilities/:id/photos', extras.uploadPhoto);
+server.post(conf.prePath + '/facilities/:id/photos', routes.sites.uploadPhoto);
 server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
     directory: './public'
 }));
 
-// extras
-server.get(new RegExp(conf.prePath +
-    "/facilities/near/(\\w{24})\.json\$"), extras.nearID); // near site by id with units
-server.get(conf.prePath + '/facilities/near.json', extras.near); // search near coord
-server.get(conf.prePath + '/facilities/within.json', extras.within); // search within box and/or sector
 
 // users
-server.get(conf.prePath + '/users.json', users.getUsers); // dumps user collection 
-server.post(conf.prePath + '/users.json', users.addUser); // post name, pass, [role] 
-server.get(user_path, users.getUser); // dumps user 
+server.get(conf.prePath + '/users.json', routes.users.getUsers); // dumps user collection 
+server.post(conf.prePath + '/users.json', routes.users.addUser); // post name, pass, [role] 
+server.get(user_path, routes.users.getUser); // dumps user 
 //server.put(conf.prePath + '/users/:username', users.updateAndVerify); // logs in then updates user 
-server.put(user_path, users.updatePass); // logs in then updates user 
-server.del(user_path, users.removeUser); // logs in then updates user 
+server.put(user_path, routes.users.updatePass); // logs in then updates user 
+server.del(user_path, routes.users.removeUser); // logs in then updates user 
 
-server.post(conf.prePath + '/users/login/', users.login); // just for testing, done during basic auth
+server.post(conf.prePath + '/users/login/', routes.users.login); // just for testing, done during basic auth
 
 exports.server = server;
-exports.db = db;
+
+
+
+
+
+/**
+ * CLUSTERING HELPERS
+ */
 
 /**
  * Listen for SIGTERM signal, close the server if it's running.

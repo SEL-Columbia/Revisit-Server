@@ -1,8 +1,7 @@
-// dependancies
+// dependencies
 var mongoose = require('mongoose'),
-    SHA2 = new(require('jshashes').SHA512)(),
-    crypto = require('crypto'),
-    log = require('./../log/logger.js').log;
+    auth = require('../../util/util.js').auth,
+    log = require('../../core/logger.js').log;
 
 var Schema = mongoose.Schema;
 var UserModel = new Schema({
@@ -40,27 +39,6 @@ UserModel.set('toJSON', {
     }
 });
 
-function randomValueHex(len) {
-    try {
-        return crypto.randomBytes(Math.ceil(len / 2))
-            .toString('hex') // convert to hexadecimal format
-            .slice(0, len); // return required number of characters
-    } catch (ex) {
-        // handle error
-        // most likely, entropy sources are drained
-        log.error('Error creating salt.', ex);
-    }
-}
-
-var genHash = function(pass, salt) {
-    return SHA2.b64_hmac(pass, salt);
-};
-
-var genSalt = function() {
-    // random str generator
-    return randomValueHex(88);
-};
-
 UserModel.statics.login = function(username, pass, callback) {
     if (username && pass) {
         this.findOne({
@@ -74,7 +52,7 @@ UserModel.statics.login = function(username, pass, callback) {
 
             var salt = user.salt;
             var hashed = user.password;
-            var new_hash = genHash(pass, salt);
+            var new_hash = auth.genHash(pass, salt);
 
             if (hashed != new_hash) {
                 callback(false, "");
@@ -97,12 +75,12 @@ UserModel.statics.update = function(username, pass, role, callback) {
 
     var update = {};
     if (pass) {
-        update['salt'] = genSalt();
-        update['password']  = genHash(pass, update['salt']);
+        update.salt = auth.genSalt();
+        update.password  = auth.genHash(pass, update.salt);
     }
 
     if (role) {
-        update['role'] = role;
+        update.role = role;
     }
     return this.findOneAndUpdate(
         {'username': username},
@@ -114,8 +92,8 @@ UserModel.statics.update = function(username, pass, role, callback) {
 
 UserModel.statics.addUser = function(username, pass, role, callback) {
     console.log("Adding User:", username);
-    var salt = genSalt();
-    var hash = genHash(pass, salt);
+    var salt = auth.genSalt();
+    var hash = auth.genHash(pass, salt);
     console.log(hash, salt);
     var userObj = new this({
         username: username,
@@ -149,7 +127,8 @@ UserModel.statics.getUser = function(username, callback) {
 
 UserModel.statics.deleteByName = function(username, callback) {
     return this.remove({"username": username }).exec(callback);
-}
+};
+
 // Avoid recompilation
 var UserModel;
 if (mongoose.models.UserModel) {
@@ -158,4 +137,4 @@ if (mongoose.models.UserModel) {
     UserModel = mongoose.model('UserModel', UserModel, 'authentication');
 }
 
-exports.UserModel = UserModel;
+module.exports = UserModel;

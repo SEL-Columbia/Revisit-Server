@@ -8,7 +8,7 @@ var _ = require('lodash-node');
 var exec = require('child_process').exec;
 var server = require('./../server.js').server;
 var sites = require('./fixturez.js');
-var SiteModel = require('../models/dbcontroller').SiteModel;
+var SiteModel = require('../domain/model/site.js');
 var ObjectId = require("mongoose").Types.ObjectId;
 
 describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
@@ -38,7 +38,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
     });
     
     describe('#getFacilities', function(done) {
-        it('should return 25 facilties', function(done) {
+        it('should return 25 facilties by default', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json")
                 .expect('Content-Type', /json/)
@@ -49,9 +49,94 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     }
 
                     res.body.facilities.should.have.length(25);
-                    res.body.length.should.equal(25);
+                    done();
+                });
+        });
+
+        it('should return 20 facilties, based on limit param', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?limit=20")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(20);
+                    done();
+                });
+        });
+
+        it('should return 20 facilties, and include limit, offset, and total values in response', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?limit=20")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(20);
+                    res.body.limit.should.equal(20);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(100);
+                    done();
+                });
+        });
+
+        it('should return 10 facilties, based on per_page param', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?per_page=10")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(10);
+                    done();
+                });
+        });
+
+        it('should return 25 facilties, and inlcude page, per_page, total_entries, and total_pages, based on page param', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?page=2")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(25);
+                    res.body.page.should.equal(2);
+                    res.body.per_page.should.equal(25);
+                    res.body.total_pages.should.equal(4);
+                    res.body.total_entries.should.equal(100);
+
+                    done();
+                });
+        });
+
+        it('should return 10 facilties, starting from page 3, and inlcude page, per_page, total_entries, and total_pages, based on page and per_page params', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?page=3&per_page=10")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(10);
+                    res.body.page.should.equal(3);
+                    res.body.per_page.should.equal(10);
+                    res.body.total_pages.should.equal(10);
+                    res.body.total_entries.should.equal(100);
+
                     done();
                 });
         });
@@ -79,7 +164,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                             res.body.facilities.should.have.length(25);
                             // just checks if overlaps fully
                             res.body.facilities.should.not.containDeep(first_set.facilities);
-                            res.body.length.should.equal(25);
+                            res.body.limit.should.equal(25);
                             res.body.offset.should.equal(25);
                             res.body.total.should.equal(100);
                             done();
@@ -98,7 +183,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     }
 
                    res.body.facilities.should.have.length(100);
-                   res.body.length.should.equal(100);
+                   res.body.limit.should.equal(100);
                    res.body.offset.should.equal(0);
                    res.body.total.should.equal(100);
                    done();
@@ -122,7 +207,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                                     'Brooklyn Hospital Center');
                         });
 
-                    res.body.length.should.equal(1);
+                    res.body.limit.should.equal(1);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(1);
                     done();
@@ -151,7 +236,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
                         });
 
-                    res.body.length.should.equal(25);
+                    res.body.limit.should.equal(25);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(100);
                     done();
@@ -178,7 +263,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
                         });
 
-                    res.body.length.should.equal(25);
+                    res.body.limit.should.equal(25);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(100);
                     done();
@@ -201,7 +286,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                             facility.properties.should.have.property('sector', 'health');
                         });
                     
-                    res.body.length.should.equal(25);
+                    res.body.limit.should.equal(25);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(56);
                     done();
@@ -225,7 +310,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                             //fac_date.should.be.above(minDate);
                         });
                     
-                    res.body.length.should.equal(25);
+                    res.body.limit.should.equal(25);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(100);
 
@@ -248,7 +333,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                             facility.should.have.property('active', true);
                         });
                     
-                   res.body.length.should.equal(25);
+                   res.body.limit.should.equal(25);
                    res.body.offset.should.equal(0);
                    res.body.total.should.equal(100);
 
@@ -274,7 +359,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                             facility.should.not.have.property('properties');
                         });
 
-                   res.body.length.should.equal(25);
+                   res.body.limit.should.equal(25);
                    res.body.offset.should.equal(0);
                    res.body.total.should.equal(100);
                    done();
@@ -309,7 +394,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                         res.body.facilities[i].should.match(facilities[i])
                     }
                    
-                    res.body.length.should.equal(25);
+                    res.body.limit.should.equal(25);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(100);
 
@@ -343,7 +428,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                         res.body.facilities[i].should.be.match(facilities[i])
                     }
 
-                    res.body.length.should.equal(25);
+                    res.body.limit.should.equal(25);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(100);
 
@@ -378,7 +463,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
                     assert(seen[0] + seen[1] == 2, "Did not see both facility names.");
 
-                    res.body.length.should.equal(2);
+                    res.body.limit.should.equal(2);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(2);
                     done();

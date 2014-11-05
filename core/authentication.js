@@ -1,11 +1,17 @@
+// deps
+var SHA2 = new(require('jshashes').SHA512)(),
+    crypto = require('crypto');
+
 // local includes
-var replies = require('./../views/responses.js');
-var dbcontroller = require('./../models/dbcontroller.js');
-var conf = require('./../config/app/config.js');
+var responses = require('./../view/responses.js'),
+    UserModel = require('./../domain/model/user.js'),
+    conf = require('./../config/app/config.js'),
+    log = require('./../core/logger.js').log;
 
 function authenticate(req, res, next) {
 
     var any_user_path = new RegExp(conf.prePath + "/users.*$");
+
     function login(req, callback) {
         req.log.info("Basic auth verification", {
             "user": res.username,
@@ -14,15 +20,17 @@ function authenticate(req, res, next) {
 
         if (req.username === 'anonymous' || typeof req.authorization.basic === 'undefined') {
             req.log.info("Basic auth failed");
-            callback(false, "No basic auth information provided"); 
+            callback(false, "No basic auth information provided");
             return;
         }
 
-        dbcontroller.UserModel.login(req.username, 
-                req.authorization.basic.password, 
-                function(success, role) {
-                    callback(success, "", role);
-                } 
+        log.debug('UserModel...', UserModel);
+
+        UserModel.login(req.username,
+            req.authorization.basic.password,
+            function(success, role) {
+                callback(success, "", role);
+            }
         );
     }
 
@@ -34,14 +42,14 @@ function authenticate(req, res, next) {
     // Branch for requests dealing with user endpoints
     if (conf.blockUsers() && any_user_path.test(req.url)) {
         login(req, function(logged, msg, role) {
-            if(!logged) {
+            if (!logged) {
                 req.log.info("User end point not auth'd");
-                return replies.apiForbidden(res, req.username);
+                return responses.apiForbidden(res, req.username);
             }
 
-            if(role !== "admin") {
+            if (role !== "admin") {
                 req.log.info("User end point not auth'd");
-                return replies.apiForbidden(res, req.username);
+                return responses.apiForbidden(res, req.username);
             }
 
             return next();
@@ -67,7 +75,7 @@ function authenticate(req, res, next) {
     login(req, function(logged, msg) {
         if (!logged) {
             req.log.info("Basic auth failed");
-            return replies.apiUnauthorized(res, req.username, msg);
+            return responses.apiUnauthorized(res, req.username, msg);
         }
 
         req.log.info("Basic auth passed");
@@ -77,4 +85,5 @@ function authenticate(req, res, next) {
 
 }
 
+// middleware
 exports.authenticate = authenticate;

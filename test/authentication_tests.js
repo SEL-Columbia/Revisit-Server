@@ -6,9 +6,8 @@ var request = require('supertest');
 var should = require('should');
 var _ = require('lodash-node');
 var server = require('./../server.js').server;
-var db_controller = require('./../models/dbcontroller.js');
-var SiteModel = require('../models/dbcontroller').SiteModel;
-var UserModel = require('../models/dbcontroller').UserModel;
+var SiteModel = require('../domain/model/site.js');
+var UserModel = require('../domain/model/user.js');
 var sites = require('./fixturez.js');
 
 describe('Authentication Tests', function(done) {

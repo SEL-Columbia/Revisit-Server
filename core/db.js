@@ -2,9 +2,7 @@
 var mongoose = require('mongoose');
 
 // local deps
-var SiteModel = require('./site.js').SiteModel;
-var UserModel = require('./user.js').UserModel;
-var log = require('./../log/logger.js').log;
+var log = require('./logger.js').log;
 var conf = require('./../config/db/db_config');
 
 // db 
@@ -20,6 +18,4 @@ var connect = function() {
     return db;
 };
 
-exports.SiteModel = SiteModel;
-exports.UserModel = UserModel;
 exports.connect = connect;

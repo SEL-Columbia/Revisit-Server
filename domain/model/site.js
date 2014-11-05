@@ -2,7 +2,7 @@
 var mongoose = require('mongoose');
 
 // local deps
-var conf = require('./../config/app/config.js');
+var conf = require('./../../config/app/config.js');
 
 var Schema = mongoose.Schema;
 var SiteModel = new Schema({
@@ -11,7 +11,7 @@ var SiteModel = new Schema({
             required: true,
             index: true
         },
-        
+
         active: {
             type: Boolean,
             default: true
@@ -25,7 +25,7 @@ var SiteModel = new Schema({
             default: Date.now,
             index: true
         },
-        coordinates: { 
+        coordinates: {
             type: [Number]
         },
         identifiers: [{
@@ -40,7 +40,7 @@ var SiteModel = new Schema({
             id: {
                 type: String
             }
-        }], 
+        }],
         properties: {
             type: {
                 type: String
@@ -57,22 +57,27 @@ var SiteModel = new Schema({
             photoEndpoint: String,
             photoUrls: [String]
         }
-    }, 
+    },
     // remove the unnecessary 'id' virtual field that mongoose adds
-    { id: false }
+    {
+        id: false
+    }
 );
 
 // Using 2d instead of 2dsphere based on performance in loadtests
-SiteModel.index({ coordinates: "2d", 'properties.sector': 1 });
+SiteModel.index({
+    coordinates: "2d",
+    'properties.sector': 1
+});
 
 // Create virtual for UUID from ID
-SiteModel.virtual('uuid').get(function(){
+SiteModel.virtual('uuid').get(function() {
     if (this._id)
         return this._id.toHexString();
 });
 
 // Create virtual for HREF from ID
-SiteModel.virtual('href').get(function(){
+SiteModel.virtual('href').get(function() {
     if (this._id)
         return conf.site + this._id.toHexString() + ".json";
 });
@@ -84,10 +89,10 @@ SiteModel.set('toObject', {
 
 // Configure toJSON output
 SiteModel.set('toJSON', {
-    transform: function (doc, ret, options) {
-        var obj = doc.toObject(); 
-        
-        // if hide field is currently the only way to remove virtual fields
+    transform: function(doc, ret, options) {
+        var obj = doc.toObject();
+
+        // hide field is currently the only way to remove virtual fields
         if (options.hide) {
             options.hide.split(',').forEach(function(prop) {
                 delete obj[prop];
@@ -96,7 +101,7 @@ SiteModel.set('toJSON', {
 
         delete obj._id;
         //delete obj.__v;
-        return obj
+        return obj;
     }
 });
 
@@ -109,58 +114,64 @@ SiteModel.statics.findAll = function(callback) {
 };
 
 SiteModel.statics.findById = function(id, callback) {
-    return this.find({"_id" : id}, callback);
-}
+    return this.find({
+        "_id": id
+    }, callback);
+};
 
 SiteModel.statics.findNear = function(lng, lat, rad, earthRad) {
-    return this.find({ "coordinates": 
-                        {"$geoWithin": 
-                            { "$centerSphere": 
-                                [   
-                                    [lng, lat], rad / earthRad 
-                                ]
-                            }
-                        }
-                     });
-}
+    return this.find({
+        "coordinates": {
+            "$geoWithin": {
+                "$centerSphere": [
+                    [lng, lat], rad / earthRad
+                ]
+            }
+        }
+    });
+};
 
 SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng) {
-    return this.find({"coordinates": 
-                        {"$geoWithin": 
-                            { "$box": 
-                                [ 
-                                    [swlng, swlat],
-                                    [nelng, nelat]
-                                ]
-                            }
-                        }
-                    })
-}
+    return this.find({
+        "coordinates": {
+            "$geoWithin": {
+                "$box": [
+                    [swlng, swlat],
+                    [nelng, nelat]
+                ]
+            }
+        }
+    });
+};
 
 SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector) {
-    return this.find(
-             {"$and": 
-                [{"coordinates": 
-                        {"$geoWithin": 
-                            { "$box": 
-                                [ 
-                                    [swlng, swlat],
-                                    [nelng, nelat]
-                                ]
-                            }
-                        }
-                    },
-                 {"properties.sector": sector}]
-             });
-}
+    return this.find({
+        "$and": [{
+            "coordinates": {
+                "$geoWithin": {
+                    "$box": [
+                        [swlng, swlat],
+                        [nelng, nelat]
+                    ]
+                }
+            }
+        }, {
+            "properties.sector": sector
+        }]
+    });
+};
 
 SiteModel.statics.updateById = function(id, site, callback) {
-    return this.findByIdAndUpdate(id, {"$set": site }, callback);
-}
+    return this.findByIdAndUpdate(id, {
+        "$set": site
+    }, callback);
+};
 
 SiteModel.statics.deleteById = function(id, callback) {
-    return this.remove({"_id": id }).exec(callback);
-}
+    return this.remove({
+        "_id": id
+    }).exec(callback);
+};
 
 // Avoid recompilation
 var SiteModel;
@@ -169,4 +180,5 @@ if (mongoose.models.SiteModel) {
 } else {
     SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');
 }
-exports.SiteModel = SiteModel
+
+module.exports = SiteModel;

@@ -7,8 +7,7 @@ var should = require('should');
 var _ = require('lodash-node');
 var server = require('./../server.js').server;
 var exec = require('child_process').exec;
-var db_controller = require('./../models/dbcontroller.js');
-var SiteModel = require('../models/dbcontroller').SiteModel;
+var SiteModel = require('../domain/model/site');
 var sites = require('./fixturez.js');
 
 describe('Facility geolocation queries API routes', function(done) {
