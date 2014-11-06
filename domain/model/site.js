@@ -70,8 +70,9 @@ SiteModel.index({
     coordinates: "2d",
     'properties.sector': 1
 });
+var uri = 'mongodb://localhost/sel';
+SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities', conn: uri });
 
-SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities'});
 
 // Create virtual for UUID from ID
 SiteModel.virtual('uuid').get(function() {
