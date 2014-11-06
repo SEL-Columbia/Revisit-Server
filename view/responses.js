@@ -5,12 +5,12 @@ var restify = require('restify');
 var log = require('./../core/logger.js').log;
 
 // response_style
-var jsonReply = function(res, site, code) {
+var jsonReply = function(res, body, code) {
     code = code || 200;
     res.writeHead(code, {
         'Content-Type': 'application/json; charset=utf-8'
     });
-    res.write(JSON.stringify(site));
+    res.write(JSON.stringify(body));
     res.end();
 
     //log.info("JSON reply sent", {"code": code});

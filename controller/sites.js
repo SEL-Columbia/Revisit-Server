@@ -97,7 +97,7 @@ function sites(req, res, next) {
                 totalPages;
 
             // if page param present and is an int, return pagination state
-            if ( req.params.page !== undefined && !isNaN(parseInt(req.params.page)) ) {
+            if (req.params.page !== undefined && !isNaN(parseInt(req.params.page))) {
                 extras.page = parseInt(req.params.page);
                 extras.per_page = parseInt(req.params.per_page) || parseInt(req.params.limit);
                 extras.total_entries = count;
@@ -121,7 +121,7 @@ function sites(req, res, next) {
         });
     });
 
-    // return next();
+    return next();
 }
 
 function site(req, res, next) {
@@ -143,7 +143,7 @@ function site(req, res, next) {
 
     });
 
-    // return next();
+    return next();
 }
 
 function update(req, res, next) {
@@ -173,7 +173,7 @@ function update(req, res, next) {
         responses.jsonReply(res, site);
     });
 
-    // return next();
+    return next();
 }
 
 function add(req, res, next) {
@@ -221,7 +221,7 @@ function add(req, res, next) {
 
     });
 
-    // // return next();
+    // return next();
 }
 
 function bulk(req, res, next) {
@@ -334,7 +334,7 @@ function bulk(req, res, next) {
         });
     });
 
-    // return next();
+    return next();
 }
 
 function bulkFile(req, res, next) {
@@ -371,7 +371,7 @@ function bulkFile(req, res, next) {
         }
     });
 
-    // return next();
+    return next();
 
 }
 
@@ -398,7 +398,7 @@ function del(req, res, next) {
 
     });
 
-    // return next();
+    return next();
 }
 
 
@@ -468,7 +468,7 @@ function near(req, res, next) {
         });
     });
 
-    // return next();
+    return next();
 
 }
 
@@ -556,7 +556,7 @@ function within(req, res, next) {
         });
     });
 
-    // return next();
+    return next();
 
 }
 
@@ -617,9 +617,10 @@ function withinSector(req, res, next) {
         });
     });
 
-    // return next();
+    return next();
 
 }
+
 
 //TODO: Refactor, does too much work 
 function uploadPhoto(req, res, next) {
