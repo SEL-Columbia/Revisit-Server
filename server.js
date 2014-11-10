@@ -131,6 +131,8 @@ server.get(new RegExp(conf.prePath +
 server.get(conf.prePath + '/facilities/near.json', routes.sites.near); // search near coord
 server.get(conf.prePath + '/facilities/within.json', routes.sites.within); // search within box and/or sector
 
+server.get(conf.prePath + '/facilities/stats.json', routes.stats.stats); // search within box and/or sector
+
 // photos
 server.post(conf.prePath + '/facilities/:id/photos', routes.sites.uploadPhoto);
 server.get(/\/sites\/photos\/?.*/, restify.serveStatic({

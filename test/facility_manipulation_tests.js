@@ -892,24 +892,27 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should fail to upload facility with colliding uuid', function(done) {
             var tid = "111111111111111111111111";
-            var kid = "012345678912345678901234";
             var bid = "111111111111111111111111";
-            //XXX: Batch insert does not work the way it should ... does not move on to next site after conflict
-            //i,e order of uploaded sites matter
+            var kid = "012345678912345678901234";
+            var jid = "012345678912345678901234";
             request(server)
                 .post(conf.prePath + "/facilities/bulk.json")
                 .send({"facilities":[
                         {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
-                        {"uuid" : kid, "name": "Kyoto", "properties": {"sector": "test"}}, 
                         {"uuid" : bid, "name": "Bklyn", "properties": {"sector": "test"}},
+                        {"uuid" : jid, "name": "Kyoto", "properties": {"sector": "test"}},
+                        {"uuid" : kid, "name": "sdf", "properties": {"sector": "test"}} 
                     ]})
                 .expect('Content-Type', /json/)
-                .expect(409) 
+                .expect(201) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("409 Conflict");
+
+                    res.body.recieved.should.equal(4);
+                    res.body.inserted.should.equal(2);
+                    res.body.failed.should.equal(2);
 
                     SiteModel.find({name: {"$in" : ["Tdot", "Kyoto", "Bklyn"]}}, function(err, sites) {
                         sites.should.have.length(2);

@@ -97,7 +97,7 @@ function sites(req, res, next) {
                 totalPages;
 
             // if page param present and is an int, return pagination state
-            if ( req.params.page !== undefined && !isNaN(parseInt(req.params.page)) ) {
+            if (req.params.page !== undefined && !isNaN(parseInt(req.params.page))) {
                 extras.page = parseInt(req.params.page);
                 extras.per_page = parseInt(req.params.per_page) || parseInt(req.params.limit);
                 extras.total_entries = count;
@@ -121,7 +121,7 @@ function sites(req, res, next) {
         });
     });
 
-    // return next();
+    return next();
 }
 
 function site(req, res, next) {
@@ -150,7 +150,7 @@ function site(req, res, next) {
 
     });
 
-    // return next();
+    return next();
 }
 
 function update(req, res, next) {
@@ -180,7 +180,7 @@ function update(req, res, next) {
         responses.jsonReply(res, site);
     });
 
-    // return next();
+    return next();
 }
 
 function add(req, res, next) {
@@ -228,7 +228,7 @@ function add(req, res, next) {
 
     });
 
-    // // return next();
+    // return next();
 }
 
 function bulk(req, res, next) {
@@ -256,6 +256,7 @@ function bulk(req, res, next) {
 
     var batchOnly = req.params.allOrNothing;
 
+    var bulkIns = SiteModel.collection.initializeUnorderedBulkOp();
     // define function to be mapped
     var fac_validator = function(facility, callback) {
         // keep the _id if they provide one
@@ -279,8 +280,11 @@ function bulk(req, res, next) {
                 err.facility = facility;
                 errors[num_failed++] = err;
                 facility = null; // nulify facility if err'd
+                callback(null, null);
+                return;
             }
 
+            bulkIns.insert(facility);
             callback(null, facility);
 
         });
@@ -314,22 +318,31 @@ function bulk(req, res, next) {
         }
 
         // At this point a subset of the data will be recorded
-        // bulk insert
-        SiteModel.collection.insert(result, function(err, sites) {
-            if (err) {
-                req.log.error(err);
-                if (err.code === 11000) {
-                    return responses.conflictReply(res, err);
-                } else {
-                    return responses.internalErrorReply(res, err);
-                }
-            }
+        var writeResult = bulkIns.execute(function(err, writeResult) {
+            if (writeResult.hasWriteErrors()) {
+                var writeErrors = writeResult.getWriteErrors();
+                req.log.error(writeErrors);
+                writeErrors.forEach(function(err) {
+                    // handle id collisions seperatly, continue with regular
+                    // output but record errors 
+                    if (err.code === 11000) {
+                        errors.push(err.toJSON());
+                        //return responses.conflictReply(res, err);
+                    } else {
+                        // can't recover from this, let em know
+                        return responses.internalErrorReply(res, err);
+                    }
+                });
+            } 
 
-            num_inserted = sites.length;
+            var num_inserted = writeResult.nInserted;
+            var num_errd = writeResult.getWriteErrorCount();
+
+
             var response = {
                 "recieved": num_supplied,
                 "inserted": num_inserted,
-                "failed": num_failed
+                "failed": num_failed + num_errd
             };
 
             if (debug === "true") {
@@ -341,7 +354,7 @@ function bulk(req, res, next) {
         });
     });
 
-    // return next();
+    return next();
 }
 
 function bulkFile(req, res, next) {
@@ -378,7 +391,7 @@ function bulkFile(req, res, next) {
         }
     });
 
-    // return next();
+    return next();
 
 }
 
@@ -405,7 +418,7 @@ function del(req, res, next) {
 
     });
 
-    // return next();
+    return next();
 }
 
 
@@ -475,7 +488,7 @@ function near(req, res, next) {
         });
     });
 
-    // return next();
+    return next();
 
 }
 
@@ -563,7 +576,7 @@ function within(req, res, next) {
         });
     });
 
-    // return next();
+    return next();
 
 }
 
@@ -624,9 +637,10 @@ function withinSector(req, res, next) {
         });
     });
 
-    // return next();
+    return next();
 
 }
+
 
 //TODO: Refactor, does too much work 
 function uploadPhoto(req, res, next) {
