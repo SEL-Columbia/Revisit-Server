@@ -311,10 +311,11 @@ function bulk(req, res, next) {
         }
 
         // At this point a subset of the data will be recorded
-        var writeResult = bulkIns.execute(function(err, writeResult) {
+        bulkIns.execute(function(err, writeResult) {
             if (writeResult.hasWriteErrors()) {
                 var writeErrors = writeResult.getWriteErrors();
                 req.log.error(writeErrors);
+                //TODO: Error parsing is ridiculous, errmsg === message, op === facility?
                 writeErrors.forEach(function(err) {
                     // handle id collisions seperatly, continue with regular
                     // output but record errors 
