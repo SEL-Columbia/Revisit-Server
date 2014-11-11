@@ -16,8 +16,9 @@ var SiteModel = require('../domain/model/site.js'),
 
 
 
-/**
+/*
  * UTILITY METHODS
+ * Format query objects, determine;
  */
 
 // check if a site is empty in JSON form (it can never be empty otherwise)
@@ -47,21 +48,117 @@ function isOnlySite(sites) {
 }
 
 
+// switch statment for query= field
+function getQuery(req) {
+    var queryType = req.params.query;
+    var query;
+    switch(queryType) {
+        case undefined:
+            query = SiteModel;
+            break;
+        case 'within':
+            query = within(req);
+            break;
+        case 'near':
+            query = near(req);
+            break;
+        default:
+            query = null;
+    }
+
+    delete req.params.query;
+    return query;
+}
+
+function near(req) {
+    req.log.info("GET near facility REQUEST", {
+        "req": req.params
+    });
+
+    var lat = req.params.lat;
+    var lng = req.params.lng;
+
+    if (typeof lat === 'undefined' || typeof lng === 'undefined') {
+        return;
+    }
+
+    var rad = req.params.rad || 0;
+    var units = req.params.units || 'km';
+
+    var earthRad = 6371; // km
+    if (units === 'mi') {
+        earthRad = 3959;
+    }
+
+    if (isNaN(rad) || parseInt(rad) < 0 || isNaN(lng) || isNaN(lat)) {
+        return;
+    }
+
+    // delete the fields here (don't add them to knownKeys in parser)
+    delete req.params.lat;
+    delete req.params.lng;
+    delete req.params.rad;
+    delete req.params.units;
+
+    // query obj 
+    return SiteModel.findNear(lng, lat, rad, earthRad);
+}
+
+function within(req) {
+    req.log.info("GET within facility REQUEST", {
+        "req": req.params
+    });
+
+    var slat = req.params.slat;
+    var wlng = req.params.wlng;
+    var nlat = req.params.nlat;
+    var elng = req.params.elng;
+    var sector = req.params.sector;
+
+    if (isNaN(slat) || isNaN(wlng) || isNaN(elng) || isNaN(nlat)) {
+        return;
+    }
+
+    // delete the fields here (don't add them to knownKeys in parser)
+    delete req.params.slat;
+    delete req.params.wlng;
+    delete req.params.nlat;
+    delete req.params.elng;
+    delete req.params.sector;
+
+    if (sector) {
+        return SiteModel.findWithinSector(slat, wlng, nlat, elng, sector);
+    }
+
+    return SiteModel.findWithin(slat, wlng, nlat, elng);
+}
 
 
 
-
-/**
- * ROUTES
+/*
+ ** ROUTES
+ * SITES -> Return facilities (formatted by query params)
+ * ADD -> Add new facility
+ * UPDATE -> Update exisiting facility
+ * DELETE -> Remove exisiting facility
+ * BULK/BULKFILE -> Upload many facilities
+ **
  */
-
 function sites(req, res, next) {
     req.log.info("GET all facilities REQUEST", {
         "req": req.params
     });
 
+    var og_query = getQuery(req);
+    var query = og_query;
+
+    if (!query) {
+        responses.apiBadRequest(res, "Please refer to the wiki for a guide on Revisit's API");
+        return;
+    }
+
     // parse query
-    query = parser.parseParams(req.params, SiteModel);
+    query = parser.parseParams(req.params, query);
     query.exec(function(err, sites) {
 
         if (err) {
@@ -78,7 +175,7 @@ function sites(req, res, next) {
         delete req.params.sortAsc;
         delete req.params.sortDesc;
 
-        count_query = parser.parseParams(req.params, SiteModel);
+        var count_query = parser.parseParams(req.params, og_query);
         count_query.limit(0).skip(0).count().exec(function(err, count) {
 
             if (err) {
@@ -108,8 +205,6 @@ function sites(req, res, next) {
                 extras.limit = limit;
                 extras.total = count;
             }
-
-            // var extras = {"length": length, "offset": off, "page": page, "total": count};
 
             var responseBody = responseBuilder
                 .buildResponse(sites, hidden_str, 'facilities')
@@ -264,8 +359,6 @@ function bulk(req, res, next) {
             facility._id = custom_id;
         }
 
-        //XXX: Sort out way to detect id collisions?
-
         var fac_model = new SiteModel(facility);
         fac_model.validate(function(err) {
             if (err) {
@@ -331,7 +424,6 @@ function bulk(req, res, next) {
 
             var num_inserted = writeResult.nInserted;
             var num_errd = writeResult.getWriteErrorCount();
-
 
             var response = {
                 "recieved": num_supplied,
@@ -415,235 +507,14 @@ function del(req, res, next) {
     return next();
 }
 
-
-function near(req, res, next) {
-    req.log.info("GET near facility REQUEST", {
-        "req": req.params
-    });
-
-    var lat = req.params.lat;
-    var lng = req.params.lng;
-
-    if (typeof lat === 'undefined' || typeof lng === 'undefined') {
-        return responses.apiBadRequest(res, "TODO: This message is not used");
-    }
-
-    var rad = req.params.rad || 0;
-    var units = req.params.units || 'km';
-
-    var earthRad = 6371; // km
-    if (units === 'mi') {
-        earthRad = 3959;
-    }
-
-    if (isNaN(rad) || parseInt(rad) < 0 || isNaN(lng) || isNaN(lat)) {
-        return responses.apiBadRequest(res, "TODO: This message is not used!");
-    }
-
-    // query obj 
-    var nearQuery = SiteModel.findNear(lng, lat, rad, earthRad);
-
-    // determine if we have any limits to add
-    parser.genLimitQuery({
-        "limit": req.params.limit,
-        "offset": req.params.offset
-    }, nearQuery);
-
-    nearQuery.exec(function(err, sites) {
-        if (err) {
-            req.log.error(err);
-            return responses.internalErrorReply(res, err);
-        }
-
-        nearQuery.limit(0).skip(0).count().exec(function(err, count) {
-            if (err) {
-                req.log.error(err);
-                return responses.internalErrorReply(res, err);
-            }
-
-            if (isEmpty(sites)) {
-                return responses.nothingFoundReply(res);
-            }
-
-            var off = parseInt(req.params.offset) || 0;
-            var extras = {
-                "length": sites.length,
-                "offset": off,
-                "total": count
-            };
-
-            var responseBody = responseBuilder
-                .buildResponse(sites, null, 'facilities', extras)
-                .toObject();
-
-            responses.jsonReply(res, responseBody, 200);
-
-
-        });
-    });
-
-    return next();
-
-}
-
-function nearID(req, res, next) {
-    req.log.info("GET near facility with id REQUEST", {
-        "req": req.params
-    });
-
-    SiteModel.findById(req.params[0], function(err, sites) {
-        if (err) {
-            req.log.error(err);
-            return responses.internalErrorReply(res, err);
-        }
-
-        if (!isOnlySite(sites)) {
-            return responses.nothingFoundReply(res);
-
-        } else {
-            var site = sites[0]; // should only be one
-            req.params.lng = site.coordinates[0];
-            req.params.lat = site.coordinates[1];
-            return near(req, res, next);
-        }
-    });
-}
-
-
-function within(req, res, next) {
-    req.log.info("GET within facility REQUEST", {
-        "req": req.params
-    });
-
-    var slat = req.params.slat;
-    var wlng = req.params.wlng;
-    var nlat = req.params.nlat;
-    var elng = req.params.elng;
-
-    //TODO: Remove withinSector and just merge it with this func
-    if (req.params.sector) {
-        return withinSector(req, res, next);
-    }
-
-    if (isNaN(slat) || isNaN(wlng) || isNaN(elng) || isNaN(nlat)) {
-        return responses.apiBadRequest(res, "TODO: This message is not used!");
-    }
-
-    var withinQuery = SiteModel.findWithin(slat, wlng, nlat, elng);
-
-    // determine if we have any limits to add
-    parser.genLimitQuery({
-        "limit": req.params.limit,
-        "offset": req.params.offset
-    }, withinQuery);
-
-    withinQuery.exec(function(err, sites) {
-        if (err) {
-            req.log.error(err);
-            return responses.internalErrorReply(res, err);
-        }
-
-        withinQuery.limit(0).skip(0).count().exec(function(err, count) {
-            if (err) {
-                req.log.error(err);
-                return responses.internalErrorReply(res, err);
-            }
-
-            if (isEmpty(sites)) {
-                return responses.nothingFoundReply(res);
-            }
-
-            var off = parseInt(req.params.offset) || 0;
-            var extras = {
-                "length": sites.length,
-                "offset": off,
-                "total": count
-            };
-
-            var responseBody = responseBuilder
-                .buildResponse(sites, null, 'facilities', extras)
-                .toObject();
-
-            responses.jsonReply(res, responseBody, 200);
-
-
-        });
-    });
-
-    return next();
-
-}
-
-function withinSector(req, res, next) {
-    req.log.info("GET within sector facility REQUEST", {
-        "req": req.params
-    });
-
-    var slat = req.params.slat;
-    var wlng = req.params.wlng;
-    var nlat = req.params.nlat;
-    var elng = req.params.elng;
-    var sector = req.params.sector;
-
-    if (isNaN(slat) || isNaN(wlng) || isNaN(elng) || isNaN(nlat)) {
-        responses.apiBadRequest(res, "TODO: This message is not used!");
-        return;
-    }
-
-    var withinSectorQuery = SiteModel.findWithinSector(slat, wlng, nlat, elng, sector);
-
-    // determine if we have any limits to add
-    parser.genLimitQuery({
-        "limit": req.params.limit,
-        "offset": req.params.offset
-    }, withinSectorQuery);
-
-    withinSectorQuery.exec(function(err, sites) {
-        if (err) {
-            req.log.error(err);
-            return responses.internalErrorReply(res, err);
-        }
-
-
-        withinSectorQuery.limit(0).skip(0).count().exec(function(err, count) {
-            if (err) {
-                req.log.error(err);
-                return responses.internalErrorReply(res, err);
-            }
-
-            if (isEmpty(sites)) {
-                return responses.nothingFoundReply(res);
-            }
-
-            var off = parseInt(req.params.offset) || 0;
-            var extras = {
-                "length": sites.length,
-                "offset": off,
-                "total": count
-            };
-
-            var responseBody = responseBuilder
-                .buildResponse(sites, null, 'facilities', extras)
-                .toObject();
-
-            responses.jsonReply(res, responseBody, 200);
-
-        });
-    });
-
-    return next();
-
-}
-
-
 //TODO: Refactor, does too much work 
 function uploadPhoto(req, res, next) {
     req.log.info("POST photo to facility REQUEST", {
         "req": req.params,
         "files": req.files
     });
-    var siteId = req.params.id || null;
 
+    var siteId = req.params.id || null;
     // if no sideId is included in request, error
     if (!siteId) {
         return next(new restify.MissingParameterError("The required siteId parameter is missing."));
@@ -736,8 +607,4 @@ exports.bulk = bulk;
 exports.bulkFile = bulkFile;
 exports.del = del;
 
-exports.within = within;
-exports.withinSector = withinSector;
-exports.near = near;
-exports.nearID = nearID;
 exports.uploadPhoto = uploadPhoto;

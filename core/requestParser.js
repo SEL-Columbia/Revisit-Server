@@ -11,11 +11,10 @@ knownKeys = [
     'offset',
     'active',
     'updatedSince',
-    'page',
+    'page', //XXX: These two fields now can't be in facility objs
     'per_page'
 ];
 
-//TODO: maybe turn all the 400's sent cause of this into 409s?            
 var badKeys = [
     '_id',
     'uuid',
@@ -58,7 +57,8 @@ var parseParams = function(params, query) {
 
     // find op is set in stone by this point
     // Note: Cannot exclude and include at the same time in mongo
-    query = query.find(filters, projections);
+    query = query.find(filters);
+    query = query.select(projections);
 
     // sort (cannot be seperated)
     if (params.sortAsc) {
