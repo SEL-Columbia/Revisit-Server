@@ -11,10 +11,9 @@ knownKeys = [
     'offset',
     'active',
     'updatedSince',
-    //XXX: These fields now can't be in facility objs
-    //TODO: Better way to handle em (based on query type maybe?);
-    'page', 
-    'per_page',
+    'query'
+];
+var geoKeys = [
     'slat',
     'lat',
     'nlat',
@@ -23,8 +22,13 @@ knownKeys = [
     'lng',
     'sector',
     'rad',
-    'units',
-    'query'
+    'units'
+];
+
+var pageKeys = [
+    //XXX: These fields now can't be in facility objs
+    'page', 
+    'per_page'
 ];
 
 var badKeys = [
@@ -55,7 +59,7 @@ var parseParams = function(params, query) {
     }
 
     // add ons
-    genAddOnsQuery(params, filters);
+    genAddOnsQuery(params, filters, params.query);
 
     // projections
     if (params.fields) {
@@ -230,10 +234,13 @@ var genDateQuery = function(filters, date_str) {
 };
 
 // For queries specifiying specific fields
-var genAddOnsQuery = function(params, filters) {
+var genAddOnsQuery = function(params, filters, query) {
     paramKeys = Object.keys(params);
     paramKeys.forEach(function(pkey) {
-        if (knownKeys.indexOf(pkey) < 0) {
+        if (knownKeys.indexOf(pkey) < 0 
+        &&  (typeof query === 'undefined' && geoKeys.indexOf(pkey) < 0)
+        &&  pageKeys.indexOf(pkey) < 0) {
+
             // Determine if mult options passed, restify packages it as an array
             if (typeof params[pkey] === "string") {
                 filters[pkey.replace(":", ".")] = params[pkey];
