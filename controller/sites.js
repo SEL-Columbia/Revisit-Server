@@ -66,7 +66,6 @@ function getQuery(req) {
             query = null;
     }
 
-    delete req.params.query;
     return query;
 }
 
@@ -94,12 +93,6 @@ function near(req) {
         return;
     }
 
-    // delete the fields here (don't add them to knownKeys in parser)
-    delete req.params.lat;
-    delete req.params.lng;
-    delete req.params.rad;
-    delete req.params.units;
-
     // query obj 
     return SiteModel.findNear(lng, lat, rad, earthRad);
 }
@@ -118,13 +111,6 @@ function within(req) {
     if (isNaN(slat) || isNaN(wlng) || isNaN(elng) || isNaN(nlat)) {
         return;
     }
-
-    // delete the fields here (don't add them to knownKeys in parser)
-    delete req.params.slat;
-    delete req.params.wlng;
-    delete req.params.nlat;
-    delete req.params.elng;
-    delete req.params.sector;
 
     if (sector) {
         return SiteModel.findWithinSector(slat, wlng, nlat, elng, sector);
@@ -149,8 +135,7 @@ function sites(req, res, next) {
         "req": req.params
     });
 
-    var og_query = getQuery(req);
-    var query = og_query;
+    var query = getQuery(req);
 
     if (!query) {
         responses.apiBadRequest(res, "Please refer to the wiki for a guide on Revisit's API");
@@ -160,7 +145,6 @@ function sites(req, res, next) {
     // parse query
     query = parser.parseParams(req.params, query);
     query.exec(function(err, sites) {
-
         if (err) {
             req.log.error(err);
             return responses.internalErrorReply(res, err);
@@ -170,14 +154,14 @@ function sites(req, res, next) {
         var hidden_str = parser.parseForVirts(req.params);
 
         // I need to prevent projections to do count
+        var og_query = getQuery(req);
         delete req.params.allProperties;
         delete req.params.fields;
         delete req.params.sortAsc;
         delete req.params.sortDesc;
-
+        // second query - slicing/project fields (count doesnt work with em);
         var count_query = parser.parseParams(req.params, og_query);
         count_query.limit(0).skip(0).count().exec(function(err, count) {
-
             if (err) {
                 req.log.error(err);
                 return responses.internalErrorReply(res, err);

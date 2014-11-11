@@ -11,8 +11,20 @@ knownKeys = [
     'offset',
     'active',
     'updatedSince',
-    'page', //XXX: These two fields now can't be in facility objs
-    'per_page'
+    //XXX: These fields now can't be in facility objs
+    //TODO: Better way to handle em (based on query type maybe?);
+    'page', 
+    'per_page',
+    'slat',
+    'lat',
+    'nlat',
+    'elng',
+    'wlng',
+    'lng',
+    'sector',
+    'rad',
+    'units',
+    'query'
 ];
 
 var badKeys = [

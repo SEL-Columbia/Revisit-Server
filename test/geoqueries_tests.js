@@ -153,6 +153,36 @@ describe('Facility geolocation queries API routes', function(done) {
 
         });
 
+        it('should return facilities within 1mi with offset 2, active=true and no virtfields', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?query=near"
+                        + "&lat=40.7645704&lng=-73.9570783&rad=1&units=mi&offset=2"
+                        + "&fields=name,active&active=true")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.forEach(
+                        function(facility) {
+                            facility.should.have.property('name');
+                            facility.should.have.property('active', true);
+                            facility.should.not.have.properties(['href', 'uuid', 'createdAt', 'properties']);
+                    });
+
+
+                    res.body.facilities.should.be.ok;
+                    res.body.facilities.should.have.lengthOf(10);
+                    res.body.limit.should.equal(10);
+                    res.body.offset.should.equal(2);
+                    res.body.total.should.equal(12);
+                    done();
+                });
+
+        });
+
         it('should return facilities within 1mi with limit 2', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json?query=near"
@@ -264,6 +294,36 @@ describe('Facility geolocation queries API routes', function(done) {
                         throw err;
                     }
 
+
+                    res.body.facilities.should.be.ok;
+                    res.body.facilities.should.have.lengthOf(25);
+                    res.body.limit.should.equal(25);
+                    res.body.offset.should.equal(2);
+                    res.body.total.should.equal(100);
+                    done();
+                });
+
+        });
+
+        it('should return facilties within box defined by x,y and x",y" with offset=2, name and active fields, no virtfields and active=true', 
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?query=within"
+                        +"&slat=0&wlng=-180&nlat=90&elng=0&offset=2"
+                        +"&fields=name,active&active=true")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.forEach(
+                        function(facility) {
+                            facility.should.have.property('name');
+                            facility.should.have.property('active', true);
+                            facility.should.not.have.properties(['href', 'uuid', 'createdAt', 'properties']);
+                    });
 
                     res.body.facilities.should.be.ok;
                     res.body.facilities.should.have.lengthOf(25);
