@@ -139,6 +139,13 @@ function site(req, res, next) {
             return responses.nothingFoundReply(res);
         }
 
+        if (req.params.hist === 'true') {
+            sites[0].history(0, 100, function(err, result) {
+                responses.jsonReply(res, result);
+            })
+
+            return;
+        } 
         responses.jsonReply(res, sites[0]);
 
     });
