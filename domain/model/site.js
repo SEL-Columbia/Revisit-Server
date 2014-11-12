@@ -4,6 +4,7 @@ var rollback = require('mongoose-rollback');
 
 // local deps
 var conf = require('./../../config/app/config.js');
+var dbconf = require('./../../config/db/db_config');
 
 var Schema = mongoose.Schema;
 var SiteModel = new Schema({
@@ -70,8 +71,8 @@ SiteModel.index({
     coordinates: "2d",
     'properties.sector': 1
 });
-var uri = 'mongodb://localhost/sel';
-SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities', conn: uri });
+
+SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities', conn: dbconf.uri });
 
 
 // Create virtual for UUID from ID
