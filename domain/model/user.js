@@ -91,10 +91,8 @@ UserModel.statics.update = function(username, pass, role, callback) {
 };
 
 UserModel.statics.addUser = function(username, pass, role, callback) {
-    console.log("Adding User:", username);
     var salt = auth.genSalt();
     var hash = auth.genHash(pass, salt);
-    console.log(hash, salt);
     var userObj = new this({
         username: username,
         password: hash,
@@ -104,12 +102,9 @@ UserModel.statics.addUser = function(username, pass, role, callback) {
 
     userObj.save(function(err, user) {
         if (err) {
-            console.log(err);
             callback(false);
             return;
         }
-        console.log(user);
-        console.log("Success!");
         callback(true);
     });
 
