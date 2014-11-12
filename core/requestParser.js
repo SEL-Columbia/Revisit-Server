@@ -10,25 +10,18 @@ knownKeys = [
     'limit',
     'offset',
     'active',
-    'updatedSince',
-    'query'
-];
-var geoKeys = [
-    'slat',
-    'lat',
-    'nlat',
-    'elng',
-    'wlng',
-    'lng',
-    'sector',
-    'rad',
-    'units'
+    'updatedSince'
 ];
 
-var pageKeys = [
-    //XXX: These fields now can't be in facility objs
-    'page', 
-    'per_page'
+queryKeys = [
+    'name',
+    'createdAt',
+    'updatedAt',
+    'coordinates',
+    'identifiers',
+    'properties',
+    'uuid',
+    'href'
 ];
 
 var badKeys = [
@@ -59,7 +52,7 @@ var parseParams = function(params, query) {
     }
 
     // add ons
-    genAddOnsQuery(params, filters, params.query);
+    genAddOnsQuery(params, filters);
 
     // projections
     if (params.fields) {
@@ -234,12 +227,12 @@ var genDateQuery = function(filters, date_str) {
 };
 
 // For queries specifiying specific fields
-var genAddOnsQuery = function(params, filters, query) {
+var genAddOnsQuery = function(params, filters) {
     paramKeys = Object.keys(params);
     paramKeys.forEach(function(pkey) {
-        if (knownKeys.indexOf(pkey) < 0 
-        &&  (typeof query === 'undefined' && geoKeys.indexOf(pkey) < 0)
-        &&  pageKeys.indexOf(pkey) < 0) {
+        var core = pkey.split(":")[0];
+        if (knownKeys.indexOf(core) < 0 
+        &&  queryKeys.indexOf(core) > -1) {
 
             // Determine if mult options passed, restify packages it as an array
             if (typeof params[pkey] === "string") {
@@ -250,6 +243,8 @@ var genAddOnsQuery = function(params, filters, query) {
                 };
             }
         }
+
+       
     });
 };
 

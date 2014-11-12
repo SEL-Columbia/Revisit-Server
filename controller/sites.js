@@ -48,22 +48,37 @@ function isOnlySite(sites) {
 }
 
 
-// switch statment for query= field
+// if block for query type field
 function getQuery(req) {
-    var queryType = req.params.query;
-    var query;
-    switch(queryType) {
-        case undefined:
-            query = SiteModel;
-            break;
-        case 'within':
-            query = within(req);
-            break;
-        case 'near':
-            query = near(req);
-            break;
-        default:
-            query = null;
+    var query = SiteModel;
+
+    // special query fields, within and near
+    var boundingBox = req.params.within;
+    var coords = req.params.near; 
+
+    // near query defined?
+    if (coords) {
+        var latLng = coords.split(',');
+        if (latLng.length !== 2)
+            return null;
+
+        req.params.lat = latLng[0];
+        req.params.lng = latLng[1];
+        query = near(req);
+    }
+
+    // within query defined?
+    if (boundingBox) {
+        var latLngBox = boundingBox.split(',');
+        if (latLngBox.length !== 4)
+            return null;
+
+        req.params.nlat = latLngBox[0]; 
+        req.params.wlng = latLngBox[1]; 
+        req.params.slat = latLngBox[2]; 
+        req.params.elng = latLngBox[3]; 
+
+        query = within(req);
     }
 
     return query;
@@ -155,6 +170,7 @@ function sites(req, res, next) {
 
         // I need to prevent projections to do count
         var og_query = getQuery(req);
+        // TODO: find pretty way clear these fields (new info: can chain .find() queries);
         delete req.params.allProperties;
         delete req.params.fields;
         delete req.params.sortAsc;
@@ -300,7 +316,7 @@ function add(req, res, next) {
 
     });
 
-    // return next();
+    return next();
 }
 
 function bulk(req, res, next) {

@@ -38,8 +38,8 @@ describe('Facility geolocation queries API routes', function(done) {
     describe('#near', function() {
         it('should return facilties with 1km', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=near"
-                        + "&lat=40.7645704&lng=-73.9570783&rad=1")
+                .get(conf.prePath + "/facilities.json"
+                        + "?near=40.7645704,-73.9570783&rad=1")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -59,8 +59,8 @@ describe('Facility geolocation queries API routes', function(done) {
 
         it('should return facilities within 1mi', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=near"
-                        + "&lat=40.7645704&lng=-73.9570783&rad=1&units=mi")
+                .get(conf.prePath + "/facilities.json"
+                        + "?near=40.7645704,-73.9570783&rad=1&units=mi")
                 .expect('Content-Type', /json/)
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -81,8 +81,8 @@ describe('Facility geolocation queries API routes', function(done) {
 
         it('should return 1 facilities within 0km', function(done) {
              request(server)
-                .get(conf.prePath + "/facilities.json?query=near"
-                        + "&lat=40.7645704&lng=-73.9570783")
+                .get(conf.prePath + "/facilities.json"
+                        + "?near=40.7645704,-73.9570783")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -103,8 +103,8 @@ describe('Facility geolocation queries API routes', function(done) {
         
         it('should return no facilities', function(done) {
              request(server)
-                .get(conf.prePath + "/facilities.json?query=near"
-                        + "&lat=0&lng=0&rad=0&units=km")
+                .get(conf.prePath + "/facilities.json"
+                        + "?near=0,0&rad=0&units=km")
                 .expect('Content-Type', /json/)
                 .expect(404) 
                 .end(function(err, res) {
@@ -119,8 +119,8 @@ describe('Facility geolocation queries API routes', function(done) {
 
         it('should fail to search near facility', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=near"
-                        + "&lat=40.7645704rad=0&units=km")
+                .get(conf.prePath + "/facilities.json"
+                        + "?near=40.7645704&rad=0&units=km")
                 .expect('Content-Type', /json/)
                 .expect(400) 
                 .end(function(err, res) {
@@ -134,8 +134,8 @@ describe('Facility geolocation queries API routes', function(done) {
 
         it('should return facilities within 1mi with offset 2', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=near"
-                        + "&lat=40.7645704&lng=-73.9570783&rad=1&units=mi&offset=2")
+                .get(conf.prePath + "/facilities.json"
+                        + "?near=40.7645704,-73.9570783&rad=1&units=mi&offset=2")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -155,8 +155,8 @@ describe('Facility geolocation queries API routes', function(done) {
 
         it('should return facilities within 1mi with offset 2, active=true and no virtfields', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=near"
-                        + "&lat=40.7645704&lng=-73.9570783&rad=1&units=mi&offset=2"
+                .get(conf.prePath + "/facilities.json"
+                        + "?near=40.7645704,-73.9570783&rad=1&units=mi&offset=2"
                         + "&fields=name,active&active=true")
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -185,8 +185,8 @@ describe('Facility geolocation queries API routes', function(done) {
 
         it('should return facilities within 1mi with limit 2', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=near"
-                        + "&lat=40.7645704&lng=-73.9570783&rad=1&units=mi&limit=2")
+                .get(conf.prePath + "/facilities.json"
+                        + "?near=40.7645704,-73.9570783&rad=1&units=mi&limit=2")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -211,8 +211,8 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should return facilties within box defined by x,y and x",y"', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&slat=0&wlng=-180&nlat=90&elng=0")
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=90,-180,0,0")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -234,8 +234,8 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should return no facilties within box a,b and a,b (point)', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&slat=40.7645704&wlng=-73.9570783&nlat=40.7645704&elng=-73.9570783")
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=40.7645704,-73.9570783,40.7645704,-73.9570783")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -254,8 +254,8 @@ describe('Facility geolocation queries API routes', function(done) {
 
         it('should fail to search within box', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&wlng=-73.9570783&nlat=40.7645704&elng=-73.9570783")
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=-73.9570783,40.7645704,-73.9570783")
                 .expect('Content-Type', /json/)
                 .expect(400) 
                 .end(function(err, res) {
@@ -269,8 +269,8 @@ describe('Facility geolocation queries API routes', function(done) {
 
         it('should return no facilities', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&slat=0&wlng=0&nlat=0&elng=0")
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=0,0,0,0")
                 .expect('Content-Type', /json/)
                 .expect(404) 
                 .end(function(err, res) {
@@ -285,8 +285,8 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should return facilties within box defined by x,y and x",y" with offset=2', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&slat=0&wlng=-180&nlat=90&elng=0&offset=2")
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=90,-180,0,0&offset=2")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -308,8 +308,8 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should return facilties within box defined by x,y and x",y" with offset=2, name and active fields, no virtfields and active=true', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&slat=0&wlng=-180&nlat=90&elng=0&offset=2"
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=90,-180,0,0&offset=2"
                         +"&fields=name,active&active=true")
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -338,8 +338,8 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should return facilties within box defined by x,y and x",y" with limit=5', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&slat=0&wlng=-180&nlat=90&elng=0&limit=5")
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=90,-180,0,0&limit=5")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -366,8 +366,8 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should return facilties within box x,y and x",y" and sector', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&slat=0&wlng=-180&nlat=90&elng=0&sector=health")
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=90,-180,0,0&sector=health")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -388,8 +388,8 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should return no facilties within box a,b and a,b (point) and sec', 
         function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&slat=40.7645704&wlng=-73.9570783&nlat=40.7645704&elng=-73.9570783&sector=health")
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=40.7645704,-73.9570783,40.7645704,-73.9570783&sector=health")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -408,9 +408,8 @@ describe('Facility geolocation queries API routes', function(done) {
 
         it('should return no facilities', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&slat=0&wlng=0&nlat=0&elng=0&sector=health")
-                .expect('Content-Type', /json/)
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=0,0,0,0&sector=health")
                 .expect('Content-Type', /json/)
                 .expect(404) 
                 .end(function(err, res) {
@@ -424,8 +423,8 @@ describe('Facility geolocation queries API routes', function(done) {
 
         it('should fail to search within box', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities.json?query=within"
-                        +"&wlng=-73.9570783&nlat=40.7645704&sector=health")
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=-73.9570783,40.7645704&sector=health")
                 .expect('Content-Type', /json/)
                 .expect(400) 
                 .end(function(err, res) {
