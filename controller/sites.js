@@ -18,7 +18,6 @@ var SiteModel = require('../domain/model/site.js'),
 
 /*
  * UTILITY METHODS
- * Format query objects, determine;
  */
 
 // check if a site is empty in JSON form (it can never be empty otherwise)
@@ -234,7 +233,8 @@ function site(req, res, next) {
             return responses.nothingFoundReply(res);
         }
 
-        if (req.params.hist === 'true') {
+        // === 'true' is a bit restrictive. the existance of the field is sufficent
+        if (typeof req.params.hist === 'string') {
             sites[0].history(0, 100, function(err, result) {
                 responses.jsonReply(res, result);
             })
@@ -349,8 +349,6 @@ function bulk(req, res, next) {
     var num_supplied = facilities.length;
     var errors = [];
 
-    var batchOnly = req.params.allOrNothing;
-
     var bulkIns = SiteModel.collection.initializeUnorderedBulkOp();
     // define function to be mapped
     var fac_validator = function(facility, callback) {
@@ -393,9 +391,8 @@ function bulk(req, res, next) {
         });
 
         // handle special case of all data failing to validate
-        if ((result.length === 0)
+        if (result.length === 0) {
             // handle batch or not commit
-            || (batchOnly === "true" && result.length !== num_supplied)) {
             var response = {
                 "recieved": num_supplied,
                 "inserted": 0,
@@ -420,7 +417,17 @@ function bulk(req, res, next) {
                     // handle id collisions seperatly, continue with regular
                     // output but record errors 
                     if (err.code === 11000) {
-                        errors.push(err.toJSON());
+                        // Format it to how regular mongoose errors look
+                        console.log(err);
+                        err = err.toJSON();
+                        err.message = "Duplicate Key Error";
+                        err.errors = err.errmsg;
+                        err.facility = err.op;
+                        delete err.op;
+                        delete err.errmsg;
+                        delete err.code;
+                        delete err.index;
+                        errors.push(err);
                         //return responses.conflictReply(res, err);
                     } else {
                         // can't recover from this, let em know
@@ -439,6 +446,7 @@ function bulk(req, res, next) {
             };
 
             if (debug === "true") {
+                console.log(errors);
                 response.errors = errors;
             }
 
