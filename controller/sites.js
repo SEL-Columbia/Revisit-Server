@@ -10,7 +10,6 @@ var SiteModel = require('../domain/model/site.js'),
     log = require('../core/logger.js').log,
     parser = require('../core/requestParser.js'),
     customID = require('../domain/customID.js'),
-    // facilityBuilder = require('../domain/facilityBuilder.js'),
     responseBuilder = require('../core/responseBuilder.js'),
     responses = require('../view/responses.js');
 
@@ -237,7 +236,7 @@ function site(req, res, next) {
         if (req.params.hist === 'true') {
             sites[0].history(0, 100, function(err, result) {
                 responses.jsonReply(res, result);
-            })
+            });
 
             return;
         } 

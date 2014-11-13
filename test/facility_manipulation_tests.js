@@ -735,7 +735,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     if (err) {
                         throw err;
                     } 
-                    res.body.recieved.should.equal(3);
+                    res.body.received.should.equal(3);
                     res.body.inserted.should.equal(3);
                     res.body.failed.should.equal(0);
                     res.body.should.not.have.property("errors");
@@ -757,7 +757,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     if (err) {
                         throw err;
                     } 
-                    res.body.recieved.should.equal(3);
+                    res.body.received.should.equal(3);
                     res.body.inserted.should.equal(3);
                     res.body.failed.should.equal(0);
                     res.body.should.not.have.property("errors");
@@ -779,7 +779,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     if (err) {
                         throw err;
                     } 
-                    res.body.recieved.should.equal(3);
+                    res.body.received.should.equal(3);
                     res.body.inserted.should.equal(2);
                     res.body.failed.should.equal(1);
                     res.body.should.not.have.property("errors");
@@ -801,7 +801,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     if (err) {
                         throw err;
                     } 
-                    res.body.recieved.should.equal(3);
+                    res.body.received.should.equal(3);
                     res.body.inserted.should.equal(2);
                     res.body.failed.should.equal(1);
                     res.body.should.have.property("errors");
@@ -823,7 +823,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     if (err) {
                         throw err;
                     } 
-                    res.body.recieved.should.equal(3);
+                    res.body.received.should.equal(3);
                     res.body.inserted.should.equal(0);
                     res.body.failed.should.equal(1);
                     res.body.should.not.have.property("errors");
@@ -856,7 +856,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.recieved.should.equal(0);
+                    res.body.received.should.equal(0);
                     res.body.inserted.should.equal(0);
                     res.body.failed.should.equal(0);
                     done();
@@ -910,7 +910,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                         throw err;
                     }
 
-                    res.body.recieved.should.equal(4);
+                    res.body.received.should.equal(4);
                     res.body.inserted.should.equal(2);
                     res.body.failed.should.equal(2);
 
@@ -944,7 +944,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                         throw err;
                     }
 
-                    res.body.recieved.should.equal(4);
+                    res.body.received.should.equal(4);
                     res.body.inserted.should.equal(2);
                     res.body.failed.should.equal(2);
                     res.body.errors.should.be.ok;
