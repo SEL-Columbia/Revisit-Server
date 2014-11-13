@@ -72,7 +72,8 @@ SiteModel.index({
     'properties.sector': 1
 });
 
-SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities', conn: dbconf.uri });
+//SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities', conn: dbconf.uri });
+SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities' });
 
 
 // Create virtual for UUID from ID
