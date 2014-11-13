@@ -17,7 +17,6 @@ var SiteModel = require('../domain/model/site.js'),
 
 /*
  * UTILITY METHODS
- * Format query objects, determine;
  */
 
 // check if a site is empty in JSON form (it can never be empty otherwise)
@@ -233,7 +232,8 @@ function site(req, res, next) {
             return responses.nothingFoundReply(res);
         }
 
-        if (req.params.hist === 'true') {
+        // === 'true' is a bit restrictive. the existance of the field is sufficent
+        if (typeof req.params.hist === 'string') {
             sites[0].history(0, 100, function(err, result) {
                 responses.jsonReply(res, result);
             });
@@ -309,7 +309,8 @@ function add(req, res, next) {
                 req.log.error(err);
 
                 // _id collided
-                if (err.code === 11000 && err.name !== "ValidationError") {
+                //if (err.code === 11000 && err.name !== "ValidationError") {
+                if (err.code === 11000) {
                     return responses.conflictReply(res, err);
                 }
 
@@ -348,7 +349,6 @@ function bulk(req, res, next) {
     var num_supplied = facilities.length;
     var errors = [];
 
-    var batchOnly = req.params.allOrNothing;
 
     var bulkIns = SiteModel.collection.initializeUnorderedBulkOp();
     // define function to be mapped
@@ -391,26 +391,29 @@ function bulk(req, res, next) {
             return obj !== null;
         });
 
-        // handle special case of all data failing to validate
-        if ((result.length === 0)
-            // handle batch or not commit
-            || (batchOnly === "true" && result.length !== num_supplied)) {
-            var response = {
-                "received": num_supplied,
-                "inserted": 0,
-                "failed": num_failed
-            };
+        var response = {
+            "received": num_supplied,
+            "inserted": num_inserted,
+            "failed": num_failed
+        };
 
-            // only return error's array when requested
-            if (debug === "true") {
-                response.errors = errors;
-            }
+        if (typeof debug === "string") {
+            response.errors = errors;
+        }
 
-            return responses.jsonReply(res, response, 200);
+        // bulkIns crashes if nothing is added to op
+        if (result.length === 0) {
+            responses.jsonReply(res, response, 200);
+            return next(); 
         }
 
         // At this point a subset of the data will be recorded
         bulkIns.execute(function(err, writeResult) {
+            if (err) {
+                // can't recover from this, let em know
+                return responses.internalErrorReply(res, err);
+            }
+
             if (writeResult.hasWriteErrors()) {
                 var writeErrors = writeResult.getWriteErrors();
                 req.log.error(writeErrors);
@@ -419,8 +422,17 @@ function bulk(req, res, next) {
                     // handle id collisions seperatly, continue with regular
                     // output but record errors 
                     if (err.code === 11000) {
-                        errors.push(err.toJSON());
-                        //return responses.conflictReply(res, err);
+                        // Format it to how regular mongoose errors look
+                        if (typeof debug === "string") {
+                            var Err = new Error();
+                            err = err.toJSON();
+                            Err.message = "Duplicate key found";
+                            Err.name = "DuplicateKeyError";
+                            Err.errors = err.errmsg;
+                            Err.facility = err.op;
+                            response.errors.push(Err);
+                        }
+
                     } else {
                         // can't recover from this, let em know
                         return responses.internalErrorReply(res, err);
@@ -428,18 +440,8 @@ function bulk(req, res, next) {
                 });
             } 
 
-            var num_inserted = writeResult.nInserted;
-            var num_errd = writeResult.getWriteErrorCount();
-
-            var response = {
-                "received": num_supplied,
-                "inserted": num_inserted,
-                "failed": num_failed + num_errd
-            };
-
-            if (debug === "true") {
-                response.errors = errors;
-            }
+            response.inserted += writeResult.nInserted;
+            response.failed += writeResult.getWriteErrorCount();
 
             responses.jsonReply(res, response, 201);
 

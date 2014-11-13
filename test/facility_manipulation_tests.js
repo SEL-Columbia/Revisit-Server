@@ -743,28 +743,6 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
-        it('should bulk upload three facilities with allOrNothing=true', function(done) {
-            request(server)
-                .post(conf.prePath + "/facilities/bulk.json?allOrNothing=true")
-                .send({"facilities":[
-                        {"name": "Toronto", "properties": {"sector": "test"}}, 
-                        {"name": "Kyoto", "properties": {"sector": "test"}}, 
-                        {"name": "Brookyln", "properties": {"sector": "test"}}
-                    ]})
-                .expect('Content-Type', /json/)
-                .expect(201) 
-                .end(function(err, res) {
-                    if (err) {
-                        throw err;
-                    } 
-                    res.body.received.should.equal(3);
-                    res.body.inserted.should.equal(3);
-                    res.body.failed.should.equal(0);
-                    res.body.should.not.have.property("errors");
-                    done();
-                });
-        });
-
         it('should bulk upload two of three facilities', function(done) {
             request(server)
                 .post(conf.prePath + "/facilities/bulk.json")
@@ -789,7 +767,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should bulk upload two of three facilities with error info', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json?debug=true")
+                .post(conf.prePath + "/facilities/bulk.json?debug")
                 .send({"facilities":[
                         {"name": "Toronto", "properties": {"sector": "test"}}, 
                         {"name": "Kyoto"}, 
@@ -805,28 +783,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     res.body.inserted.should.equal(2);
                     res.body.failed.should.equal(1);
                     res.body.should.have.property("errors");
-                    done();
-                });
-        });
-
-        it('should bulk upload zero of three with malformed facility and allOrNothing=true', function(done) {
-            request(server)
-                .post(conf.prePath + "/facilities/bulk.json?allOrNothing=true")
-                .send({"facilities":[
-                        {"name": "Toronto", "properties": {"sector": "test"}}, 
-                        {"name": "Kyoto"}, 
-                        {"name": "Brookyln", "properties": {"sector": "test"}}
-                    ]})
-                .expect('Content-Type', /json/)
-                .expect(200) 
-                .end(function(err, res) {
-                    if (err) {
-                        throw err;
-                    } 
-                    res.body.received.should.equal(3);
-                    res.body.inserted.should.equal(0);
-                    res.body.failed.should.equal(1);
-                    res.body.should.not.have.property("errors");
+                    res.body.errors.should.have.length(1);
                     done();
                 });
         });
@@ -930,7 +887,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
             var kid = "012345678912345678901234";
             var jid = "012345678912345678901234";
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json?debug=true")
+                .post(conf.prePath + "/facilities/bulk.json?debug")
                 .send({"facilities":[
                         {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
                         {"uuid" : bid, "name": "Bklyn", "properties": {"sector": "test"}},
@@ -947,7 +904,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     res.body.received.should.equal(4);
                     res.body.inserted.should.equal(2);
                     res.body.failed.should.equal(2);
-                    res.body.errors.should.be.ok;
+                    res.body.errors.should.have.length(2);;
                     done();
                 });
         });
