@@ -25,9 +25,6 @@ function stats(req, res, next) {
         SiteModel.aggregate([{
             $group: {
                 _id: null,
-                lastUpdate: {
-                	$max: '$updatedAt'
-                },
                 sites: {
                     $sum: 1
                 },
@@ -41,8 +38,16 @@ function stats(req, res, next) {
                 return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
             }
 
-            statsObj.sites = results[0].sites;
-            statsObj.visits = results[0].visits;
+            // if no results found, set all to 0 / null and return.
+            if (results.length < 1) {
+            	statsObj.sites = 0;
+            	statsObj.visits = 0;
+            	statsObj.lastUpdate = null;
+            	return next();
+            }
+
+        	statsObj.sites = results[0].sites;
+        	statsObj.visits = results[0].visits;
 
             SiteModel.find().limit(1).sort({'updatedAt': -1}).exec(function(err, results) {
             	if (err) {
