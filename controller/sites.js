@@ -393,7 +393,7 @@ function bulk(req, res, next) {
         });
 
         var response = {
-            "recieved": num_supplied,
+            "received": num_supplied,
             "inserted": num_inserted,
             "failed": num_failed
         };
