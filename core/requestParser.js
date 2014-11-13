@@ -10,12 +10,20 @@ knownKeys = [
     'limit',
     'offset',
     'active',
-    'updatedSince',
-    'page',
-    'per_page'
+    'updatedSince'
 ];
 
-//TODO: maybe turn all the 400's sent cause of this into 409s?            
+queryKeys = [
+    'name',
+    'createdAt',
+    'updatedAt',
+    'coordinates',
+    'identifiers',
+    'properties',
+    'uuid',
+    'href'
+];
+
 var badKeys = [
     '_id',
     'uuid',
@@ -58,7 +66,8 @@ var parseParams = function(params, query) {
 
     // find op is set in stone by this point
     // Note: Cannot exclude and include at the same time in mongo
-    query = query.find(filters, projections);
+    query = query.find(filters);
+    query = query.select(projections);
 
     // sort (cannot be seperated)
     if (params.sortAsc) {
@@ -221,7 +230,10 @@ var genDateQuery = function(filters, date_str) {
 var genAddOnsQuery = function(params, filters) {
     paramKeys = Object.keys(params);
     paramKeys.forEach(function(pkey) {
-        if (knownKeys.indexOf(pkey) < 0) {
+        var core = pkey.split(":")[0];
+        if (knownKeys.indexOf(core) < 0 
+        &&  queryKeys.indexOf(core) > -1) {
+
             // Determine if mult options passed, restify packages it as an array
             if (typeof params[pkey] === "string") {
                 filters[pkey.replace(":", ".")] = params[pkey];
@@ -231,6 +243,8 @@ var genAddOnsQuery = function(params, filters) {
                 };
             }
         }
+
+       
     });
 };
 

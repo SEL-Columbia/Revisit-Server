@@ -126,11 +126,8 @@ server.post(conf.prePath + "/facilities/bulk", routes.sites.bulkFile); // new si
 server.get(id_path, routes.sites.site); // site by id
 server.del(id_path, routes.sites.del); // delete by id
 server.put(id_path, routes.sites.update); // update site by id
-server.get(new RegExp(conf.prePath +
-    "/facilities/near/(\\w{24})\.json\$"), routes.sites.nearID); // near site by id with units
-server.get(conf.prePath + '/facilities/near.json', routes.sites.near); // search near coord
-server.get(conf.prePath + '/facilities/within.json', routes.sites.within); // search within box and/or sector
 
+// stats
 server.get(conf.prePath + '/facilities/stats.json', routes.stats.stats); // search within box and/or sector
 
 // photos
@@ -138,7 +135,6 @@ server.post(conf.prePath + '/facilities/:id/photos', routes.sites.uploadPhoto);
 server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
     directory: './public'
 }));
-
 
 // users
 server.get(conf.prePath + '/users.json', routes.users.getUsers); // dumps user collection 
