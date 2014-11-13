@@ -72,8 +72,17 @@ SiteModel.index({
     'properties.sector': 1
 });
 
+// Add text index to name & id -- could potentially add text index to entire db 
+// (though if we're going to do that, it might be worthwhile using ElasticSearch)
+SiteModel.index({
+    name: 'text'
+});
+
 //SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities', conn: dbconf.uri });
-SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities' });
+SiteModel.plugin(rollback, {
+    index: true,
+    collectionName: 'facilities'
+});
 
 
 // Create virtual for UUID from ID
@@ -125,6 +134,14 @@ SiteModel.statics.findById = function(id, callback) {
     }, callback);
 };
 
+SiteModel.statics.search = function(searchTerm, callback) {
+    return this.find({
+        '$text': {
+            '$search': searchTerm
+        }
+    }, callback);
+};
+
 SiteModel.statics.findNear = function(lng, lat, rad, earthRad) {
     return this.find({
         "coordinates": {
@@ -168,11 +185,13 @@ SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector
 };
 
 SiteModel.statics.updateById = function(id, site, callback) {
-    this.findOne({'_id': id }, function(err, model) {
+    this.findOne({
+        '_id': id
+    }, function(err, model) {
         if (err) {
             return callback(err, null);
         }
-        
+
         Object.keys(site).forEach(function(key) {
             model[key] = site[key];
         });
