@@ -304,7 +304,7 @@ function bulk(req, res, next) {
             // handle batch or not commit
             || (batchOnly === "true" && result.length !== num_supplied)) {
             var response = {
-                "recieved": num_supplied,
+                "received": num_supplied,
                 "inserted": 0,
                 "failed": num_failed
             };
@@ -340,7 +340,7 @@ function bulk(req, res, next) {
 
 
             var response = {
-                "recieved": num_supplied,
+                "received": num_supplied,
                 "inserted": num_inserted,
                 "failed": num_failed + num_errd
             };
@@ -365,7 +365,7 @@ function bulkFile(req, res, next) {
     // body can be undefined ... strange this is the only place where its possible
     if (!req.files || typeof req.files.facilities === 'undefined') {
         return responses.apiBadRequest(res);
-    }
+    }    
 
     // read file, validate, pass to bulk insert
     fs.readFile(req.files.facilities.path, 'utf8', function(err, facility_string) {
