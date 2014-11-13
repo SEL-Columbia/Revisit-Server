@@ -222,6 +222,9 @@ function site(req, res, next) {
         "req": req.params
     });
 
+    var rollback = req.params.rollback;
+    var revert = req.params.revert;
+
     SiteModel.findById(req.params[0], function(err, sites) {
         if (err) {
             req.log.error(err);
@@ -232,15 +235,29 @@ function site(req, res, next) {
             return responses.nothingFoundReply(res);
         }
 
+        var site = sites[0];
+        // history
         // === 'true' is a bit restrictive. the existance of the field is sufficent
         if (typeof req.params.hist === 'string') {
-            sites[0].history(0, 100, function(err, result) {
+            site.history(0, 100, function(err, result) {
                 responses.jsonReply(res, result);
             });
 
-            return;
-        } 
-        responses.jsonReply(res, sites[0]);
+        // rollback
+        } else if (rollback && !isNaN(rollback)) {
+            rollback = parseInt(rollback); 
+            site.rollback(rollback, function(err, history) {
+                responses.jsonReply(res, site);
+            });
+        // revert 
+        } else if (revert && !isNaN(revert)) {
+            revert = parseInt(revert); 
+            site.revert(revert, function(err, history) {
+                responses.jsonReply(res, site);
+            });
+        } else {
+            responses.jsonReply(res, site);
+        }
 
     });
 
@@ -309,7 +326,6 @@ function add(req, res, next) {
                 req.log.error(err);
 
                 // _id collided
-                //if (err.code === 11000 && err.name !== "ValidationError") {
                 if (err.code === 11000) {
                     return responses.conflictReply(res, err);
                 }
