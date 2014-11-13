@@ -26,7 +26,6 @@ var server = restify.createServer({
 /**
  * SERVER MIDDLEWARE
  */
-
 server.pre(restify.CORS({
     origins: ['*'],
     headers: ['x-request-within']
@@ -68,15 +67,9 @@ server.use(restify.requestLogger({
 // auth code in controller, configurable in conf/app/*
 server.use(authenticate);
 
-
-
-
-
-
 /**
  * SERVER EVENTS
  */
-
 server.on('after', restify.auditLogger({
     log: log
 }));
@@ -105,14 +98,9 @@ server.listen(conf.port, function() {
 });
 
 
-
-
-
-
 /**
  * SETUP ROUTES
  */
-
 
 // Gotta create an regexp object when working with string variables
 var id_path = new RegExp(conf.prePath + "/facilities/(\\w{24})\.json$");
@@ -147,9 +135,6 @@ server.del(user_path, routes.users.removeUser); // logs in then updates user
 server.post(conf.prePath + '/users/login/', routes.users.login); // just for testing, done during basic auth
 
 exports.server = server;
-
-
-
 
 
 /**
