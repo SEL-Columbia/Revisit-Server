@@ -31,7 +31,12 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 if (err) throw (err);
 
                     the_uuid = site.uuid;
-                    done();
+
+                    // wipe history model
+                    SiteModel.wipeHistory(function(err) {
+                        if (err) throw (err);
+                        done();
+                    });
                 });
             });
         });
@@ -489,6 +494,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
 
         });
+
         it('should return fail to find a facilty if the url does not end in .json', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities/" + the_uuid + ".jsonabcd")
@@ -519,6 +525,26 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should return history for this one facilty', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities/" + the_uuid + ".json?hist")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+
+                    res.body.should.be.ok;
+                    res.body.should.have.length(1);
+                    res.body[0].uuid.should.match(the_uuid);
+                    res.body[0]._version.should.match(0);
+                    done();
+                });
+        });
+
+        //TODO: Revert testing? Rollback testing? Do we need to if module has own tests?
     });
 
     describe('#updateFacility', function(done) {
@@ -541,7 +567,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     done();
                 });
         });
-    
+
         it("should fail to update facility's createdAt field", function(done) {
             request(server)
                 .put(conf.prePath + "/facilities/" + the_uuid + ".json")
