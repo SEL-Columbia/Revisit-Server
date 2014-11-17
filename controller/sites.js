@@ -240,7 +240,18 @@ function site(req, res, next) {
         // === 'true' is a bit restrictive. the existance of the field is sufficent
         if (typeof req.params.hist === 'string') {
             site.history(0, 100, function(err, result) {
-                responses.jsonReply(res, result);
+                var extras = {
+                    limit : result.length,
+                    version : site._version
+                };
+
+                var responseBody = responseBuilder
+                    .buildResponse(result, null, 'history')
+                    .addExtras(extras)
+                    .toObject();
+
+                responses.jsonReply(res, responseBody, 200);
+
             });
 
         // rollback
