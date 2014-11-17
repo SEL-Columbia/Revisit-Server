@@ -751,7 +751,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
     
         it('should bulk upload three facilities', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send({"facilities":[
                         {"name": "Toronto", "properties": {"sector": "test"}}, 
                         {"name": "Kyoto", "properties": {"sector": "test"}}, 
@@ -773,7 +773,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should bulk upload two of three facilities', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send({"facilities":[
                         {"name": "Toronto", "properties": {"sector": "test"}}, 
                         {"name": "Kyoto"}, 
@@ -795,7 +795,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should bulk upload two of three facilities with error info', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json?debug")
+                .post(conf.prePath + "/facilities.json?bulk&debug")
                 .send({"facilities":[
                         {"name": "Toronto", "properties": {"sector": "test"}}, 
                         {"name": "Kyoto"}, 
@@ -818,7 +818,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should fail to upload empty post', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send()
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -833,7 +833,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should fail to upload facilities but not respond with an error', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send({"facilities": []})
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -853,7 +853,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
             var kid = "012345678912345678901234";
             var bid = "111111111111711171111111";
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send({"facilities":[
                         {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
                         {"uuid" : kid, "name": "Kyoto", "properties": {"sector": "test"}}, 
@@ -881,7 +881,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
             var kid = "012345678912345678901234";
             var jid = "012345678912345678901234";
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send({"facilities":[
                         {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
                         {"uuid" : bid, "name": "Bklyn", "properties": {"sector": "test"}},
@@ -915,7 +915,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
             var kid = "012345678912345678901234";
             var jid = "012345678912345678901234";
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json?debug")
+                .post(conf.prePath + "/facilities.json?bulk&debug")
                 .send({"facilities":[
                         {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
                         {"uuid" : bid, "name": "Bklyn", "properties": {"sector": "test"}},

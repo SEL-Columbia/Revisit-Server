@@ -310,6 +310,25 @@ function add(req, res, next) {
         "req": req.params
     });
 
+    // branching on bulk now 
+    if (typeof req.params.bulk === 'string') {
+        // JSON post
+        if (req.body && req.body.facilities) {
+            bulk(req,res,next);
+        
+        // File upload
+        } else if (req.files)  {
+            bulkFile(req, res, next);
+
+        //Trigger happy api user
+        } else {
+            responses.apiBadRequest(res,
+                "Refer to API for required fields.");
+        }
+
+        return;
+    }
+
     // keep the _id if they provide one
     var custom_id = customID(req.params.uuid);
 
