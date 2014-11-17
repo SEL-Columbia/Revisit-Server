@@ -494,6 +494,25 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     done();
                 });
         });
+
+        it('should return no facilties with fields="poop"',
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?fields=poop")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    
+                    res.body.limit.should.equal(0);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+                    res.body.facilities.should.be.match([]);
+                    done();
+                });
+        });
     });
 
     describe('#getFacility', function(done) {
