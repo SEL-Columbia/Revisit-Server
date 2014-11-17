@@ -106,13 +106,16 @@ describe('Facility geolocation queries API routes', function(done) {
                 .get(conf.prePath + "/facilities.json"
                         + "?near=0,0&rad=0&units=km")
                 .expect('Content-Type', /json/)
-                .expect(404) 
+                .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-
-                    res.body.code.should.match("404 Not Found");
+            
+                    res.body.limit.should.equal(0);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(0);
+                    res.body.facilities.should.be.match([]);
                     done();
                 });
         });
@@ -272,12 +275,16 @@ describe('Facility geolocation queries API routes', function(done) {
                 .get(conf.prePath + "/facilities.json"
                         +"?within=0,0,0,0")
                 .expect('Content-Type', /json/)
-                .expect(404) 
+                .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("404 Not Found");
+
+                    res.body.limit.should.equal(0);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(0);
+                    res.body.facilities.should.be.match([]);
                     done();
                 });
         });
@@ -411,12 +418,16 @@ describe('Facility geolocation queries API routes', function(done) {
                 .get(conf.prePath + "/facilities.json"
                         +"?within=0,0,0,0&sector=health")
                 .expect('Content-Type', /json/)
-                .expect(404) 
+                .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("404 Not Found");
+
+                    res.body.limit.should.equal(0);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(0);
+                    res.body.facilities.should.be.match([]);
                     done();
                 });
         });

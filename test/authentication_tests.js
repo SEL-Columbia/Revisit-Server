@@ -131,11 +131,9 @@ describe('Authentication Tests', function(done) {
                         throw err;
                     }
 
-                    console.log(res.body);
                     res.body.should.be.ok;
                     res.body.uuid.should.match(the_uuid);
                     res.body.name.should.match(new_name);
-                    console.log(res.body);
                     done();
                 });
         });
@@ -185,11 +183,9 @@ describe('Authentication Tests', function(done) {
                             throw err;
                         }
 
-                        console.log(res.body);
                         res.body.should.be.ok;
                         res.body.uuid.should.match(the_uuid);
                         res.body.name.should.match(new_name);
-                        console.log(res.body);
                         done();
                     });
             });

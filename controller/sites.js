@@ -182,7 +182,9 @@ function sites(req, res, next) {
             }
 
             if (isEmpty(sites, hidden_str)) {
-                return responses.nothingFoundReply(res);
+                // never 404?
+                sites = [];
+                //return responses.nothingFoundReply(res);
             }
 
             var extras = {},
