@@ -537,9 +537,11 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
 
                     res.body.should.be.ok;
-                    res.body.should.have.length(1);
-                    res.body[0].uuid.should.match(the_uuid);
-                    res.body[0]._version.should.match(0);
+                    res.body.limit.should.match(res.body.history.length);
+                    res.body.history[0].should.not.have.property("_id");
+                    res.body.history[0].should.have.property("uuid");
+                    res.body.history[0].uuid.should.match(the_uuid);
+                    res.body.version.should.match(0);
                     done();
                 });
         });
