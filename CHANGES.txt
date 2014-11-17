@@ -48,7 +48,7 @@ Facility Update:
 
     Theres no reason to allow for updating id/uuid.
 
-Facility GET:
+Facilities GET:
 
     Like FRED we respond with a facility object however we do not allow for
     limit = off to actually be off. limit = off is now limit = 1000.

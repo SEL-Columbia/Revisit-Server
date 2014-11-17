@@ -365,8 +365,6 @@ describe('Facility geolocation queries API routes', function(done) {
 
         });
 
-
-
     });
 
     describe('#withinSector', function() {
@@ -389,7 +387,27 @@ describe('Facility geolocation queries API routes', function(done) {
                     res.body.total.should.equal(56);
                     done();
                 });
+        });
 
+        it('should return facilties within box x,y and x",y" and sector using properties instead', 
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json"
+                        +"?within=90,-180,0,0&properties:sector=health")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.be.ok;
+                    res.body.facilities.should.have.lengthOf(25);
+                    res.body.limit.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(56);
+                    done();
+                });
         });
 
         it('should return no facilties within box a,b and a,b (point) and sec', 
