@@ -119,14 +119,9 @@ function within(req) {
     var wlng = req.params.wlng;
     var nlat = req.params.nlat;
     var elng = req.params.elng;
-    var sector = req.params.sector;
 
     if (isNaN(slat) || isNaN(wlng) || isNaN(elng) || isNaN(nlat)) {
         return;
-    }
-
-    if (sector) {
-        return SiteModel.findWithinSector(slat, wlng, nlat, elng, sector);
     }
 
     return SiteModel.findWithin(slat, wlng, nlat, elng);

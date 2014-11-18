@@ -372,27 +372,6 @@ describe('Facility geolocation queries API routes', function(done) {
         function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json"
-                        +"?within=90,-180,0,0&sector=health")
-                .expect('Content-Type', /json/)
-                .expect(200) 
-                .end(function(err, res) {
-                    if (err) {
-                        throw err;
-                    }
-
-                    res.body.facilities.should.be.ok;
-                    res.body.facilities.should.have.lengthOf(25);
-                    res.body.limit.should.equal(25);
-                    res.body.offset.should.equal(0);
-                    res.body.total.should.equal(56);
-                    done();
-                });
-        });
-
-        it('should return facilties within box x,y and x",y" and sector using properties instead', 
-        function(done) {
-            request(server)
-                .get(conf.prePath + "/facilities.json"
                         +"?within=90,-180,0,0&properties:sector=health")
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -406,6 +385,13 @@ describe('Facility geolocation queries API routes', function(done) {
                     res.body.limit.should.equal(25);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(56);
+
+                    res.body.facilities.forEach(
+                        function(facility) {
+                            facility.properties.should.have.property('sector', 'health');
+                    });
+
+
                     done();
                 });
         });
@@ -414,7 +400,7 @@ describe('Facility geolocation queries API routes', function(done) {
         function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json"
-                        +"?within=40.7645704,-73.9570783,40.7645704,-73.9570783&sector=health")
+                        +"?within=40.7645704,-73.9570783,40.7645704,-73.9570783&properties:sector=health")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -427,6 +413,12 @@ describe('Facility geolocation queries API routes', function(done) {
                     res.body.limit.should.equal(1);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(1);
+
+                    res.body.facilities.forEach(
+                        function(facility) {
+                            facility.properties.should.have.property('sector', 'health');
+                    });
+
                     done();
                 });
         });
@@ -434,7 +426,7 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should return no facilities', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json"
-                        +"?within=0,0,0,0&sector=health")
+                        +"?within=0,0,0,0&properties:sector=health")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -446,6 +438,7 @@ describe('Facility geolocation queries API routes', function(done) {
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(0);
                     res.body.facilities.should.be.match([]);
+
                     done();
                 });
         });
@@ -453,7 +446,7 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should fail to search within box', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json"
-                        +"?within=-73.9570783,40.7645704&sector=health")
+                        +"?within=-73.9570783,40.7645704&properties:sector=health")
                 .expect('Content-Type', /json/)
                 .expect(400) 
                 .end(function(err, res) {
