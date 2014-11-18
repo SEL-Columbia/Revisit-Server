@@ -48,7 +48,7 @@ Facility Update:
 
     Theres no reason to allow for updating id/uuid.
 
-Facility GET:
+Facilities GET:
 
     Like FRED we respond with a facility object however we do not allow for
     limit = off to actually be off. limit = off is now limit = 1000.
@@ -84,9 +84,20 @@ Facility Bulk:
     in the response as a uuid. It once again expects the format to be a 24 char
     string.
 
-    Interestingly bulk inserts in mongo do not roll back on error. So if theres
-    a uuid/id collision, a partial commit will have happened. Will look into
-    this soon.
 
-    bulk has two flags, debug and allOrNothing. They do what you would expect
-    based on their names. Set to true to use.
+    Bulk endpoint never 404/400's unless something major happened. A report is
+    sent as a response explaining what was and wasnt inserted. Add ?debug to get
+    a detailed error report if needed.
+
+
+Facility GET:
+    
+    Three new query paramters were added. hist, rollback and revert.
+    They return history, updated the facility with a previous version and revert
+    to a previous facility respectively. 
+
+    If model is inserted outside of the api OR through the bulk upload enpoint
+    version 0 is not recorded. Version 0 is created on update to the model (so
+    version 0 == first update in this case) or through any of the three hist
+    queries (Version 0 === actual version 0 in this case, generated on the fly)
+

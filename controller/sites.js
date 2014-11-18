@@ -195,7 +195,9 @@ function sites(req, res, next) {
             }
 
             if (isEmpty(sites, hidden_str)) {
-                return responses.nothingFoundReply(res);
+                // never 404?
+                sites = [];
+                //return responses.nothingFoundReply(res);
             }
 
             var extras = {},
@@ -253,7 +255,18 @@ function site(req, res, next) {
         // === 'true' is a bit restrictive. the existance of the field is sufficent
         if (typeof req.params.hist === 'string') {
             site.history(0, 100, function(err, result) {
-                responses.jsonReply(res, result);
+                var extras = {
+                    limit : result.length,
+                    version : site._version
+                };
+
+                var responseBody = responseBuilder
+                    .buildResponse(result, null, 'history')
+                    .addExtras(extras)
+                    .toObject();
+
+                responses.jsonReply(res, responseBody, 200);
+
             });
 
         // rollback
@@ -311,6 +324,25 @@ function add(req, res, next) {
     req.log.info("POST add facility REQUEST", {
         "req": req.params
     });
+
+    // branching on bulk now 
+    if (typeof req.params.bulk === 'string') {
+        // JSON post
+        if (req.body && req.body.facilities) {
+            bulk(req,res,next);
+        
+        // File upload
+        } else if (req.files)  {
+            bulkFile(req, res, next);
+
+        //Trigger happy api user
+        } else {
+            responses.apiBadRequest(res,
+                "Refer to API for required fields.");
+        }
+
+        return;
+    }
 
     // keep the _id if they provide one
     var custom_id = customID(req.params.uuid);
