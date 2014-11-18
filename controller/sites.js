@@ -47,8 +47,8 @@ function isOnlySite(sites) {
 
 
 // if block for query type field
-function getQuery(req) {
-    var query = SiteModel.findAll();
+function getQuery(req, showDeleted) {
+    var query = SiteModel.findAll(showDeleted);
 
     // special query fields, within and near
     var boundingBox = req.params.within;
@@ -62,7 +62,7 @@ function getQuery(req) {
 
         req.params.lat = latLng[0];
         req.params.lng = latLng[1];
-        query = near(req);
+        query = near(req, showDeleted);
     }
 
     // within query defined?
@@ -76,13 +76,13 @@ function getQuery(req) {
         req.params.slat = latLngBox[2]; 
         req.params.elng = latLngBox[3]; 
 
-        query = within(req);
+        query = within(req, showDeleted);
     }
 
     return query;
 }
 
-function near(req) {
+function near(req, showDeleted) {
     req.log.info("GET near facility REQUEST", {
         "req": req.params
     });
@@ -107,10 +107,10 @@ function near(req) {
     }
 
     // query obj 
-    return SiteModel.findNear(lng, lat, rad, earthRad);
+    return SiteModel.findNear(lng, lat, rad, earthRad, showDeleted);
 }
 
-function within(req) {
+function within(req, showDeleted) {
     req.log.info("GET within facility REQUEST", {
         "req": req.params
     });
@@ -124,7 +124,7 @@ function within(req) {
         return;
     }
 
-    return SiteModel.findWithin(slat, wlng, nlat, elng);
+    return SiteModel.findWithin(slat, wlng, nlat, elng, showDeleted);
 }
 
 
@@ -143,7 +143,8 @@ function sites(req, res, next) {
         "req": req.params
     });
 
-    var query = getQuery(req);
+    var showDeleted = false;
+    var query = getQuery(req, showDeleted);
 
     if (!query) {
         responses.apiBadRequest(res, "Please refer to the wiki for a guide on Revisit's API");
@@ -162,7 +163,7 @@ function sites(req, res, next) {
         var hidden_str = parser.parseForVirts(req.params);
 
         // I need to prevent projections to do count
-        var og_query = getQuery(req);
+        var og_query = getQuery(req, showDeleted);
         // TODO: find pretty way clear these fields (new info: can chain .find() queries);
         delete req.params.allProperties;
         delete req.params.fields;
@@ -221,8 +222,9 @@ function site(req, res, next) {
 
     var rollback = req.params.rollback;
     var revert = req.params.revert;
+    var showDeleted = false;
 
-    SiteModel.findById(req.params[0], function(err, sites) {
+    SiteModel.findById(req.params[0], showDeleted).exec(function(err, sites) {
         if (err) {
             req.log.error(err);
             return responses.internalErrorReply(res, err);
@@ -277,6 +279,7 @@ function update(req, res, next) {
         "req": req.params
     });
 
+    var updateDeleted = false;
     var id = req.params[0];
     delete req.params[0];
 
@@ -289,7 +292,7 @@ function update(req, res, next) {
             "Refer to API for allowed update fields.");
     }
 
-    SiteModel.updateById(id, req.params, function(err, site) {
+    SiteModel.updateById(id, req.params, updateDeleted, function(err, site) {
         if (err) {
             // findbyid raises an error when id is not found, diff then actual err
             req.log.error(err);

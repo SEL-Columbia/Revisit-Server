@@ -118,24 +118,51 @@ SiteModel.set('toJSON', {
     }
 });
 
-SiteModel.statics.findLimit = function(lim, off, callback) {
+SiteModel.statics.findLimit = function(lim, off, showDeleted) {
     var deleted = {$or : [{_deleted: {$exists: false}}, {_deleted: false} ] }
-    return this.find(deleted).skip(off).limit(lim).exec(callback);
+    if (showDeleted) {
+        deleted = null;
+    }
+    return this.find(deleted).skip(off).limit(lim);
 };
 
-SiteModel.statics.findAll = function() {
+SiteModel.statics.findAll = function(showDeleted) {
     var deleted = {$or : [{_deleted: {$exists: false}}, {_deleted: false} ] }
+    if (showDeleted) {
+        deleted = null;
+    }
     return this.find(deleted);
 };
 
-SiteModel.statics.findById = function(id, callback) {
+SiteModel.statics.findById = function(id, showDeleted) {
+    if (showDeleted) {
+        return this.find({
+            _id: id
+        });
+    }  
+
     return this.find({
         _id: id,
         $or : [{_deleted: {$exists: false}}, {_deleted: false} ] 
-    }, callback);
+    });
 };
 
-SiteModel.statics.findNear = function(lng, lat, rad, earthRad) {
+SiteModel.statics.findNear = function(lng, lat, rad, earthRad, showDeleted) {
+
+    if (showDeleted) {
+
+        return this.find({
+            "coordinates": {
+                "$geoWithin": {
+                    "$centerSphere": [
+                        [lng, lat], rad / earthRad
+                    ]
+                }
+            }
+        });
+
+    }
+
     return this.find({
         "coordinates": {
             "$geoWithin": {
@@ -150,7 +177,21 @@ SiteModel.statics.findNear = function(lng, lat, rad, earthRad) {
     });
 };
 
-SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng) {
+SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng, showDeleted) {
+
+    if (showDeleted) {
+        return this.find({
+            "coordinates": {
+                "$geoWithin": {
+                    "$box": [
+                        [swlng, swlat],
+                        [nelng, nelat]
+                    ]
+                }
+            }
+        });
+    }
+
     return this.find({
         "coordinates": {
             "$geoWithin": {
@@ -166,13 +207,13 @@ SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng) {
     });
 };
 
-SiteModel.statics.updateById = function(id, site, callback) {
+SiteModel.statics.updateById = function(id, site, updateDeleted, callback) {
     this.findOne({'_id': id }, function(err, model) {
         if (err) {
             return callback(err, null);
         }
 
-        if (model._deleted) {
+        if (model._deleted && !updateDeleted) {
             err = new Error();
             err.message = "Does not exist";
             err.name= "Already Deleted";
