@@ -394,6 +394,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                    done();
                 });
         });
+
         it('should return facilties sorted in ascending order by name', 
         function(done) {
             request(server)

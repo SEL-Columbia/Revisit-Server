@@ -30,6 +30,7 @@ module.exports = (function() {
                 // array of objects that just need fields removed
                 item._id = undefined;
                 item.__v = undefined;
+                item._deleted = undefined;
                 var itemObj = item;
             }
 

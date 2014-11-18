@@ -48,7 +48,7 @@ function isOnlySite(sites) {
 
 // if block for query type field
 function getQuery(req) {
-    var query = SiteModel;
+    var query = SiteModel.findAll();
 
     // special query fields, within and near
     var boundingBox = req.params.within;
@@ -535,15 +535,13 @@ function del(req, res, next) {
     req.log.info("DEL delete facility REQUEST", {
         "req": req.params
     });
+
     var id = req.params[0];
 
-    SiteModel.deleteById(id, function(err, nRemoved, writeStatus) {
+    SiteModel.deleteById(id, function(err, site) {
         if (err) {
+            // findbyid raises an error when id is not found, diff then actual err
             req.log.error(err);
-            return responses.internalErrorReply(res, err);
-        }
-
-        if (nRemoved === 0) {
             return responses.nothingFoundReply(res);
         }
 

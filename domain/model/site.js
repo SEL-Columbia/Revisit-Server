@@ -14,6 +14,12 @@ var SiteModel = new Schema({
             index: true
         },
 
+        _deleted: {
+            type: Boolean,
+            default: false,
+            index: true
+        },
+
         active: {
             type: Boolean,
             default: true
@@ -107,21 +113,25 @@ SiteModel.set('toJSON', {
 
         delete obj._id;
         delete obj.__v;
+        delete obj._deleted; //XXX: will need to be shown if asked? maybe?
         return obj;
     }
 });
 
 SiteModel.statics.findLimit = function(lim, off, callback) {
-    return this.find({}).skip(off).limit(lim).exec(callback);
+    var deleted = {$or : [{_deleted: {$exists: false}}, {_deleted: false} ] }
+    return this.find(deleted).skip(off).limit(lim).exec(callback);
 };
 
-SiteModel.statics.findAll = function(callback) {
-    return this.find({}, callback);
+SiteModel.statics.findAll = function() {
+    var deleted = {$or : [{_deleted: {$exists: false}}, {_deleted: false} ] }
+    return this.find(deleted);
 };
 
 SiteModel.statics.findById = function(id, callback) {
     return this.find({
-        "_id": id
+        _id: id,
+        $or : [{_deleted: {$exists: false}}, {_deleted: false} ] 
     }, callback);
 };
 
@@ -133,7 +143,10 @@ SiteModel.statics.findNear = function(lng, lat, rad, earthRad) {
                     [lng, lat], rad / earthRad
                 ]
             }
-        }
+        },
+
+        $or : [{_deleted: {$exists: false}}, {_deleted: false} ] 
+
     });
 };
 
@@ -146,7 +159,10 @@ SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng) {
                     [nelng, nelat]
                 ]
             }
-        }
+        },
+
+        $or : [{_deleted: {$exists: false}}, {_deleted: false} ] 
+
     });
 };
 
@@ -155,7 +171,14 @@ SiteModel.statics.updateById = function(id, site, callback) {
         if (err) {
             return callback(err, null);
         }
-        
+
+        if (model._deleted) {
+            err = new Error();
+            err.message = "Does not exist";
+            err.name= "Already Deleted";
+            return callback(err, null);
+        }
+
         Object.keys(site).forEach(function(key) {
             model[key] = site[key];
         });
@@ -169,9 +192,28 @@ SiteModel.statics.updateById = function(id, site, callback) {
 };
 
 SiteModel.statics.deleteById = function(id, callback) {
-    return this.remove({
-        "_id": id
-    }).exec(callback);
+
+    this.findOne({'_id': id }, function(err, model) {
+        if (err) {
+            return callback(err, null);
+        }
+        
+        if (model._deleted) {
+            err = new Error();
+            err.message = "Does not exist";
+            err.name = "Already Deleted";
+            return callback(err, null);
+        }
+
+        model._deleted = true;
+        model.save(callback);
+
+    });
+
+
+    //return this.remove({
+    //    "_id": id
+    //}).exec(callback);
 };
 
 // Avoid recompilation
