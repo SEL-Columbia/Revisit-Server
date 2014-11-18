@@ -371,6 +371,29 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should return facilities with their virtual fields', 
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                   res.body.facilities.forEach(
+                        function(facility) {
+                            facility.should.have.property('uuid');
+                            facility.should.have.property('href');
+                        });
+
+                   res.body.limit.should.equal(25);
+                   res.body.offset.should.equal(0);
+                   res.body.total.should.equal(100);
+                   done();
+                });
+        });
         it('should return facilties sorted in ascending order by name', 
         function(done) {
             request(server)
