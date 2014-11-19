@@ -589,7 +589,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should return history for this one facilty', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities/" + the_uuid + ".json?hist")
+                .get(conf.prePath + "/facilities/" + the_uuid + ".json?history")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {

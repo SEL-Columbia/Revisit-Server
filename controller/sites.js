@@ -143,7 +143,7 @@ function sites(req, res, next) {
         "req": req.params
     });
 
-    var showDeleted = false;
+    var showDeleted = typeof req.params.showDeleted === 'string';
     var query = getQuery(req, showDeleted);
 
     if (!query) {
@@ -222,7 +222,8 @@ function site(req, res, next) {
 
     var rollback = req.params.rollback;
     var revert = req.params.revert;
-    var showDeleted = false;
+    var history = req.params.history;
+    var showDeleted = typeof req.params.showDeleted === 'string';
 
     SiteModel.findById(req.params[0], showDeleted).exec(function(err, sites) {
         if (err) {
@@ -237,7 +238,7 @@ function site(req, res, next) {
         var site = sites[0];
         // history
         // === 'true' is a bit restrictive. the existance of the field is sufficent
-        if (typeof req.params.hist === 'string') {
+        if (typeof history === 'string') {
             site.history(0, 100, function(err, result) {
                 var extras = {
                     limit : result.length,
@@ -279,7 +280,7 @@ function update(req, res, next) {
         "req": req.params
     });
 
-    var updateDeleted = false;
+    var updateDeleted = typeof req.params.showDeleted === 'string';
     var id = req.params[0];
     delete req.params[0];
 
