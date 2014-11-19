@@ -167,23 +167,6 @@ SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng) {
     });
 };
 
-SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector) {
-    return this.find({
-        "$and": [{
-            "coordinates": {
-                "$geoWithin": {
-                    "$box": [
-                        [swlng, swlat],
-                        [nelng, nelat]
-                    ]
-                }
-            }
-        }, {
-            "properties.sector": sector
-        }]
-    });
-};
-
 SiteModel.statics.updateById = function(id, site, callback) {
     this.findOne({
         '_id': id
