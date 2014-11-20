@@ -604,4 +604,139 @@ describe('Authentication Tests', function(done) {
             });
         });
     });
+
+    describe('Using showDeleted flag', function() {
+
+        it('should ALLOW showDeleted flag with user auth turned OFF.', function(done) {
+
+            conf.useAuth(false);
+            request(server)
+                .del(conf.prePath + "/facilities/" + the_uuid + ".json")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.id.should.match(the_uuid);
+                    res.body.message.should.match("Resource deleted");
+     
+                    request(server)
+                        .get(conf.prePath + "/facilities/" + the_uuid + ".json?showDeleted")
+                        .expect('Content-Type', /json/)
+                        .expect(200) 
+                        .end(function(err, res) {
+                            if (err) {
+                                throw err;
+                            }
+
+                            res.body.should.be.ok;
+                            res.body.uuid.should.match(the_uuid);
+                            done();
+                        });
+                });
+        });
+
+        it('should NOT ALLOW showDeleted flag with user auth turned ON.', function(done) {
+
+            conf.useAuth(false);
+            request(server)
+                .del(conf.prePath + "/facilities/" + the_uuid + ".json")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.id.should.match(the_uuid);
+                    res.body.message.should.match("Resource deleted");
+     
+                    conf.useAuth(true);
+                    request(server)
+                        .get(conf.prePath + "/facilities/" + the_uuid + ".json?showDeleted")
+                        .expect('Content-Type', /json/)
+                        .expect(403) 
+                        .end(function(err, res) {
+                            if (err) {
+                                throw err;
+                            }
+
+                            res.body.should.be.ok;
+                            res.body.code.should.match('403 Forbidden');
+                            done();
+                        });
+                });
+        });
+
+        it('should NOT ALLOW showDeleted flag with user auth turned ON. For AUTHD user', function(done) {
+
+            conf.useAuth(true);
+            UserModel.addUser("Bob", "test", "simple", function(success) {
+                assert(success);
+                request(server)
+                    .del(conf.prePath + "/facilities/" + the_uuid + ".json")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(200) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.id.should.match(the_uuid);
+                        res.body.message.should.match("Resource deleted");
+     
+                        request(server)
+                            .get(conf.prePath + "/facilities/" + the_uuid + ".json?showDeleted")
+                            .auth('Bob', 'test')
+                            .expect('Content-Type', /json/)
+                            .expect(403) 
+                            .end(function(err, res) {
+                                if (err) {
+                                    throw err;
+                                }
+
+                                res.body.should.be.ok;
+                                res.body.code.should.match('403 Forbidden');
+                                done();
+                            });
+                    });
+            });
+        });
+
+        it('should ALLOW showDeleted flag with user auth turned ON. For AUTHD ADMIN user', function(done) {
+
+            conf.useAuth(true);
+            UserModel.addUser("Bob", "test", "admin", function(success) {
+                assert(success);
+                request(server)
+                    .del(conf.prePath + "/facilities/" + the_uuid + ".json")
+                    .auth('Bob', 'test')
+                    .expect('Content-Type', /json/)
+                    .expect(200) 
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.id.should.match(the_uuid);
+                        res.body.message.should.match("Resource deleted");
+     
+                        request(server)
+                            .get(conf.prePath + "/facilities/" + the_uuid + ".json?showDeleted")
+                            .auth('Bob', 'test')
+                            .expect('Content-Type', /json/)
+                            .expect(200) 
+                            .end(function(err, res) {
+                                if (err) {
+                                    throw err;
+                                }
+
+                                res.body.should.be.ok;
+                                res.body.uuid.should.match(the_uuid);
+                                done();
+                            });
+                    });
+            });
+        });
+
+    });
 });
