@@ -387,6 +387,15 @@ function bulk(req, res, next) {
         return responses.apiBadRequest(res);
     }
 
+    if (typeof facilities === 'string') {
+        // Not a JSON array, check if parsable
+        try {
+            facilities = JSON.parse(facilities);
+        } catch (err) {
+            return responses.apiBadRequest(res);
+        }
+    }
+
     var num_inserted = 0;
     var num_failed = 0;
     var num_supplied = facilities.length;
