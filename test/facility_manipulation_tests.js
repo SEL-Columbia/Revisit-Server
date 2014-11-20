@@ -892,6 +892,22 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should fail to upload bad post', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities.json?bulk")
+                .send("bad")
+                .expect('Content-Type', /json/)
+                .expect(400) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("400 Bad Request");
+                    done();
+                });
+        });
+
+
         it('should fail to upload facilities but not respond with an error', function(done) {
             request(server)
                 .post(conf.prePath + "/facilities.json?bulk")

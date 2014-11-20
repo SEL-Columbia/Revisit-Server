@@ -371,7 +371,8 @@ function add(req, res, next) {
 
 function bulk(req, res, next) {
     req.log.info("POST add MULTIPLE facility REQUEST (from json)", {
-        "req": req.params
+        "req": req.params,
+        "req.body": req.body
     });
 
     // body can be undefined ... strange this is the only place where its possible
