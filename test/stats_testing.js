@@ -39,7 +39,12 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
                         // clear out users
                         UserModel.find({}).remove(function(err, result) {
-                            done();
+                            if (err) throw err;
+
+                            UserModel.addUser("Vijay", "test", "admin", function(success) {
+                                assert(success);
+                                done();
+                            });
                         });
                     });
                 });
@@ -57,14 +62,13 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                         throw err;
                     }
 
-                    console.log(res.body);
                     res.body.should.be.ok;
-                    res.body.users.should.match(0);
+                    res.body.users.should.match(1);
                     res.body.sites.should.match(100);
                     res.body.visits.should.match(481);
                     res.body.lastUpdate.should.be.ok;
                     ((new Date(res.body.lastUpdate)).toString())
-                        .should.match((new Date("Dec " + 30 + " " + 2014)).toString())
+                        .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
                     done();
 
                 });
@@ -73,23 +77,26 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
         it('should return stats for an empty db', function(done) {
             SiteModel.find({}).remove(function(err, result) {
                 if (err) throw err;
+                UserModel.find({}).remove(function(err, result) {
+                    if (err) throw err;
 
-                request(server)
-                    .get(conf.prePath + "/facilities/stats.json")
-                    .expect(200)
-                    .end(function(err, res) {
-                        if (err) {
-                            throw err;
-                        }
+                    request(server)
+                        .get(conf.prePath + "/facilities/stats.json")
+                        .expect(200)
+                        .end(function(err, res) {
+                            if (err) {
+                                throw err;
+                            }
 
-                        res.body.should.be.ok;
-                        res.body.users.should.match(0);
-                        res.body.sites.should.match(0);
-                        res.body.visits.should.match(0);
-                        assert(res.body.lastUpdate === null);
-                        done();
+                            res.body.should.be.ok;
+                            res.body.users.should.match(0);
+                            res.body.sites.should.match(0);
+                            res.body.visits.should.match(0);
+                            assert(res.body.lastUpdate === null);
+                            done();
 
-                    });
+                        });
+                });
             })
         });
 
@@ -106,10 +113,25 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                         throw err;
                     }
 
-                    res.body.should.be.ok;
-                    res.body.uuid.should.match(the_uuid);
-                    res.body.name.should.match(new_name);
-                    done();
+                    var date_str = (new Date(res.body.updatedAt)).toString();
+                    request(server)
+                        .get(conf.prePath + "/facilities/stats.json")
+                        .expect(200)
+                        .end(function(err, res) {
+                            if (err) {
+                                throw err;
+                            }
+
+                            res.body.should.be.ok;
+                            res.body.users.should.match(1);
+                            res.body.sites.should.match(100);
+                            res.body.visits.should.match(481);
+                            res.body.lastUpdate.should.be.ok;
+                            ((new Date(res.body.lastUpdate)).toString())
+                                .should.match(date_str)
+                            done();
+
+                        });
                 });
         });
 
@@ -118,18 +140,46 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 assert(success);
                 // second request
                 request(server)
-                    .get(conf.prePath + '/users/Bob.json')
-                    .expect('Content-Type', /json/)
-                    .expect(200)
-                    .end(function(err, res) {
-                        if (err) {
-                            throw err;
-                        }
+                .get(conf.prePath + "/facilities/stats.json")
+                .expect(200)
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
 
-                        res.body.username.should.match("Bob");
-                        res.body.role.should.match("simple");
-                        done();
-                    });
+                    res.body.should.be.ok;
+                    res.body.users.should.match(2);
+                    res.body.sites.should.match(100);
+                    res.body.visits.should.match(481);
+                    res.body.lastUpdate.should.be.ok;
+                    ((new Date(res.body.lastUpdate)).toString())
+                        .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
+                    done();
+
+                });
+            });
+        });
+
+        it('should decrease the user count by one', function(done) {
+             UserModel.deleteByName('Vijay', function() {
+                request(server)
+                .get(conf.prePath + "/facilities/stats.json")
+                .expect(200)
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.should.be.ok;
+                    res.body.users.should.match(0);
+                    res.body.sites.should.match(100);
+                    res.body.visits.should.match(481);
+                    res.body.lastUpdate.should.be.ok;
+                    ((new Date(res.body.lastUpdate)).toString())
+                        .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
+                    done();
+
+                });
             });
         });
 
@@ -143,9 +193,26 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.name.should.match("Toronto");
-                    deletion_uuid = res.body.uuid; // for deletion
-                    done();
+
+                    var date_str = (new Date(res.body.updatedAt)).toString();
+                    request(server)
+                        .get(conf.prePath + "/facilities/stats.json")
+                        .expect(200)
+                        .end(function(err, res) {
+                            if (err) {
+                                throw err;
+                            }
+
+                            res.body.should.be.ok;
+                            res.body.users.should.match(1);
+                            res.body.sites.should.match(101);
+                            res.body.visits.should.match(481);
+                            res.body.lastUpdate.should.be.ok;
+                            ((new Date(res.body.lastUpdate)).toString())
+                                .should.match(date_str)
+                            done();
+
+                        });
                 });
         });
 
@@ -158,9 +225,25 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.id.should.match(the_uuid);
-                    res.body.message.should.match("Resource deleted");
-                    done();
+
+                    request(server)
+                        .get(conf.prePath + "/facilities/stats.json")
+                        .expect(200)
+                        .end(function(err, res) {
+                            if (err) {
+                                throw err;
+                            }
+
+                            res.body.should.be.ok;
+                            res.body.users.should.match(1);
+                            res.body.sites.should.match(99); //XXX: This field needs updating based on how stats endpoint handles showDeleted
+                            res.body.visits.should.match(481);
+                            res.body.lastUpdate.should.be.ok;
+                            ((new Date(res.body.lastUpdate)).toString())
+                                .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
+                            done();
+
+                        });
                 });
         });
 
