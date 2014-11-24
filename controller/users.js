@@ -62,7 +62,7 @@ function getUser(req, res, next) {
     req.log.info("Getting User:", {"req": req.params});
     req.params.username = req.params[0];
     if (!req.params.username)
-        responses.apiBadRequest(res, "No username supplied");
+        responses.apiBadRequest(res, "No username supplied.");
 
     UserModel.getUser(req.params.username, function(err, users) {
         if (err) {
@@ -94,11 +94,11 @@ function updateAndVerify(req, res, next) {
 
     // user must be there and either pass/oldpass or role must be there
     if (!user || (!(pass && oldPass) && !role) || !oldPass)
-        return responses.apiBadRequest(res, "Not using this string yet");
+        return responses.apiBadRequest(res, "User update request malformed.");
 
     UserModel.login(user, oldPass, function(success) {
         if (!success) {
-            return responses.apiBadRequest(res, "Something about password");
+            return responses.apiBadRequest(res, "Login info malformed.");
         }
 
         UserModel.update(user, pass, role, function(err, user) {
@@ -109,7 +109,7 @@ function updateAndVerify(req, res, next) {
 
             if (!user) {
                 // User not found (not possible cause of login above would catch it)
-                return responses.apiBadRequPassest(res, "Not using this string yet");
+                return responses.apiBadRequPassest(res, "Cannot login as user.");
             }
 
             responses.jsonReply(res, user);
@@ -129,7 +129,7 @@ function updatePass(req, res, next) {
     var role = req.params.role;
 
     if (!user || (!pass && !role))
-        return responses.apiBadRequest(res, "Not using this string yet");
+        return responses.apiBadRequest(res, "User update request malformed.");
 
     UserModel.update(user, pass, role, function(err, user) {
         if (err) {
@@ -139,7 +139,7 @@ function updatePass(req, res, next) {
 
         // User not found, would not err out 
         if (!user) {
-            return responses.apiBadRequest(res, "Not using this string yet");
+            return responses.apiBadRequest(res, "Login info malformed.");
         }
 
         responses.jsonReply(res, user);

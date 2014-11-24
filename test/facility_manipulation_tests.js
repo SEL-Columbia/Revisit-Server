@@ -371,6 +371,30 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should return facilities with their virtual fields', 
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                   res.body.facilities.forEach(
+                        function(facility) {
+                            facility.should.have.property('uuid');
+                            facility.should.have.property('href');
+                        });
+
+                   res.body.limit.should.equal(25);
+                   res.body.offset.should.equal(0);
+                   res.body.total.should.equal(100);
+                   done();
+                });
+        });
+
         it('should return facilties sorted in ascending order by name', 
         function(done) {
             request(server)
@@ -475,7 +499,45 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
 
         });
-  });
+
+        it('should return no facilties with name = "poop"',
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?name=poop")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    
+                    res.body.limit.should.equal(0);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(0);
+                    res.body.facilities.should.be.match([]);
+                    done();
+                });
+        });
+
+        it('should return no facilties with fields="poop"',
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?fields=poop")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    
+                    res.body.limit.should.equal(0);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+                    res.body.facilities.should.be.match([]);
+                    done();
+                });
+        });
+    });
 
     describe('#getFacility', function(done) {
         it('should return one facilty', function(done) {
@@ -527,7 +589,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should return history for this one facilty', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities/" + the_uuid + ".json?hist")
+                .get(conf.prePath + "/facilities/" + the_uuid + ".json?history")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -537,9 +599,11 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
 
                     res.body.should.be.ok;
-                    res.body.should.have.length(1);
-                    res.body[0].uuid.should.match(the_uuid);
-                    res.body[0]._version.should.match(0);
+                    res.body.limit.should.match(res.body.history.length);
+                    res.body.history[0].should.not.have.property("_id");
+                    res.body.history[0].should.have.property("uuid");
+                    res.body.history[0].uuid.should.match(the_uuid);
+                    res.body.version.should.match(0);
                     done();
                 });
         });
@@ -749,7 +813,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
     
         it('should bulk upload three facilities', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send({"facilities":[
                         {"name": "Toronto", "properties": {"sector": "test"}}, 
                         {"name": "Kyoto", "properties": {"sector": "test"}}, 
@@ -771,7 +835,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should bulk upload two of three facilities', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send({"facilities":[
                         {"name": "Toronto", "properties": {"sector": "test"}}, 
                         {"name": "Kyoto"}, 
@@ -793,7 +857,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should bulk upload two of three facilities with error info', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json?debug")
+                .post(conf.prePath + "/facilities.json?bulk&debug")
                 .send({"facilities":[
                         {"name": "Toronto", "properties": {"sector": "test"}}, 
                         {"name": "Kyoto"}, 
@@ -816,7 +880,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should fail to upload empty post', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send()
                 .expect('Content-Type', /json/)
                 .expect(400) 
@@ -829,9 +893,25 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should fail to upload bad post', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities.json?bulk")
+                .send("bad")
+                .expect('Content-Type', /json/)
+                .expect(400) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("400 Bad Request");
+                    done();
+                });
+        });
+
+
         it('should fail to upload facilities but not respond with an error', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send({"facilities": []})
                 .expect('Content-Type', /json/)
                 .expect(200) 
@@ -851,7 +931,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
             var kid = "012345678912345678901234";
             var bid = "111111111111711171111111";
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send({"facilities":[
                         {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
                         {"uuid" : kid, "name": "Kyoto", "properties": {"sector": "test"}}, 
@@ -879,7 +959,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
             var kid = "012345678912345678901234";
             var jid = "012345678912345678901234";
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json")
+                .post(conf.prePath + "/facilities.json?bulk")
                 .send({"facilities":[
                         {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
                         {"uuid" : bid, "name": "Bklyn", "properties": {"sector": "test"}},
@@ -913,7 +993,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
             var kid = "012345678912345678901234";
             var jid = "012345678912345678901234";
             request(server)
-                .post(conf.prePath + "/facilities/bulk.json?debug")
+                .post(conf.prePath + "/facilities.json?bulk&debug")
                 .send({"facilities":[
                         {"uuid" : tid, "name": "Tdot", "properties": {"sector": "test"}}, 
                         {"uuid" : bid, "name": "Bklyn", "properties": {"sector": "test"}},

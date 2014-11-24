@@ -10,7 +10,8 @@ var responses = require('./../view/responses.js'),
 
 function authenticate(req, res, next) {
 
-    var any_user_path = new RegExp(conf.prePath + "/users.*$");
+    var anyUserPath = new RegExp(conf.prePath + "/users.*$");
+    var anyShowDeletedPath = new RegExp("(&showDeleted|\\?showDeleted)");
 
     function login(req, callback) {
         req.log.info("Basic auth verification", {
@@ -33,14 +34,13 @@ function authenticate(req, res, next) {
             }
         );
     }
-
     // if auth is disabled, even user endpoints will be visible
     if (!conf.useAuth()) {
         return next();
     }
 
     // Branch for requests dealing with user endpoints
-    if (conf.blockUsers() && any_user_path.test(req.url)) {
+    if (conf.blockUsers() && anyUserPath.test(req.url)) {
         login(req, function(logged, msg, role) {
             if (!logged) {
                 req.log.info("User end point not auth'd");
@@ -52,6 +52,26 @@ function authenticate(req, res, next) {
                 return responses.apiForbidden(res, req.username);
             }
 
+            // Might as well move on then if youre admin
+            return next();
+        });
+
+        return;
+    }
+
+    if (anyShowDeletedPath.test(req.url)) {
+        login(req, function(logged, msg, role) {
+            if (!logged) {
+                req.log.info("Trying to show deleted as anon");
+                return responses.apiForbidden(res, req.username);
+            }
+
+            if (role !== "admin") {
+                req.log.info("Trying to show deleted as non admin");
+                return responses.apiForbidden(res, req.username);
+            }
+
+            // Might as well move on then if youre admin
             return next();
         });
 

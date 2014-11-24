@@ -17,11 +17,22 @@ module.exports = (function() {
         responseObj = {};
 
         var itemObjs = [];
+        console.log(hidden);
         items.forEach(function(item) {
-            var itemObj = item.toJSON({
-                hide: hidden,
-                transform: true
-            });
+            if (hidden !== null) {
+                // document object that can be transformed 
+                var itemObj = item.toJSON({
+                    hide: hidden,
+                    transform: true
+                });
+
+            } else {
+                // array of objects that just need fields removed
+                item._id = undefined;
+                item.__v = undefined;
+                item._deleted = undefined;
+                var itemObj = item;
+            }
 
             itemObjs.push(itemObj);
         });

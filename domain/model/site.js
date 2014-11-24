@@ -14,6 +14,12 @@ var SiteModel = new Schema({
             index: true
         },
 
+        _deleted: {
+            type: Boolean,
+            default: false,
+            index: true
+        },
+
         active: {
             type: Boolean,
             default: true
@@ -116,22 +122,38 @@ SiteModel.set('toJSON', {
 
         delete obj._id;
         delete obj.__v;
+        delete obj._deleted; //XXX: will need to be shown if asked? maybe?
         return obj;
     }
 });
 
-SiteModel.statics.findLimit = function(lim, off, callback) {
-    return this.find({}).skip(off).limit(lim).exec(callback);
+SiteModel.statics.findLimit = function(lim, off, showDeleted) {
+    var deleted = {$or : [{_deleted: {$exists: false}}, {_deleted: false} ] }
+    if (showDeleted) {
+        deleted = null;
+    }
+    return this.find(deleted).skip(off).limit(lim);
 };
 
-SiteModel.statics.findAll = function(callback) {
-    return this.find({}, callback);
+SiteModel.statics.findAll = function(showDeleted) {
+    var deleted = {$or : [{_deleted: {$exists: false}}, {_deleted: false} ] }
+    if (showDeleted) {
+        deleted = null;
+    }
+    return this.find(deleted);
 };
 
-SiteModel.statics.findById = function(id, callback) {
+SiteModel.statics.findById = function(id, showDeleted) {
+    if (showDeleted) {
+        return this.find({
+            _id: id
+        });
+    }  
+
     return this.find({
-        "_id": id
-    }, callback);
+        _id: id,
+        $or : [{_deleted: {$exists: false}}, {_deleted: false} ] 
+    });
 };
 
 SiteModel.statics.search = function(searchTerm, callback) {
@@ -142,7 +164,21 @@ SiteModel.statics.search = function(searchTerm, callback) {
     }, callback);
 };
 
-SiteModel.statics.findNear = function(lng, lat, rad, earthRad) {
+SiteModel.statics.findNear = function(lng, lat, rad, earthRad, showDeleted) {
+
+    if (showDeleted) {
+
+        return this.find({
+            "coordinates": {
+                "$geoWithin": {
+                    "$centerSphere": [
+                        [lng, lat], rad / earthRad
+                    ]
+                }
+            }
+        });
+    }
+
     return this.find({
         "coordinates": {
             "$geoWithin": {
@@ -150,26 +186,17 @@ SiteModel.statics.findNear = function(lng, lat, rad, earthRad) {
                     [lng, lat], rad / earthRad
                 ]
             }
-        }
+        },
+
+        $or : [{_deleted: {$exists: false}}, {_deleted: false} ] 
+
     });
 };
 
-SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng) {
-    return this.find({
-        "coordinates": {
-            "$geoWithin": {
-                "$box": [
-                    [swlng, swlat],
-                    [nelng, nelat]
-                ]
-            }
-        }
-    });
-};
+SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng, showDeleted) {
 
-SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector) {
-    return this.find({
-        "$and": [{
+    if (showDeleted) {
+        return this.find({
             "coordinates": {
                 "$geoWithin": {
                     "$box": [
@@ -178,36 +205,66 @@ SiteModel.statics.findWithinSector = function(swlat, swlng, nelat, nelng, sector
                     ]
                 }
             }
-        }, {
-            "properties.sector": sector
-        }]
+        });
+    }
+
+    return this.find({
+        "coordinates": {
+            "$geoWithin": {
+                "$box": [
+                    [swlng, swlat],
+                    [nelng, nelat]
+                ]
+            }
+        },
+
+        $or : [{_deleted: {$exists: false}}, {_deleted: false} ] 
+
     });
 };
 
-SiteModel.statics.updateById = function(id, site, callback) {
-    this.findOne({
-        '_id': id
-    }, function(err, model) {
+SiteModel.statics.updateById = function(id, site, updateDeleted, callback) {
+    this.findOne({'_id': id }, function(err, model) {
         if (err) {
             return callback(err, null);
         }
 
-        Object.keys(site).forEach(function(key) {
-            model[key] = site[key];
-        });
+        if (model._deleted && !updateDeleted) {
+            err = new Error();
+            err.message = "Does not exist";
+            err.name= "Already Deleted";
+            return callback(err, null);
+        }
 
+        model._deleted = true;
         model.save(callback);
+    
     });
-
-    //return this.findByIdAndUpdate(id, {
-    //    "$set": site
-    //}, callback);
 };
 
 SiteModel.statics.deleteById = function(id, callback) {
-    return this.remove({
-        "_id": id
-    }).exec(callback);
+
+    this.findOne({'_id': id }, function(err, model) {
+        if (err) {
+            return callback(err, null);
+        }
+        
+        if (model._deleted) {
+            err = new Error();
+            err.message = "Does not exist";
+            err.name = "Already Deleted";
+            return callback(err, null);
+        }
+
+        model._deleted = true;
+        model.save(callback);
+
+    });
+
+
+    //return this.remove({
+    //    "_id": id
+    //}).exec(callback);
 };
 
 // Avoid recompilation

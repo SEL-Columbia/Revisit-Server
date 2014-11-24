@@ -109,8 +109,7 @@ var user_path = new RegExp(conf.prePath + "/users/(\\w+)\.json$");
 // main
 server.get(conf.prePath + "/facilities.json", routes.sites.sites); // all sites
 server.post(conf.prePath + "/facilities.json", routes.sites.add); // new site
-server.post(conf.prePath + "/facilities/bulk.json", routes.sites.bulk); // new site
-server.post(conf.prePath + "/facilities/bulk", routes.sites.bulkFile); // new site
+
 server.get(id_path, routes.sites.site); // site by id
 server.del(id_path, routes.sites.del); // delete by id
 server.put(id_path, routes.sites.update); // update site by id

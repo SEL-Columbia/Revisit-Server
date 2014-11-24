@@ -106,13 +106,16 @@ describe('Facility geolocation queries API routes', function(done) {
                 .get(conf.prePath + "/facilities.json"
                         + "?near=0,0&rad=0&units=km")
                 .expect('Content-Type', /json/)
-                .expect(404) 
+                .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-
-                    res.body.code.should.match("404 Not Found");
+            
+                    res.body.limit.should.equal(0);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(0);
+                    res.body.facilities.should.be.match([]);
                     done();
                 });
         });
@@ -272,12 +275,16 @@ describe('Facility geolocation queries API routes', function(done) {
                 .get(conf.prePath + "/facilities.json"
                         +"?within=0,0,0,0")
                 .expect('Content-Type', /json/)
-                .expect(404) 
+                .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("404 Not Found");
+
+                    res.body.limit.should.equal(0);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(0);
+                    res.body.facilities.should.be.match([]);
                     done();
                 });
         });
@@ -358,8 +365,6 @@ describe('Facility geolocation queries API routes', function(done) {
 
         });
 
-
-
     });
 
     describe('#withinSector', function() {
@@ -367,7 +372,7 @@ describe('Facility geolocation queries API routes', function(done) {
         function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json"
-                        +"?within=90,-180,0,0&sector=health")
+                        +"?within=90,-180,0,0&properties:sector=health")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -380,16 +385,22 @@ describe('Facility geolocation queries API routes', function(done) {
                     res.body.limit.should.equal(25);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(56);
+
+                    res.body.facilities.forEach(
+                        function(facility) {
+                            facility.properties.should.have.property('sector', 'health');
+                    });
+
+
                     done();
                 });
-
         });
 
         it('should return no facilties within box a,b and a,b (point) and sec', 
         function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json"
-                        +"?within=40.7645704,-73.9570783,40.7645704,-73.9570783&sector=health")
+                        +"?within=40.7645704,-73.9570783,40.7645704,-73.9570783&properties:sector=health")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -402,6 +413,12 @@ describe('Facility geolocation queries API routes', function(done) {
                     res.body.limit.should.equal(1);
                     res.body.offset.should.equal(0);
                     res.body.total.should.equal(1);
+
+                    res.body.facilities.forEach(
+                        function(facility) {
+                            facility.properties.should.have.property('sector', 'health');
+                    });
+
                     done();
                 });
         });
@@ -409,14 +426,19 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should return no facilities', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json"
-                        +"?within=0,0,0,0&sector=health")
+                        +"?within=0,0,0,0&properties:sector=health")
                 .expect('Content-Type', /json/)
-                .expect(404) 
+                .expect(200) 
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
-                    res.body.code.should.match("404 Not Found");
+
+                    res.body.limit.should.equal(0);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(0);
+                    res.body.facilities.should.be.match([]);
+
                     done();
                 });
         });
@@ -424,7 +446,7 @@ describe('Facility geolocation queries API routes', function(done) {
         it('should fail to search within box', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json"
-                        +"?within=-73.9570783,40.7645704&sector=health")
+                        +"?within=-73.9570783,40.7645704&properties:sector=health")
                 .expect('Content-Type', /json/)
                 .expect(400) 
                 .end(function(err, res) {

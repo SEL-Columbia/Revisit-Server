@@ -47,8 +47,8 @@ function isOnlySite(sites) {
 
 
 // if block for query type field
-function getQuery(req) {
-    var query = SiteModel;
+function getQuery(req, showDeleted) {
+    var query = SiteModel.findAll(showDeleted);
 
     // special query fields, within and near
     var boundingBox = req.params.within;
@@ -67,7 +67,7 @@ function getQuery(req) {
 
         req.params.lat = latLng[0];
         req.params.lng = latLng[1];
-        query = near(req);
+        query = near(req, showDeleted);
     }
 
     // within query defined?
@@ -81,13 +81,13 @@ function getQuery(req) {
         req.params.slat = latLngBox[2]; 
         req.params.elng = latLngBox[3]; 
 
-        query = within(req);
+        query = within(req, showDeleted);
     }
 
     return query;
 }
 
-function near(req) {
+function near(req, showDeleted) {
     req.log.info("GET near facility REQUEST", {
         "req": req.params
     });
@@ -112,10 +112,10 @@ function near(req) {
     }
 
     // query obj 
-    return SiteModel.findNear(lng, lat, rad, earthRad);
+    return SiteModel.findNear(lng, lat, rad, earthRad, showDeleted);
 }
 
-function within(req) {
+function within(req, showDeleted) {
     req.log.info("GET within facility REQUEST", {
         "req": req.params
     });
@@ -124,17 +124,12 @@ function within(req) {
     var wlng = req.params.wlng;
     var nlat = req.params.nlat;
     var elng = req.params.elng;
-    var sector = req.params.sector;
 
     if (isNaN(slat) || isNaN(wlng) || isNaN(elng) || isNaN(nlat)) {
         return;
     }
 
-    if (sector) {
-        return SiteModel.findWithinSector(slat, wlng, nlat, elng, sector);
-    }
-
-    return SiteModel.findWithin(slat, wlng, nlat, elng);
+    return SiteModel.findWithin(slat, wlng, nlat, elng, showDeleted);
 }
 
 // Full text search endpoint
@@ -161,7 +156,8 @@ function sites(req, res, next) {
         "req": req.params
     });
 
-    var query = getQuery(req);
+    var showDeleted = typeof req.params.showDeleted === 'string';
+    var query = getQuery(req, showDeleted);
 
     if (!query) {
         responses.apiBadRequest(res, "Please refer to the wiki for a guide on Revisit's API");
@@ -180,7 +176,7 @@ function sites(req, res, next) {
         var hidden_str = parser.parseForVirts(req.params);
 
         // I need to prevent projections to do count
-        var og_query = getQuery(req);
+        var og_query = getQuery(req, showDeleted);
         // TODO: find pretty way clear these fields (new info: can chain .find() queries);
         delete req.params.allProperties;
         delete req.params.fields;
@@ -195,7 +191,9 @@ function sites(req, res, next) {
             }
 
             if (isEmpty(sites, hidden_str)) {
-                return responses.nothingFoundReply(res);
+                // never 404?
+                sites = [];
+                //return responses.nothingFoundReply(res);
             }
 
             var extras = {},
@@ -237,8 +235,10 @@ function site(req, res, next) {
 
     var rollback = req.params.rollback;
     var revert = req.params.revert;
+    var history = req.params.history;
+    var showDeleted = typeof req.params.showDeleted === 'string';
 
-    SiteModel.findById(req.params[0], function(err, sites) {
+    SiteModel.findById(req.params[0], showDeleted).exec(function(err, sites) {
         if (err) {
             req.log.error(err);
             return responses.internalErrorReply(res, err);
@@ -251,9 +251,20 @@ function site(req, res, next) {
         var site = sites[0];
         // history
         // === 'true' is a bit restrictive. the existance of the field is sufficent
-        if (typeof req.params.hist === 'string') {
+        if (typeof history === 'string') {
             site.history(0, 100, function(err, result) {
-                responses.jsonReply(res, result);
+                var extras = {
+                    limit : result.length,
+                    version : site._version
+                };
+
+                var responseBody = responseBuilder
+                    .buildResponse(result, null, 'history')
+                    .addExtras(extras)
+                    .toObject();
+
+                responses.jsonReply(res, responseBody, 200);
+
             });
 
         // rollback
@@ -282,6 +293,7 @@ function update(req, res, next) {
         "req": req.params
     });
 
+    var updateDeleted = typeof req.params.showDeleted === 'string';
     var id = req.params[0];
     delete req.params[0];
 
@@ -294,7 +306,7 @@ function update(req, res, next) {
             "Refer to API for allowed update fields.");
     }
 
-    SiteModel.updateById(id, req.params, function(err, site) {
+    SiteModel.updateById(id, req.params, updateDeleted, function(err, site) {
         if (err) {
             // findbyid raises an error when id is not found, diff then actual err
             req.log.error(err);
@@ -311,6 +323,25 @@ function add(req, res, next) {
     req.log.info("POST add facility REQUEST", {
         "req": req.params
     });
+
+    // branching on bulk now 
+    if (typeof req.params.bulk === 'string') {
+        // JSON post
+        if (req.body && req.body.facilities) {
+            bulk(req,res,next);
+        
+        // File upload
+        } else if (req.files)  {
+            bulkFile(req, res, next);
+
+        //Trigger happy api user
+        } else {
+            responses.apiBadRequest(res,
+                "Refer to API for required fields.");
+        }
+
+        return;
+    }
 
     // keep the _id if they provide one
     var custom_id = customID(req.params.uuid);
@@ -357,7 +388,8 @@ function add(req, res, next) {
 
 function bulk(req, res, next) {
     req.log.info("POST add MULTIPLE facility REQUEST (from json)", {
-        "req": req.params
+        "req": req.params,
+        "req.body": req.body
     });
 
     // body can be undefined ... strange this is the only place where its possible
@@ -371,6 +403,15 @@ function bulk(req, res, next) {
 
     if (!facilities) {
         return responses.apiBadRequest(res);
+    }
+
+    if (typeof facilities === 'string') {
+        // Not a JSON array, check if parsable
+        try {
+            facilities = JSON.parse(facilities);
+        } catch (err) {
+            return responses.apiBadRequest(res);
+        }
     }
 
     var num_inserted = 0;
@@ -521,15 +562,13 @@ function del(req, res, next) {
     req.log.info("DEL delete facility REQUEST", {
         "req": req.params
     });
+
     var id = req.params[0];
 
-    SiteModel.deleteById(id, function(err, nRemoved, writeStatus) {
+    SiteModel.deleteById(id, function(err, site) {
         if (err) {
+            // findbyid raises an error when id is not found, diff then actual err
             req.log.error(err);
-            return responses.internalErrorReply(res, err);
-        }
-
-        if (nRemoved === 0) {
             return responses.nothingFoundReply(res);
         }
 
