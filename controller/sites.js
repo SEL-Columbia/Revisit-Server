@@ -234,7 +234,6 @@ function site(req, res, next) {
 
         var site = sites[0];
         // history
-        // === 'true' is a bit restrictive. the existance of the field is sufficent
         if (typeof history === 'string') {
             site.history(0, 100, function(err, result) {
                 var extras = {
@@ -252,17 +251,17 @@ function site(req, res, next) {
             });
 
         // rollback
-        } else if (rollback && !isNaN(rollback)) {
-            rollback = parseInt(rollback); 
-            site.rollback(rollback, function(err, history) {
-                responses.jsonReply(res, site);
-            });
-        // revert 
-        } else if (revert && !isNaN(revert)) {
-            revert = parseInt(revert); 
-            site.revert(revert, function(err, history) {
-                responses.jsonReply(res, site);
-            });
+        //} else if (rollback && !isNaN(rollback)) {
+        //    rollback = parseInt(rollback); 
+        //    site.rollback(rollback, function(err, history) {
+        //        responses.jsonReply(res, site);
+        //    });
+        //// revert 
+        //} else if (revert && !isNaN(revert)) {
+        //    revert = parseInt(revert); 
+        //    site.revert(revert, function(err, history) {
+        //        responses.jsonReply(res, site);
+        //    });
         } else {
             responses.jsonReply(res, site);
         }
