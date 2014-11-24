@@ -15,6 +15,7 @@ var UserModel = require('../domain/model/user.js');
 describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
     var the_uuid = null;
+    var the_visits = null;
     before(function(done) {
        done(); 
     });
@@ -32,6 +33,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 if (err) throw (err);
 
                     the_uuid = site.uuid;
+                    the_visits = site.properties.visits;
 
                     // wipe history model
                     SiteModel.wipeHistory(function(err) {
@@ -237,7 +239,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                             res.body.should.be.ok;
                             res.body.users.should.match(1);
                             res.body.sites.should.match(99); //XXX: This field needs updating based on how stats endpoint handles showDeleted
-                            res.body.visits.should.match(476);
+                            res.body.visits.should.match(481 - the_visits);
                             res.body.lastUpdate.should.be.ok;
                             ((new Date(res.body.lastUpdate)).toString())
                                 .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
