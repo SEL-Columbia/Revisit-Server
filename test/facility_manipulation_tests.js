@@ -769,7 +769,6 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                         throw err;
                     }
                     res.body.name.should.match("Toronto");
-                    deletion_uuid = res.body.uuid; // for deletion
                     done();
                 });
         });

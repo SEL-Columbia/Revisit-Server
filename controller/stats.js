@@ -43,6 +43,7 @@ function stats(req, res, next) {
             	statsObj.sites = 0;
             	statsObj.visits = 0;
             	statsObj.lastUpdate = null;
+	            responses.jsonReply(res, statsObj, 200);
             	return next();
             }
 
@@ -55,6 +56,7 @@ function stats(req, res, next) {
 	                return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
 	            }
 
+                console.log('IVE BEEN CALLEDDD\n');
 	            statsObj.lastUpdate = results[0].updatedAt;
 
 	            responses.jsonReply(res, statsObj, 200);
