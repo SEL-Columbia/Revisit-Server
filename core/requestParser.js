@@ -223,7 +223,7 @@ var genActiveQuery = function(filters, active) {
 
 // For date based queries
 var genDateQuery = function(filters, date_str) {
-    var date = new Date(date_str).toISOString();
+    var date = new Date(date_str);
     //filters['updatedAt'] = {'$gte': date, '$lte': new Date()}
     filters.updatedAt = {
         '$gte': date

@@ -382,7 +382,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     var minDate = new Date(2013, 0, 1);
                     res.body.facilities.forEach(
                         function(facility) {
-                            (new Date(facility.updatedAt)).should.be.above(minDate);
+                            (new Date(facility.updatedAt).getTime()).should.be.above(minDate.getTime());
                             //fac_date.should.be.above(minDate);
                         });
                     
@@ -785,7 +785,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     if (err) {
                         throw err;
                     }
-                    res.body.createdAt.toString().should.not.match(date.toString());
+                    ((new Date(res.body.createdAt)).toString()).should.not.match(date.toString());
                     done();
                 });
         });
