@@ -106,7 +106,8 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
-        it('should return 25 facilties, and inlcude page, per_page, total_entries, and total_pages, based on page param', function(done) {
+        it('should return 25 facilties, and include page, per_page, total_entries,' 
+                + 'and total_pages, based on page param', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json?page=2")
                 .expect('Content-Type', /json/)
@@ -126,7 +127,8 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
-        it('should return 10 facilties, starting from page 3, and inlcude page, per_page, total_entries, and total_pages, based on page and per_page params', function(done) {
+        it('should return 10 facilties, starting from page 3, and include page,'
+                + 'per_page, total_entries, and total_pages, based on page and per_page params', function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json?page=3&per_page=10")
                 .expect('Content-Type', /json/)
@@ -146,6 +148,75 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should return facilities with names containing Brooklyn', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?search=Brooklyn")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(3);
+                    res.body.total.should.equal(3);
+                    res.body.limit.should.equal(3);
+                    res.body.offset.should.equal(0);
+                    res.body.facilities.forEach(function(facility) {
+                        assert(~facility.name.indexOf("Brooklyn"));
+                    });
+                    done();
+                });
+        });
+
+        it('should not return facilities with names containing Brooklyn when name is set', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?search=Brooklyn&name=Brooklyn Hospital Center")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(1);
+                    res.body.total.should.equal(1);
+                    res.body.limit.should.equal(1);
+                    res.body.offset.should.equal(0);
+
+                    res.body.facilities.forEach(function(facility) {
+                        facility.should.have.property('name', 'Brooklyn Hospital Center');
+                    });
+                    done();
+               });
+        });
+
+        it('should facilities with names containing Brooklyn with only names and href projected in the health sector with an offset=1', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?search=Brooklyn&properties:sector=health&fields=name,href,properties:sector&offset=1")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(1);
+                    res.body.total.should.equal(2);
+                    res.body.limit.should.equal(1);
+                    res.body.offset.should.equal(1);
+
+                    res.body.facilities.forEach(function(facility) {
+                        facility.should.have.properties(['name', 'href', 'properties']);
+                        facility.properties.should.have.property('sector', 'health');
+                        assert(~facility.name.indexOf("Brooklyn"));
+                        facility.should.not.have.properties(['uuid', 'active', 'createdAt']);
+                    });
+
+                    done();
+ 
+                });
+        });
         it('should return 25 facilties starting from an offset',function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json?offset=0")

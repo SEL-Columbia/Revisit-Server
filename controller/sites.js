@@ -50,14 +50,8 @@ function isOnlySite(sites) {
 function getQuery(req, showDeleted) {
     var query = SiteModel.findAll(showDeleted);
 
-    // special query fields, within and near
     var boundingBox = req.params.within;
     var coords = req.params.near;
-    var search = req.params.search;
-
-    if (search) {
-        query = textSearch(req, search);
-    }
 
     // near query defined?
     if (coords) {
@@ -131,16 +125,6 @@ function within(req, showDeleted) {
 
     return SiteModel.findWithin(slat, wlng, nlat, elng, showDeleted);
 }
-
-// Full text search endpoint
-function textSearch(req, searchTerm) {
-    req.log.info("GET facilities matching searchTerm: " + searchTerm + " REQUEST", {
-        "req": req.params
-    });
-
-    return SiteModel.search(searchTerm);
-}
-
 
 /*
  ** ROUTES

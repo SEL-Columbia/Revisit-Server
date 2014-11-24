@@ -10,6 +10,7 @@ knownKeys = [
     'limit',
     'offset',
     'active',
+    'search', //NEW
     'updatedSince'
 ];
 
@@ -64,10 +65,13 @@ var parseParams = function(params, query) {
     }
 
 
-    // find op is set in stone by this point
     // Note: Cannot exclude and include at the same time in mongo
     query = query.find(filters);
     query = query.select(projections);
+    if (params.search) {
+        query = query.find({'$text': {'$search': params.search }});
+    }
+
 
     // sort (cannot be seperated)
     if (params.sortAsc) {
@@ -231,8 +235,8 @@ var genAddOnsQuery = function(params, filters) {
     paramKeys = Object.keys(params);
     paramKeys.forEach(function(pkey) {
         var core = pkey.split(":")[0];
-        if (knownKeys.indexOf(core) < 0 
-        &&  queryKeys.indexOf(core) > -1) {
+        if ((!~knownKeys.indexOf(core)) 
+        &&  (~queryKeys.indexOf(core))) {
 
             // Determine if mult options passed, restify packages it as an array
             if (typeof params[pkey] === "string") {
