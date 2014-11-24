@@ -236,7 +236,10 @@ SiteModel.statics.updateById = function(id, site, updateDeleted, callback) {
             return callback(err, null);
         }
 
-        model._deleted = true;
+        Object.keys(site).forEach(function(key) {
+            model[key] = site[key];
+        });
+
         model.save(callback);
     
     });
