@@ -237,7 +237,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                             res.body.should.be.ok;
                             res.body.users.should.match(1);
                             res.body.sites.should.match(99); //XXX: This field needs updating based on how stats endpoint handles showDeleted
-                            res.body.visits.should.match(481);
+                            res.body.visits.should.match(476);
                             res.body.lastUpdate.should.be.ok;
                             ((new Date(res.body.lastUpdate)).toString())
                                 .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
@@ -247,6 +247,35 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should decrease the facility count by one but still show everything in stats', function(done) {
+            request(server)
+                .del(conf.prePath + "/facilities/" + the_uuid + ".json")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
 
+                    request(server)
+                        .get(conf.prePath + "/facilities/stats.json?showDeleted")
+                        .expect(200)
+                        .end(function(err, res) {
+                            if (err) {
+                                throw err;
+                            }
+
+                            res.body.should.be.ok;
+                            res.body.users.should.match(1);
+                            res.body.sites.should.match(100); //XXX: This field needs updating based on how stats endpoint handles showDeleted
+                            res.body.visits.should.match(481);
+                            res.body.lastUpdate.should.be.ok;
+                            ((new Date(res.body.lastUpdate)).toString())
+                                .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
+                            done();
+
+                        });
+                });
+        });
     });
 });
