@@ -394,6 +394,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                    done();
                 });
         });
+
         it('should return facilties sorted in ascending order by name', 
         function(done) {
             request(server)
@@ -588,7 +589,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should return history for this one facilty', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities/" + the_uuid + ".json?hist")
+                .get(conf.prePath + "/facilities/" + the_uuid + ".json?history")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {
@@ -891,6 +892,22 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     done();
                 });
         });
+
+        it('should fail to upload bad post', function(done) {
+            request(server)
+                .post(conf.prePath + "/facilities.json?bulk")
+                .send("bad")
+                .expect('Content-Type', /json/)
+                .expect(400) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match("400 Bad Request");
+                    done();
+                });
+        });
+
 
         it('should fail to upload facilities but not respond with an error', function(done) {
             request(server)
