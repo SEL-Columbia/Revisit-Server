@@ -122,11 +122,13 @@ SiteModel.set('toJSON', {
 
         delete obj._id;
         delete obj.__v;
-        delete obj._deleted; //XXX: will need to be shown if asked? maybe?
+        delete obj._deleted; //XXX: will need to be shown if asked? maybe? 
         return obj;
     }
 });
 
+//NOTE: callback model removed in favour of exec model. 
+//Although both seem compatiable ...  its less confusing if not shown imo
 SiteModel.statics.findLimit = function(lim, off, showDeleted) {
     var deleted = {$or : [{_deleted: {$exists: false}}, {_deleted: false} ] }
     if (showDeleted) {
@@ -156,15 +158,13 @@ SiteModel.statics.findById = function(id, showDeleted) {
     });
 };
 
-
-SiteModel.statics.search = function(searchTerm, callback) {
+SiteModel.statics.search = function(searchTerm) {
     return this.find({
         '$text': {
             '$search': searchTerm
         }
-    }, callback);
+    });
 };
-
 
 SiteModel.statics.findNear = function(lng, lat, rad, earthRad, showDeleted) {
 
@@ -179,7 +179,6 @@ SiteModel.statics.findNear = function(lng, lat, rad, earthRad, showDeleted) {
                 }
             }
         });
-
     }
 
     return this.find({
@@ -226,14 +225,12 @@ SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng, showDeleted)
     });
 };
 
-
+/* These two require callbacks to be passed in due to their extra steps */
 SiteModel.statics.updateById = function(id, site, updateDeleted, callback) {
     this.findOne({'_id': id }, function(err, model) {
-
         if (err) {
             return callback(err, null);
         }
-
 
         if (model._deleted && !updateDeleted) {
             err = new Error();
@@ -247,11 +244,8 @@ SiteModel.statics.updateById = function(id, site, updateDeleted, callback) {
         });
 
         model.save(callback);
+    
     });
-
-    //return this.findByIdAndUpdate(id, {
-    //    "$set": site
-    //}, callback);
 };
 
 SiteModel.statics.deleteById = function(id, callback) {

@@ -207,9 +207,82 @@ describe('Facility geolocation queries API routes', function(done) {
 
         });
 
+        it('should return facilities with names containing Brooklyn near pt with a large rad', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?search=Brooklyn"
+                        + "&near=40.7645704,-73.9570783&rad=20")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(3);
+                    res.body.total.should.equal(3);
+                    res.body.limit.should.equal(3);
+                    res.body.offset.should.equal(0);
+                    res.body.facilities.forEach(function(facility) {
+                        assert(~facility.name.indexOf("Brooklyn"));
+                    });
+                    done();
+                });
+        });
+
+        it('should not return facilities with names containing Brooklyn when'
+                +'name is set near a pt with a large rad', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?search=Brooklyn&name=Brooklyn Hospital Center"
+                        + "&near=40.7645704,-73.9570783&rad=20")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(1);
+                    res.body.total.should.equal(1);
+                    res.body.limit.should.equal(1);
+                    res.body.offset.should.equal(0);
+
+                    res.body.facilities.forEach(function(facility) {
+                        facility.should.have.property('name', 'Brooklyn Hospital Center');
+                    });
+                    done();
+               });
+        });
+
+        it('should facilities with names containing Brooklyn with only names' 
+                +'AND href projected in the health sector with an offset=1'
+                +'AND near a pt with a large rad!', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?search=Brooklyn&properties:sector=health&fields=name,href,properties:sector&offset=1"
+                        + "&near=40.7645704,-73.9570783&rad=20")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(1);
+                    res.body.total.should.equal(2);
+                    res.body.limit.should.equal(1);
+                    res.body.offset.should.equal(1);
+
+                    res.body.facilities.forEach(function(facility) {
+                        facility.should.have.properties(['name', 'href', 'properties']);
+                        facility.properties.should.have.property('sector', 'health');
+                        assert(~facility.name.indexOf("Brooklyn"));
+                        facility.should.not.have.properties(['uuid', 'active', 'createdAt']);
+                    });
+
+                    done();
+                });
+        });
     });
 
-    //TODO: combine sw lat/lng and ne lat/lng
     describe('#within', function() {
         it('should return facilties within box defined by x,y and x",y"', 
         function(done) {
@@ -365,6 +438,81 @@ describe('Facility geolocation queries API routes', function(done) {
 
         });
 
+
+        it('should return facilities with names containing Brooklyn within a large box', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?search=Brooklyn"
+                        +"&within=90,-180,0,0")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(3);
+                    res.body.total.should.equal(3);
+                    res.body.limit.should.equal(3);
+                    res.body.offset.should.equal(0);
+                    res.body.facilities.forEach(function(facility) {
+                        assert(~facility.name.indexOf("Brooklyn"));
+                    });
+                    done();
+                });
+        });
+
+        it('should not return facilities with names containing Brooklyn when'
+                +'name is set within a large box', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?search=Brooklyn&name=Brooklyn Hospital Center"
+                        +"&within=90,-180,0,0")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(1);
+                    res.body.total.should.equal(1);
+                    res.body.limit.should.equal(1);
+                    res.body.offset.should.equal(0);
+
+                    res.body.facilities.forEach(function(facility) {
+                        facility.should.have.property('name', 'Brooklyn Hospital Center');
+                    });
+                    done();
+               });
+        });
+
+        it('should facilities with names containing Brooklyn with only names' 
+                +'AND href projected in the health sector with an offset=1'
+                +'AND within a large box!', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?search=Brooklyn&properties:sector=health&fields=name,href,properties:sector&offset=1"
+                        +"&within=90,-180,0,0")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(1);
+                    res.body.total.should.equal(2);
+                    res.body.limit.should.equal(1);
+                    res.body.offset.should.equal(1);
+
+                    res.body.facilities.forEach(function(facility) {
+                        facility.should.have.properties(['name', 'href', 'properties']);
+                        facility.properties.should.have.property('sector', 'health');
+                        assert(~facility.name.indexOf("Brooklyn"));
+                        facility.should.not.have.properties(['uuid', 'active', 'createdAt']);
+                    });
+
+                    done();
+                });
+        });
     });
 
     describe('#withinSector', function() {

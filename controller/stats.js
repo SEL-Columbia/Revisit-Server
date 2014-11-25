@@ -15,24 +15,18 @@ var SiteModel = require('../domain/model/site'),
  */
 function stats(req, res, next) {
     var statsObj = {};
+    var showDeleted = typeof req.params.showDeleted === 'string';
     UserModel.count({}, function(err, count) {
         if (err) {
             req.log.error(err);
             return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
         }
+
         statsObj.users = count;
 
-        SiteModel.aggregate([{
-            $group: {
-                _id: null,
-                sites: {
-                    $sum: 1
-                },
-                visits: {
-                    $sum: '$properties.visits'
-                }
-            }
-        }], function(err, results) {
+        var query = getStatsQuery(showDeleted);
+        
+        query.exec(function(err, results) {
             if (err) {
                 req.log.error(err);
                 return next(new restify.ResourceNotFoundError(JSON.stringify(err)));
@@ -43,6 +37,7 @@ function stats(req, res, next) {
             	statsObj.sites = 0;
             	statsObj.visits = 0;
             	statsObj.lastUpdate = null;
+	            responses.jsonReply(res, statsObj, 200);
             	return next();
             }
 
@@ -56,7 +51,6 @@ function stats(req, res, next) {
 	            }
 
 	            statsObj.lastUpdate = results[0].updatedAt;
-
 	            responses.jsonReply(res, statsObj, 200);
 
 	            return next();
@@ -66,6 +60,41 @@ function stats(req, res, next) {
 
     });
 
+}
+
+function getStatsQuery(showDeleted) {;
+
+    if (showDeleted) {
+        return SiteModel.aggregate([{
+            $group: {
+                _id: null,
+                sites: {
+                    $sum: 1
+                },
+                visits: {
+                    $sum: '$properties.visits'
+                }
+            }
+        }]);
+    }   
+
+    return SiteModel.aggregate([{
+        $match: {
+           $or : [
+               {_deleted: {$exists: false}}, 
+               {_deleted: false}
+           ] 
+        } },
+        { $group: {
+           _id: null,
+           sites: {
+               $sum: 1
+           },
+           visits: {
+               $sum: '$properties.visits'
+           }
+        }
+    }]);
 }
 
 exports.stats = stats;

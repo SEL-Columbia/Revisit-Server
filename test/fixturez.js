@@ -1,6 +1,6 @@
 
 var  m = 0;
-var month = ['Jan', 'May', 'Oct', 'Dec'] 
+var month = ['Jan', 'May', 'Aug', 'Oct'] 
 var day = 0;
 var year = ['2012', '2013', '2013', '2014']
 var y = 0;
