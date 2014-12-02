@@ -1,6 +1,7 @@
 process.env['NODE_ENV'] = 'testing';
 
 var conf = require('./../config/app/config.js');
+var auth = require('./../core/authentication.js');
 var assert = require('assert');
 var request = require('supertest');
 var should = require('should');
@@ -42,10 +43,10 @@ describe('User endpoint tests', function(done) {
     });
 
     afterEach(function(done) {
-        conf.useAuth(false);
-        conf.allowGet(true);
-        conf.allowPost(false);
-        conf.allowPut(false);
+        auth.useAuth(false);
+        auth.allowGet(true);
+        auth.allowPost(false);
+        auth.allowPut(false);
         done();
     });
 

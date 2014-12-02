@@ -7,7 +7,7 @@ var routes = require('./controller/routes.js'),
     db = require('./core/db.js').connect(),
     conf = require('./config/app/config.js'),
     log = require('./core/logger.js').log,
-    authenticate = require('./core/authentication.js');
+    authenticate = require('./core/authentication.js').authenticate;
 
 
 

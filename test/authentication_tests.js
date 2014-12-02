@@ -1,6 +1,7 @@
 process.env['NODE_ENV'] = 'testing';
 
 var conf = require('./../config/app/config.js');
+var auth = require('./../core/authentication.js');
 var assert = require('assert');
 var request = require('supertest');
 var should = require('should');
@@ -42,10 +43,10 @@ describe('Authentication Tests', function(done) {
     });
 
     afterEach(function(done) {
-        conf.useAuth(false);
-        conf.allowGet(true);
-        conf.allowPost(false);
-        conf.allowPut(false);
+        auth.useAuth(false);
+        auth.allowGet(true);
+        auth.allowPost(false);
+        auth.allowPut(false);
         done();
     });
 
@@ -69,8 +70,8 @@ describe('Authentication Tests', function(done) {
 
         it('should NOT allow GET requests from an UNAUTHORIZED user', function(done) {
 
-            conf.useAuth(true);
-            conf.allowGet(false);
+            auth.useAuth(true);
+            auth.allowGet(false);
 
             request(server)
                 .get(conf.prePath + "/facilities.json")
@@ -88,8 +89,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow GET requests from an AUTHORIZED user', function(done) {
 
-            conf.useAuth(true);
-            conf.allowGet(false);
+            auth.useAuth(true);
+            auth.allowGet(false);
 
             // insert user
             UserModel.addUser("Bob", "test", "simple", function(success) {
@@ -115,8 +116,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow PUT requests from an UNAUTHORIZED user', function(done) {
 
-            conf.useAuth(true);
-            conf.allowPut(true);
+            auth.useAuth(true);
+            auth.allowPut(true);
 
             var new_name = "" + Math.random();
             request(server)
@@ -140,8 +141,8 @@ describe('Authentication Tests', function(done) {
 
         it('should NOT allow PUT requests from an UNAUTHORIZED user', function(done) {
 
-            conf.useAuth(true);
-            conf.allowPut(false);
+            auth.useAuth(true);
+            auth.allowPut(false);
 
             var new_name = "" + Math.random();
             request(server)
@@ -163,8 +164,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow PUT requests from an AUTHORIZED user', function(done) {
 
-            conf.useAuth(true);
-            conf.allowPut(false);
+            auth.useAuth(true);
+            auth.allowPut(false);
 
             var new_name = "" + Math.random();
             // insert user
@@ -197,8 +198,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow POST requests from an UNAUTHORIZED user', function(done) {
 
-            conf.useAuth(true);
-            conf.allowPost(true);
+            auth.useAuth(true);
+            auth.allowPost(true);
 
             request(server)
                 .post(conf.prePath + "/facilities.json")
@@ -217,8 +218,8 @@ describe('Authentication Tests', function(done) {
 
         it('should NOT allow POST requests from an UNAUTHORIZED user', function(done) {
 
-            conf.useAuth(true);
-            conf.allowPost(false);
+            auth.useAuth(true);
+            auth.allowPost(false);
 
             request(server)
                 .post(conf.prePath + "/facilities.json")
@@ -237,8 +238,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow POST requests from an AUTHORIZED user', function(done) {
 
-            conf.useAuth(true);
-            conf.allowPost(false);
+            auth.useAuth(true);
+            auth.allowPost(false);
 
             var new_name = "" + Math.random();
             // insert user
@@ -267,7 +268,7 @@ describe('Authentication Tests', function(done) {
         it('should allow DELETE requests from an UNAUTHORIZED user', function(done) {
 
             // authorization off, allow deletes
-            conf.useAuth(false);
+            auth.useAuth(false);
 
             request(server)
                 .del(conf.prePath + "/facilities/" + the_uuid + ".json")
@@ -285,7 +286,7 @@ describe('Authentication Tests', function(done) {
 
         it('should NOT allow DELETE requests from an UNAUTHORIZED user', function(done) {
 
-            conf.useAuth(true);
+            auth.useAuth(true);
 
             request(server)
                 .del(conf.prePath + "/facilities/" + the_uuid + ".json")
@@ -303,7 +304,7 @@ describe('Authentication Tests', function(done) {
 
         it('should allow DELETE requests from an AUTHORIZED user', function(done) {
 
-            conf.useAuth(true);
+            auth.useAuth(true);
 
             var new_name = "" + Math.random();
             // insert user
@@ -331,7 +332,7 @@ describe('Authentication Tests', function(done) {
         it('should allow endpoint /user.json requests from an UNAUTHORIZED user', function(done) {
 
             // authorization off, allow deletes
-            conf.useAuth(false);
+            auth.useAuth(false);
 
             request(server)
                 .post(conf.prePath + "/users.json?username=new&password=user")
@@ -350,7 +351,7 @@ describe('Authentication Tests', function(done) {
         it('should allow endpoint /user/username.json requests from an UNAUTHORIZED user', function(done) {
 
             // authorization off, allow deletes
-            conf.useAuth(false);
+            auth.useAuth(false);
 
             UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
@@ -372,7 +373,7 @@ describe('Authentication Tests', function(done) {
         it('should allow endpoint /users/login requests from an UNAUTHORIZED user', function(done) {
 
             // authorization off, allow deletes
-            conf.useAuth(false);
+            auth.useAuth(false);
 
             UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
@@ -396,8 +397,8 @@ describe('Authentication Tests', function(done) {
 
         it('should NOT allow endpoint /user.json requests from an AUTHORIZED user with INCORRECT role', function(done) {
 
-            conf.useAuth(true);
-            conf.blockUsers(true); // on by default
+            auth.useAuth(true);
+            auth.blockUsers(true); // on by default
 
             UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
@@ -418,8 +419,8 @@ describe('Authentication Tests', function(done) {
 
         it('should NOT allow endpoint /user/username.json requests from an AUTHORIZED user with INCORRECT role', function(done) {
 
-            conf.useAuth(true);
-            conf.blockUsers(true); // on by default
+            auth.useAuth(true);
+            auth.blockUsers(true); // on by default
 
             UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
@@ -440,8 +441,8 @@ describe('Authentication Tests', function(done) {
 
         it('should NOT allow endpoint /users/login requests from an AUTHORIZED user with INCORRECT role', function(done) {
 
-            conf.useAuth(true);
-            conf.blockUsers(true); // on by default
+            auth.useAuth(true);
+            auth.blockUsers(true); // on by default
 
             UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
@@ -465,8 +466,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow endpoint /user.json requests from an AUTHORIZED user with CORRECT role', function(done) {
 
-            conf.useAuth(true);
-            conf.blockUsers(true); // on by default
+            auth.useAuth(true);
+            auth.blockUsers(true); // on by default
 
             UserModel.addUser("Bob", "test", "admin", function(success) {
                 assert(success);
@@ -488,8 +489,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow endpoint /user/username.json requests from an AUTHORIZED user with CORRECT role', function(done) {
 
-            conf.useAuth(true);
-            conf.blockUsers(true); // on by default
+            auth.useAuth(true);
+            auth.blockUsers(true); // on by default
 
             UserModel.addUser("Bob", "test", "admin", function(success) {
                 assert(success);
@@ -511,8 +512,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow endpoint /users/login requests from an AUTHORIZED user with CORRECT role', function(done) {
 
-            conf.useAuth(true);
-            conf.blockUsers(true); // on by default
+            auth.useAuth(true);
+            auth.blockUsers(true); // on by default
 
             UserModel.addUser("Bob", "test", "admin", function(success) {
                 assert(success);
@@ -537,8 +538,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow endpoint /user.json requests from an AUTHORIZED user with endpoint checking OFF', function(done) {
 
-            conf.useAuth(true);
-            conf.blockUsers(false); // on by default
+            auth.useAuth(true);
+            auth.blockUsers(false); // on by default
 
             UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
@@ -560,8 +561,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow endpoint /user/username.json requests from an AUTHORIZED user with endpoint checking OFF', function(done) {
 
-            conf.useAuth(true);
-            conf.blockUsers(false); // on by default
+            auth.useAuth(true);
+            auth.blockUsers(false); // on by default
 
             UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
@@ -583,8 +584,8 @@ describe('Authentication Tests', function(done) {
 
         it('should allow endpoint /users/login requests from an AUTHORIZED user with endpoint checking OFF', function(done) {
 
-            conf.useAuth(true);
-            conf.blockUsers(false); // on by default
+            auth.useAuth(true);
+            auth.blockUsers(false); // on by default
 
             UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
@@ -609,7 +610,7 @@ describe('Authentication Tests', function(done) {
 
         it('should ALLOW showDeleted flag with user auth turned OFF.', function(done) {
 
-            conf.useAuth(false);
+            auth.useAuth(false);
             request(server)
                 .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .expect('Content-Type', /json/)
@@ -639,7 +640,7 @@ describe('Authentication Tests', function(done) {
 
         it('should NOT ALLOW showDeleted flag with user auth turned ON.', function(done) {
 
-            conf.useAuth(false);
+            auth.useAuth(false);
             request(server)
                 .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .expect('Content-Type', /json/)
@@ -651,7 +652,7 @@ describe('Authentication Tests', function(done) {
                     res.body.id.should.match(the_uuid);
                     res.body.message.should.match("Resource deleted");
      
-                    conf.useAuth(true);
+                    auth.useAuth(true);
                     request(server)
                         .get(conf.prePath + "/facilities/" + the_uuid + ".json?showDeleted")
                         .expect('Content-Type', /json/)
@@ -670,7 +671,7 @@ describe('Authentication Tests', function(done) {
 
         it('should NOT ALLOW showDeleted flag with user auth turned ON. For AUTHD user', function(done) {
 
-            conf.useAuth(true);
+            auth.useAuth(true);
             UserModel.addUser("Bob", "test", "simple", function(success) {
                 assert(success);
                 request(server)
@@ -705,7 +706,7 @@ describe('Authentication Tests', function(done) {
 
         it('should ALLOW showDeleted flag with user auth turned ON. For AUTHD ADMIN user', function(done) {
 
-            conf.useAuth(true);
+            auth.useAuth(true);
             UserModel.addUser("Bob", "test", "admin", function(success) {
                 assert(success);
                 request(server)
