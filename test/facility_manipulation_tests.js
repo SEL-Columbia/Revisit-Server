@@ -466,6 +466,43 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should return facilties sorted in ascending order by name using sortBy', 
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?fields=name&sortBy=name")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    
+                    //TODO: not very readable 
+                    // TODO - check string sort order via < >
+                    // TODO: use a built in sort of somekind
+                    var facilities = _.cloneDeep(res.body.facilities)
+                    facilities.sort(function(a,b){
+                       if (a.name < b.name) 
+                           return -1;
+                       if (a.name > b.name) 
+                           return 1;
+
+                       return 0;
+                    });
+
+                    for (i = 0; i < 25; i++) {
+                        res.body.facilities[i].should.match(facilities[i])
+                    }
+                   
+                    res.body.limit.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+
+                    done();
+                });
+        });
+
+
         it('should return facilties sorted in ascending order by name', 
         function(done) {
             request(server)
@@ -506,6 +543,40 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
         function(done) {
             request(server)
                 .get(conf.prePath + "/facilities.json?fields=name&sortDesc=name")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    
+                    //TODO: not very readable 
+                    var facilities = _.cloneDeep(res.body.facilities)
+                    facilities.sort(function(a,b){
+                       if (a.name > b.name) 
+                           return -1;
+                       if (a.name < b.name) 
+                           return 1;
+
+                       return 0;
+                    });
+
+                    for (i = 0; i < 25; i++) {
+                        res.body.facilities[i].should.be.match(facilities[i])
+                    }
+
+                    res.body.limit.should.equal(25);
+                    res.body.offset.should.equal(0);
+                    res.body.total.should.equal(100);
+
+                    done();
+                });
+        });
+
+        it('should return facilties sorted in descending order by name using sortBy', 
+        function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?fields=name&sortBy=name&orderBy=desc")
                 .expect('Content-Type', /json/)
                 .expect(200) 
                 .end(function(err, res) {

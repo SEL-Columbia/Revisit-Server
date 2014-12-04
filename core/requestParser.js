@@ -6,12 +6,23 @@ knownKeys = [
     'allProperties',
     'sortAsc',
     'sortDesc',
+    'sortBy',
+    'orderBy',
     'fields',
     'limit',
     'offset',
     'active',
     'search', //NEW
     'updatedSince'
+];
+
+sortKeys = [
+    'asc',
+    'ascending',
+    'descending',
+    'desc',
+    '1',
+    '-1'
 ];
 
 queryKeys = [
@@ -25,7 +36,7 @@ queryKeys = [
     'href'
 ];
 
-var badKeys = [
+badKeys = [
     '_id',
     'uuid',
     'url',
@@ -81,6 +92,11 @@ var parseParams = function(params, query) {
     if (params.sortDesc) {
         genDescQuery(sorts, params.sortDesc);
     }
+
+    if (params.sortBy) {
+        genSortQuery(sorts, params.sortBy, params.orderBy);
+    }
+
 
     query = query.sort(sorts);
 
@@ -216,6 +232,22 @@ var genDescQuery = function(sorts, desc) {
     sorts[desc] = -1;
 };
 
+var genSortQuery = function(sorts, sortBy, orderBy) {
+    var order = orderBy || 'ascending';
+    if (!~sortKeys.indexOf(order)) {
+        console.log(order, " is not a known order");
+        console.log(order, " is not a known order");
+        console.log(order, " is not a known order");
+        return;
+    }
+
+    if (order === "-1" || order === "1") {
+        order = parseInt(order);
+    }
+
+    sorts[sortBy] = order;
+}
+
 // For active queries (require boolean values)
 var genActiveQuery = function(filters, active) {
     filters.active = active;
@@ -247,8 +279,6 @@ var genAddOnsQuery = function(params, filters) {
                 };
             }
         }
-
-       
     });
 };
 

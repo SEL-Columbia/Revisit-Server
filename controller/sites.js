@@ -166,6 +166,7 @@ function sites(req, res, next) {
         delete req.params.fields;
         delete req.params.sortAsc;
         delete req.params.sortDesc;
+        delete req.params.sortBy;
         // second query - slicing/project fields (count doesnt work with em);
         var count_query = parser.parseParams(req.params, og_query);
         count_query.limit(0).skip(0).count().exec(function(err, count) {
