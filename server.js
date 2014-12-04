@@ -7,7 +7,8 @@ var routes = require('./controller/routes.js'),
     db = require('./core/db.js').connect(),
     conf = require('./config/app/config.js'),
     log = require('./core/logger.js').log,
-    authenticate = require('./core/authentication.js').authenticate;
+    authenticate = require('./core/authentication.js').authenticate,
+    unknownMethodHandler = require('./core/cors.js');
 
 
 
@@ -83,9 +84,8 @@ server.on('NotFound', function (req, res, next) {
     responses.nothingFoundReply(res, req.url + " was not found.");
 });
 
-server.on('MethodNotAllowed', function (req, res, next) {
-    responses.apiNotAllowed(res);
-});
+// Uses unknownMethodHandler (cors module)
+server.on('MethodNotAllowed', unknownMethodHandler);
 
 server.listen(conf.port, function() {
     log.info('%s listening at %s', server.name, server.url);
