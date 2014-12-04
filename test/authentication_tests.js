@@ -203,7 +203,12 @@ describe('Authentication Tests', function(done) {
 
             request(server)
                 .post(conf.prePath + "/facilities.json")
-                .send({"name": "Toronto", "properties": {"sector": "test"}})
+                .send({
+                    "name": "Toronto",
+                    "properties": {
+                        "sector": "test"
+                    }
+                })
                 .expect('Content-Type', /json/)
                 .expect(201)
                 .end(function(err, res) {
@@ -223,7 +228,12 @@ describe('Authentication Tests', function(done) {
 
             request(server)
                 .post(conf.prePath + "/facilities.json")
-                .send({"name": "Toronto", "properties": {"sector": "test"}})
+                .send({
+                    "name": "Toronto",
+                    "properties": {
+                        "sector": "test"
+                    }
+                })
                 .expect('Content-Type', /json/)
                 .expect(401)
                 .end(function(err, res) {
@@ -248,7 +258,12 @@ describe('Authentication Tests', function(done) {
                 request(server)
                     .post(conf.prePath + "/facilities.json")
                     .auth('Bob', 'test')
-                    .send({"name": "Toronto", "properties": {"sector": "test"}})
+                    .send({
+                        "name": "Toronto",
+                        "properties": {
+                            "sector": "test"
+                        }
+                    })
                     .expect('Content-Type', /json/)
                     .expect(201)
                     .end(function(err, res) {
@@ -273,7 +288,7 @@ describe('Authentication Tests', function(done) {
             request(server)
                 .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .expect('Content-Type', /json/)
-                .expect(200) 
+                .expect(200)
                 .end(function(err, res) {
                     if (err) {
                         throw err;
@@ -314,7 +329,7 @@ describe('Authentication Tests', function(done) {
                     .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(200) 
+                    .expect(200)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -337,7 +352,7 @@ describe('Authentication Tests', function(done) {
             request(server)
                 .post(conf.prePath + "/users.json?username=new&password=user")
                 .expect('Content-Type', /json/)
-                .expect(201) 
+                .expect(201)
                 .end(function(err, res) {
                     if (err) {
                         throw err;
@@ -358,7 +373,7 @@ describe('Authentication Tests', function(done) {
                 request(server)
                     .put(conf.prePath + "/users/Bob.json?role=admin")
                     .expect('Content-Type', /json/)
-                    .expect(200) 
+                    .expect(200)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -380,7 +395,7 @@ describe('Authentication Tests', function(done) {
                 request(server)
                     .post(conf.prePath + "/users/login/?username=Bob&password=test")
                     .expect('Content-Type', /json/)
-                    .expect(200) 
+                    .expect(200)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -406,7 +421,7 @@ describe('Authentication Tests', function(done) {
                     .post(conf.prePath + "/users.json?username=new&password=user")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(403) 
+                    .expect(403)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -428,7 +443,7 @@ describe('Authentication Tests', function(done) {
                     .put(conf.prePath + "/users/Bob.json?role=admin")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(403) 
+                    .expect(403)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -450,7 +465,7 @@ describe('Authentication Tests', function(done) {
                     .post(conf.prePath + "/users/login/?username=Bob&password=test")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(403) 
+                    .expect(403)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -475,7 +490,7 @@ describe('Authentication Tests', function(done) {
                     .post(conf.prePath + "/users.json?username=new&password=user with CORRECT role")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(201) 
+                    .expect(201)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -498,7 +513,7 @@ describe('Authentication Tests', function(done) {
                     .put(conf.prePath + "/users/Bob.json?role=somethingelse")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(200) 
+                    .expect(200)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -521,7 +536,7 @@ describe('Authentication Tests', function(done) {
                     .post(conf.prePath + "/users/login/?username=Bob&password=test")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(200) 
+                    .expect(200)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -533,7 +548,7 @@ describe('Authentication Tests', function(done) {
             });
         });
     });
-    
+
     describe('Accessing User endpoints as an AUTHORIZED user with INCORRECT role and endpoint checking OFF', function() {
 
         it('should allow endpoint /user.json requests from an AUTHORIZED user with endpoint checking OFF', function(done) {
@@ -547,7 +562,7 @@ describe('Authentication Tests', function(done) {
                     .post(conf.prePath + "/users.json?username=new&password=user")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(201) 
+                    .expect(201)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -570,7 +585,7 @@ describe('Authentication Tests', function(done) {
                     .put(conf.prePath + "/users/Bob.json?role=somethingelse")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(200) 
+                    .expect(200)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -593,7 +608,7 @@ describe('Authentication Tests', function(done) {
                     .post(conf.prePath + "/users/login/?username=Bob&password=test")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(200) 
+                    .expect(200)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
@@ -614,18 +629,18 @@ describe('Authentication Tests', function(done) {
             request(server)
                 .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .expect('Content-Type', /json/)
-                .expect(200) 
+                .expect(200)
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
                     res.body.id.should.match(the_uuid);
                     res.body.message.should.match("Resource deleted");
-     
+
                     request(server)
                         .get(conf.prePath + "/facilities/" + the_uuid + ".json?showDeleted")
                         .expect('Content-Type', /json/)
-                        .expect(200) 
+                        .expect(200)
                         .end(function(err, res) {
                             if (err) {
                                 throw err;
@@ -644,19 +659,19 @@ describe('Authentication Tests', function(done) {
             request(server)
                 .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                 .expect('Content-Type', /json/)
-                .expect(200) 
+                .expect(200)
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
                     res.body.id.should.match(the_uuid);
                     res.body.message.should.match("Resource deleted");
-     
+
                     auth.useAuth(true);
                     request(server)
                         .get(conf.prePath + "/facilities/" + the_uuid + ".json?showDeleted")
                         .expect('Content-Type', /json/)
-                        .expect(403) 
+                        .expect(403)
                         .end(function(err, res) {
                             if (err) {
                                 throw err;
@@ -678,19 +693,19 @@ describe('Authentication Tests', function(done) {
                     .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(200) 
+                    .expect(200)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
                         }
                         res.body.id.should.match(the_uuid);
                         res.body.message.should.match("Resource deleted");
-     
+
                         request(server)
                             .get(conf.prePath + "/facilities/" + the_uuid + ".json?showDeleted")
                             .auth('Bob', 'test')
                             .expect('Content-Type', /json/)
-                            .expect(403) 
+                            .expect(403)
                             .end(function(err, res) {
                                 if (err) {
                                     throw err;
@@ -713,19 +728,19 @@ describe('Authentication Tests', function(done) {
                     .del(conf.prePath + "/facilities/" + the_uuid + ".json")
                     .auth('Bob', 'test')
                     .expect('Content-Type', /json/)
-                    .expect(200) 
+                    .expect(200)
                     .end(function(err, res) {
                         if (err) {
                             throw err;
                         }
                         res.body.id.should.match(the_uuid);
                         res.body.message.should.match("Resource deleted");
-     
+
                         request(server)
                             .get(conf.prePath + "/facilities/" + the_uuid + ".json?showDeleted")
                             .auth('Bob', 'test')
                             .expect('Content-Type', /json/)
-                            .expect(200) 
+                            .expect(200)
                             .end(function(err, res) {
                                 if (err) {
                                     throw err;
