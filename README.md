@@ -1,8 +1,8 @@
 # Facility Registry API Server
 
-A RESTful API that serves basic facility information, designed for simple integration with other applications that use facilities. Provides endpoints for querying facilities by various properties such as location, name, and type.
+A RESTful API that serves basic facility information, designed for simple integration with other applications that use facilities. Revisit provides endpoints for querying facilities by various properties such as location, name, and type as well as ways to update and add your own facility data.
 
-Revisit aims to provide context for your application and be a repository for global facility data.
+Revisit aims to be a global repository for facility data. Revisit offers context for your application in areas where a simple map does not provide enough direction.
 
 [![Build Status](https://travis-ci.org/SEL-Columbia/Revisit-Server.png)](https://travis-ci.org/SEL-Columbia/Revisit-Server)
 
@@ -10,7 +10,7 @@ Although we are not limiting the data to health sector facilities, the service w
 
 For details on setting up a local dev enviroment, [see the wiki](https://github.com/SEL-Columbia/Revisit-Server/wiki/Setting-Up-a-Local-Environment).
 
-For an indepth look at our api, [see the wiki](https://github.com/SEL-Columbia/Revisit-Server/wiki/API-Documentation-v0.2.1).
+For an indepth look at our api, [see the api docs](https://github.com/SEL-Columbia/Revisit-Server/wiki/API-Documentation-v0.2.1).
 
 
 ## Dependencies
