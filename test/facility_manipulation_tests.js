@@ -146,6 +146,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     done();
                 });
         });
+
         it('should return 10 facilties, starting from page 3, and include page,'
                 + 'per_page, total_entries, and total_pages, based on page and per_page params', function(done) {
             request(server)

@@ -76,7 +76,6 @@ describe('CORS Tests', function(done) {
                     if (err) {
                         throw err;
                     }
-                    console.log(res);
                     done();
                 });
 
