@@ -17,7 +17,6 @@ module.exports = (function() {
         responseObj = {};
 
         var itemObjs = [];
-        console.log(hidden);
         items.forEach(function(item) {
             if (hidden !== null) {
                 // document object that can be transformed 

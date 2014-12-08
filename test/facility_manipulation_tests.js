@@ -127,6 +127,25 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should return 25 facilties, and include page, per_page, total_entries,' 
+                + 'and total_pages, based on odd numbered per_page count', function(done) {
+            request(server)
+                .get(conf.prePath + "/facilities.json?page=15&per_page=7")
+                .expect('Content-Type', /json/)
+                .expect(200) 
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    res.body.facilities.should.have.length(2);
+                    res.body.page.should.equal(15);
+                    res.body.per_page.should.equal(7);
+                    res.body.total_pages.should.equal(15);
+                    res.body.total_entries.should.equal(100);
+                    done();
+                });
+        });
         it('should return 10 facilties, starting from page 3, and include page,'
                 + 'per_page, total_entries, and total_pages, based on page and per_page params', function(done) {
             request(server)

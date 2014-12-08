@@ -192,7 +192,7 @@ function sites(req, res, next) {
                 extras.page = parseInt(req.params.page);
                 extras.per_page = parseInt(req.params.per_page) || parseInt(req.params.limit);
                 extras.total_entries = count;
-                extras.total_pages = Math.floor(count / extras.per_page);
+                extras.total_pages = Math.ceil(count / extras.per_page);
             } else {
                 // page NOT set, return limit/offset state
                 extras.offset = parseInt(req.params.offset) || 0;
