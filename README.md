@@ -1,6 +1,8 @@
 # Facility Registry API Server
 
-A RESTful API that serves basic facility information, designed for simple integration with other applications that use facilities.
+A RESTful API that serves basic facility information, designed for simple integration with other applications that use facilities. Provides endpoints for querying facilities by various properties such as location, name, and type.
+
+Revisit aims to provide context for your application and be a repository for global facility data.
 
 [![Build Status](https://travis-ci.org/SEL-Columbia/Revisit-Server.png)](https://travis-ci.org/SEL-Columbia/Revisit-Server)
 
@@ -8,13 +10,8 @@ Although we are not limiting the data to health sector facilities, the service w
 
 For details on setting up a local dev enviroment, [see the wiki](https://github.com/SEL-Columbia/Revisit-Server/wiki/Setting-Up-a-Local-Environment).
 
-# Notes
+For an indepth look at our api, [see the wiki](https://github.com/SEL-Columbia/Revisit-Server/wiki/API-Documentation-v0.2.1).
 
-## Extra Properties
-* Number of times visited
-* Sector
-* Type
-* Does the facility have power?
 
 ## Dependencies
 * Restify: REST API framework for node.js
@@ -26,12 +23,6 @@ For details on setting up a local dev enviroment, [see the wiki](https://github.
 * mocha: For BDD testing
 * supertest: for testing requests
 * should: readable asserts 
-
-## Possible Alternatives
-* Save: DB interaction layer, allows us to swap mongodb without much code change
-* Express: More involved stack then restify, has restify extension as well
-* Mongojs: Exposes mongoapi directly
-
 
 ## Deployment
 * Ruby based deployment via [Capistrano](http://capistranorb.com). For details on deployment, [see the  wiki](https://github.com/SEL-Columbia/Revisit-Server/wiki/Deployment).
