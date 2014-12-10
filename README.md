@@ -14,9 +14,9 @@ For an indepth look at our api, [see the api docs](https://github.com/SEL-Columb
 
 
 ## Dependencies
-* Restify: REST API framework for node.js
-* Mongo: Document store, a lot of node integration options
-* Mongoose: ODM for mongo, enforces facility format
+* restify: REST API framework for node.js
+* mongo: Document store, a lot of node integration options
+* mongoose: ODM for mongo, enforces facility format
 * mongoose-rollback: versioning plugin for mongoose
 * jshashes: hashing basic auth passwords
 * mkdirp: simple recursive directory creation for photos
