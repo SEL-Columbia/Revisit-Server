@@ -102,6 +102,7 @@ function updateAndVerify(req, res, next) {
         }
 
         UserModel.update(user, pass, role, function(err, user) {
+
             if (err) {
                 req.log.error(err);
                 return responses.internalErrorReply(res, err);
@@ -143,6 +144,7 @@ function updatePass(req, res, next) {
         }
 
         responses.jsonReply(res, user);
+
     });
 
     return next();
@@ -153,7 +155,9 @@ function removeUser (req, res, next) {
     req.params.username = req.params[0];
     var username = req.params.username;
 
-    UserModel.deleteByName(username, function(err, nRemoved, writeStatus) {
+    UserModel.deleteByName(username, function(err, result) {
+        var nRemoved = result.result.n;
+
         if (err) {
             req.log.error(err);
             return responses.internalErrorReply(res, err);

@@ -464,8 +464,9 @@ function bulk(req, res, next) {
         // At this point a subset of the data will be recorded
         bulkIns.execute(function(err, writeResult) {
             if (err) {
-                // can't recover from this, let em know
-                return responses.internalErrorReply(res, err);
+                // New to mongo 3, the err status gets duplicated here and in write errors
+                if (!err.errmsg.includes("11000")) 
+                    return responses.internalErrorReply(res, err);
             }
 
             if (writeResult.hasWriteErrors()) {

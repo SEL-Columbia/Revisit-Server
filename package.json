@@ -25,7 +25,7 @@
     "jshashes": "^1.0.5",
     "lodash-node": "^2.4.1",
     "mkdirp": "^0.5.0",
-    "mongoose": "^3.8.17",
+    "mongoose": "^4.0.5",
     "mongoose-rollback": "^1.1.2",
     "restify": "^2.8.2"
   }

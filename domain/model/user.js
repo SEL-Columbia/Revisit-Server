@@ -85,6 +85,7 @@ UserModel.statics.update = function(username, pass, role, callback) {
     return this.findOneAndUpdate(
         {'username': username},
         update,
+        { new : true }, 
         callback
     );
 
