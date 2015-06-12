@@ -465,7 +465,7 @@ function bulk(req, res, next) {
         bulkIns.execute(function(err, writeResult) {
             if (err) {
                 // New to mongo 3, the err status gets duplicated here and in write errors
-                if (!err.errmsg.includes("11000")) 
+                if (!(err.errmsg.indexOf("11000") > -1)) 
                     return responses.internalErrorReply(res, err);
             }
 
