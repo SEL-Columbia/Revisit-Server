@@ -22,6 +22,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
         
         // wipe db
         SiteModel.find({}).remove(function(err, result) {
+            if (err) throw (err);
             // load db
             SiteModel.collection.insert(sites, function(err, result) {
                 if (err) throw (err);
