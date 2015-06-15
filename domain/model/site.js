@@ -1,6 +1,7 @@
 // dependancies
 var mongoose = require('mongoose');
 var rollback = require('mongoose-rollback');
+var quadtree = require('mongoose-quadtree');
 
 // local deps
 var conf = require('./../../config/app/config.js');
@@ -87,6 +88,13 @@ SiteModel.index({
 //SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities', conn: dbconf.uri });
 SiteModel.plugin(rollback, {
     index: true,
+    collectionName: 'facilities'
+});
+
+SiteModel.plugin(quadtree, {
+    index: true, 
+    threshold: 1000,
+    seperation: 0.05,
     collectionName: 'facilities'
 });
 

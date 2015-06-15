@@ -4,6 +4,7 @@ var mongoose = require('mongoose');
 // local deps
 var log = require('./logger.js').log;
 var conf = require('./../config/db/db_config');
+var SiteModel = require('../domain/model/site.js');
 
 // db 
 var connect = function() {
@@ -17,5 +18,11 @@ var connect = function() {
 
     return db;
 };
+
+// init index
+SiteModel.initTree()
+    .then(function() {
+        log.info("Complete quadtree index");
+    });
 
 exports.connect = connect;
