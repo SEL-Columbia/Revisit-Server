@@ -14,7 +14,6 @@ var SiteModel = require('../domain/model/site.js'),
     responses = require('../view/responses.js');
 
 
-
 /*
  * UTILITY METHODS
  */
@@ -146,6 +145,33 @@ function sites(req, res, next) {
     if (!query) {
         responses.apiBadRequest(res, "Please refer to the wiki for a guide on Revisit's API");
         return;
+    }
+
+    // if this is a tree query instead of doing a within
+    if  (typeof req.params.compressed === 'string' && typeof req.params.within === 'string') {
+        req.log.info('Tree query coming in');
+        var slat = req.params.slat;
+        var wlng = req.params.wlng;
+        var nlat = req.params.nlat;
+        var elng = req.params.elng;
+
+        // listen to leaks
+        //var hd = new memwatch.HeapDiff();
+        SiteModel.findNodes({'en': [elng, nlat], 'ws': [wlng, slat]})
+            .onResolve(function(err, sites) {
+                if (err) throw (err);
+
+                var responseBody = {};
+                responseBody.count = 0;
+                responseBody.facilities = sites;
+                sites.forEach(function(site) {
+                    responseBody.count += site.count;
+                });
+
+                responses.jsonReply(res, responseBody, 200);
+            });
+
+        return next();
     }
 
     // parse query
