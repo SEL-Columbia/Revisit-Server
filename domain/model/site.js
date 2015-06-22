@@ -95,6 +95,7 @@ SiteModel.plugin(quadtree, {
     index: true, 
     threshold: 1000,
     seperation: 0.05,
+    compress: true,
     collectionName: 'facilities'
 });
 

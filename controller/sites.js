@@ -157,17 +157,13 @@ function sites(req, res, next) {
 
         // listen to leaks
         //var hd = new memwatch.HeapDiff();
-        SiteModel.findNodes({'en': [elng, nlat], 'ws': [wlng, slat]})
+        SiteModel.findSubtree({'en': [elng, nlat], 'ws': [wlng, slat]})
             .onResolve(function(err, sites) {
                 if (err) throw (err);
 
                 var responseBody = {};
-                responseBody.count = 0;
+                responseBody.count = sites.count;
                 responseBody.facilities = sites;
-                sites.forEach(function(site) {
-                    responseBody.count += site.count;
-                });
-
                 responses.jsonReply(res, responseBody, 200);
             });
 

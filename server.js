@@ -10,13 +10,6 @@ var routes = require('./controller/routes.js'),
     authenticate = require('./core/authentication.js').authenticate,
     unknownMethodHandler = require('./core/cors.js');
 
-// Memleaks listener
-//var memwatch = require('memwatch-next');
-//memwatch.on('leak', function(info) {
-//    console.log("Found leak");
-//    log.debug(info);
-//});
-
 // Instantiate server 
 var server = restify.createServer({
     name: conf.app_name,
