@@ -149,21 +149,26 @@ function sites(req, res, next) {
 
     // if this is a tree query instead of doing a within
     if  (typeof req.params.compressed === 'string' && typeof req.params.within === 'string') {
-        req.log.info('Tree query coming in');
+        req.log.info("GET within facilities COMPRESSED REQUEST", {
+            "req": req.params
+        });
+
+        // These fields were filled in by the within query handler
         var slat = req.params.slat;
         var wlng = req.params.wlng;
         var nlat = req.params.nlat;
         var elng = req.params.elng;
 
-        // listen to leaks
-        //var hd = new memwatch.HeapDiff();
+        // Ask Quadtree to retrieve tree nodes within bounds
         SiteModel.findSubtree({'en': [elng, nlat], 'ws': [wlng, slat]})
             .onResolve(function(err, sites) {
                 if (err) throw (err);
 
                 var responseBody = {};
+                // Format it similarly to the rest of our api 
                 responseBody.count = sites.count;
                 responseBody.facilities = sites;
+                //XXX Note all other query paramters are ignored (fields,=,etc)
                 responses.jsonReply(res, responseBody, 200);
             });
 
