@@ -1,5 +1,5 @@
-# config valid only for Capistrano 3.2.1
-lock '3.2.1'
+# config valid only for Capistrano 3.4.0
+lock '3.4.0'
 
 
 set :application, "revisit-server"
@@ -106,7 +106,7 @@ namespace :setup do
         tmp_provision_path = "config/provision.sh"
         run_locally do
           open(tmp_provision_path, 'w') do |f|
-            f.puts "#{fetch(:provision_file_contents)}" 
+            f.puts "#{fetch(:provision_file_contents)}"
           end
         end
 
@@ -114,14 +114,14 @@ namespace :setup do
           # upload to the user's home folder then execute
           upload! tmp_provision_path, "/home/#{fetch:user}/provision.sh"
           execute :sudo, "chmod +x /home/#{fetch:user}/provision.sh"
-          
+
           # upload mongo scripts
           upload! "config/mongo.tar.gz", "/home/#{fetch:user}/mongo.tar.gz"
           execute :tar, "-zxf /home/#{fetch:user}/mongo.tar.gz"
 
           # provision!
           execute :sudo, "/home/#{fetch:user}/provision.sh"
-          
+
           ### cleanup remote
           execute :rm, "-rf /home/#{fetch:user}/mongo*"
           execute :rm, "/home/#{fetch:user}/provision.sh"
@@ -147,7 +147,7 @@ namespace :setup do
       end
     end
 
-  namespace :db do 
+  namespace :db do
     desc "Create database settings"
     task :config do
       on roles(:app) do
@@ -169,7 +169,7 @@ namespace :setup do
             execute :mkdir, fetch(:local_tmp_dir)
           end
           open(tmp_db_config_path, 'w') do |f|
-            f.puts "#{fetch(:db_config_file_contents)}" 
+            f.puts "#{fetch(:db_config_file_contents)}"
           end
         end
 
@@ -183,7 +183,7 @@ namespace :setup do
         run_locally do
           execute :rm, "-rf", tmp_db_config_path
         end
-        
+
       end
     end
 
@@ -207,7 +207,7 @@ namespace :setup do
             execute :mkdir, fetch(:local_tmp_dir)
           end
           open(tmp_db_backup_path, 'w') do |f|
-            f.puts "#{fetch(:db_backup_file_contents)}" 
+            f.puts "#{fetch(:db_backup_file_contents)}"
           end
         end
 
@@ -222,7 +222,7 @@ namespace :setup do
         run_locally do
           execute :rm, "-rf", tmp_db_backup_path
         end
-        
+
       end
     end
 
@@ -237,7 +237,7 @@ namespace :setup do
       info "---------------------------"
       info " "
     end
-    
+
     # load in upstart config content
     require_relative "scripts/upstart-config.rb"
 
@@ -247,7 +247,7 @@ namespace :setup do
         execute :mkdir, fetch(:local_tmp_dir)
       end
       open(tmp_upstart_config_path, 'w') do |f|
-        f.puts "#{fetch(:upstart_file_contents)}" 
+        f.puts "#{fetch(:upstart_file_contents)}"
       end
     end
 
@@ -325,7 +325,7 @@ namespace :deploy do
   task :restart do
     invoke 'node:restart'
   end
-  
+
 
 end
 
