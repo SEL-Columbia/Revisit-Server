@@ -337,7 +337,10 @@ namespace :deploy do
 end
 
 
+
 before 'deploy', 'setup:servercheck'
+
+before 'deploy', 'node:stop'
 
 # After the app is published, build the index
 after 'deploy:published', 'setup:db:build_index'
