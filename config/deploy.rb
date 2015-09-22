@@ -229,7 +229,7 @@ namespace :setup do
     desc "Build the quadtree index"
     task :build_index do
       on roles(:app) do
-        execute :node, "#{fetch(:deploy_to)}/bin/build-quadtree-index.js"
+        execute :node, "#{fetch(:deploy_to)}/current/bin/build-quadtree-index.js"
       end
     end
 
@@ -339,8 +339,12 @@ end
 
 before 'deploy', 'setup:servercheck'
 
-# After the app is published, restart the server
-after 'deploy:published', 'deploy:restart'
+# After the app is published, build the index
+after 'deploy:published', 'setup:db:build_index'
+
+# After the index is built, restart the app
+after 'setup:db:build_index', 'deploy:restart'
+
 
 # Before restarting the server, make sure the upstart config is present
 # before 'deploy:restart', 'node:check_upstart_config'

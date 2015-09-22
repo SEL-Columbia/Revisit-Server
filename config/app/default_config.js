@@ -5,7 +5,7 @@
 var config = {};
 
 // set defaults -- these will be overriden by duplicate settings in env_config
-config.app_name = "revisit-server";
+config.app_name = 'revisit-server';
 config.version = '0.1.0';
 
 config.USE_AUTH = false;
@@ -15,14 +15,14 @@ config.ALLOW_PUT = false;
 config.BLOCK_USERS = true;
 
 config.prePath = '/api/v0';
-config.host = "localhost";
+config.host = 'localhost';
 config.port = '3000';
 
-config.site = "http://" + config.host;
-config.site += config.port ? ":" + config.port : '';
-config.site += config.prePath + "/" + "facilities/";
+config.site = 'http://' + config.host;
+config.site += config.port ? ':' + config.port : '';
+config.site += config.prePath + '/' + 'facilities/';
 
-config.photoPath = "http://" + config.host + "/sites/photos/";
+config.photoPath = 'http://' + config.host + '/sites/photos/';
 
 config.log_root = __dirname + '/../../log/';
 
@@ -32,43 +32,43 @@ if (config.ALLOW_POST || config.ALLOW_PUT) {
 
 /**
  * Combo getter/setters for auth
- * 
+ *
  * TODO: this should be moved to an authorization module
  */
 
 config.useAuth = function(use) {
-	if (typeof use === "boolean") {
-		config.USE_AUTH = use;
-	}
-	return config.USE_AUTH;
+    if (typeof use === 'boolean') {
+        config.USE_AUTH = use;
+    }
+    return config.USE_AUTH;
 };
 
 config.allowGet = function(allow) {
-	if (typeof allow === "boolean") {
-		config.ALLOW_GET = allow;
-	}
-	return config.ALLOW_GET;
+    if (typeof allow === 'boolean') {
+        config.ALLOW_GET = allow;
+    }
+    return config.ALLOW_GET;
 };
 
 config.allowPut = function(allow) {
-	if (typeof allow === "boolean") {
-		config.ALLOW_PUT = allow;
-	}
-	return config.ALLOW_PUT;
+    if (typeof allow === 'boolean') {
+        config.ALLOW_PUT = allow;
+    }
+    return config.ALLOW_PUT;
 };
 
 config.allowPost = function(allow) {
-	if (typeof allow === "boolean") {
-		config.ALLOW_POST = allow;
-	}
-	return config.ALLOW_POST;
+    if (typeof allow === 'boolean') {
+        config.ALLOW_POST = allow;
+    }
+    return config.ALLOW_POST;
 };
 
 config.blockUsers = function(allow) {
-	if (typeof allow === "boolean") {
-		config.BLOCK_USERS = allow;
-	}
-	return config.BLOCK_USERS;
+    if (typeof allow === 'boolean') {
+        config.BLOCK_USERS = allow;
+    }
+    return config.BLOCK_USERS;
 };
 // export combined configuration for this environment
 module.exports = config;

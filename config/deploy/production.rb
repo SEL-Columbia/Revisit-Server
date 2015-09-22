@@ -30,7 +30,7 @@ set :linked_files, %w{config/db/production_config.js}
 # Defaults to 'master' branch.
 #
 # Examples:
-# 
+#
 # REVISION=8b42a3e cap production deploy
 # BRANCH=some_test_branch cap staging deploy
 #
@@ -39,6 +39,10 @@ set :branch, ENV["REVISION"] || ENV["BRANCH"] || "master"
 # For staging, we DO want devDependencies included, at least for now.
 set :npm_flags, '--production --silent'
 # set :npm_flags, '--silent'
+
+set :default_env, {
+  'NODE_ENV' => 'production'
+}
 
 # Custom SSH Options
 # ==================
