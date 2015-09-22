@@ -327,21 +327,20 @@ if (mongoose.models.SiteModel) {
     SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');
 }
 
-// if specified in config, build the quadtree index
-if (conf.build_index) {
-    var ts = Date.now();
-    SiteModel.initTree()
-        .then(
-            function() {
-                log.info('Building quadtree index completed in ' + (Date.now() - ts) + 'ms');
-                process.exit(0);
-            },
-            function() {
-                log.error('Error building quadtree index');
-                process.exit(1);
-            });
-
-}
+// build the quadtree index
+// XXX - This shouldn't actually start an index build, since the index should be built as
+// an independent process via bin/build-quadtree-index.js script.
+var ts = Date.now();
+SiteModel.initTree()
+    .then(
+        function() {
+            log.info('Quadtree index built in ' + (Date.now() - ts) + 'ms');
+            process.exit(0);
+        },
+        function() {
+            log.error('Error building quadtree index');
+            process.exit(1);
+        });
 
 
 module.exports = SiteModel;
