@@ -1,4 +1,4 @@
-// dependencies 
+// dependencies
 var restify = require('restify');
 
 // local includes
@@ -10,7 +10,7 @@ var routes = require('./controller/routes.js'),
     authenticate = require('./core/authentication.js').authenticate,
     unknownMethodHandler = require('./core/cors.js');
 
-// Instantiate server 
+// Instantiate server
 var server = restify.createServer({
     name: conf.app_name,
     log: log,
@@ -122,12 +122,12 @@ server.get(/\/sites\/photos\/?.*/, restify.serveStatic({
 }));
 
 // users
-server.get(conf.prePath + '/users.json', routes.users.getUsers); // dumps user collection 
-server.post(conf.prePath + '/users.json', routes.users.addUser); // post name, pass, [role] 
-server.get(user_path, routes.users.getUser); // dumps user 
-//server.put(conf.prePath + '/users/:username', users.updateAndVerify); // logs in then updates user 
-server.put(user_path, routes.users.updatePass); // logs in then updates user 
-server.del(user_path, routes.users.removeUser); // logs in then updates user 
+server.get(conf.prePath + '/users.json', routes.users.getUsers); // dumps user collection
+server.post(conf.prePath + '/users.json', routes.users.addUser); // post name, pass, [role]
+server.get(user_path, routes.users.getUser); // dumps user
+//server.put(conf.prePath + '/users/:username', users.updateAndVerify); // logs in then updates user
+server.put(user_path, routes.users.updatePass); // logs in then updates user
+server.del(user_path, routes.users.removeUser); // logs in then updates user
 
 server.post(conf.prePath + '/users/login/', routes.users.login); // just for testing, done during basic auth
 

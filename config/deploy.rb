@@ -226,6 +226,13 @@ namespace :setup do
       end
     end
 
+    desc "Build the quadtree index"
+    task :build_index do
+      on roles(:app) do
+        execute :node, "#{fetch(:deploy_to)}/bin/build-quadtree-index.js"
+      end
+    end
+
   end
 
   desc "Create and upload upstart script for this node app"
@@ -314,6 +321,7 @@ namespace :node do
       end
     end
   end
+
 end
 
 
@@ -325,7 +333,6 @@ namespace :deploy do
   task :restart do
     invoke 'node:restart'
   end
-
 
 end
 

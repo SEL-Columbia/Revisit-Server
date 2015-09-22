@@ -1,72 +1,71 @@
 // dependancies
-var mongoose = require('mongoose');
-var rollback = require('mongoose-rollback');
-var quadtree = require('mongoose-quadtree');
+var mongoose = require('mongoose'),
+    rollback = require('mongoose-rollback'),
+    quadtree = require('mongoose-quadtree');
 
 // local deps
-var conf = require('./../../config/app/config.js');
-var dbconf = require('./../../config/db/db_config');
+var conf = require('./../../config/app/config.js'),
+    log = require('../../core/logger').log;
 
 var Schema = mongoose.Schema;
 var SiteModel = new Schema({
-        name: {
+    name: {
+        type: String,
+        required: true,
+        index: true
+    },
+
+    _deleted: {
+        type: Boolean,
+        default: false,
+        index: true
+    },
+
+    active: {
+        type: Boolean,
+        default: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
+        type: Date,
+        default: Date.now,
+        index: true
+    },
+    coordinates: {
+        type: [Number]
+    },
+    identifiers: [{
+        agency: {
+            type: String
+        },
+
+        context: {
+            type: String
+        },
+
+        id: {
+            type: String
+        }
+    }],
+    properties: {
+        type: {
+            type: String
+        },
+        sector: {
             type: String,
             required: true,
             index: true
         },
-
-        _deleted: {
-            type: Boolean,
-            default: false,
+        visits: {
+            type: Number,
             index: true
         },
-
-        active: {
-            type: Boolean,
-            default: true
-        },
-        createdAt: {
-            type: Date,
-            default: Date.now
-        },
-        updatedAt: {
-            type: Date,
-            default: Date.now,
-            index: true
-        },
-        coordinates: {
-            type: [Number]
-        },
-        identifiers: [{
-            agency: {
-                type: String
-            },
-
-            context: {
-                type: String
-            },
-
-            id: {
-                type: String
-            }
-        }],
-        properties: {
-            type: {
-                type: String
-            },
-            sector: {
-                type: String,
-                required: true,
-                index: true
-            },
-            visits: {
-                type: Number,
-                index: true
-            },
-            photoEndpoint: String,
-            photoUrls: [String]
-        }
-    },
+        photoEndpoint: String,
+        photoUrls: [String]
+    }},
     // remove the unnecessary 'id' virtual field that mongoose adds
     {
         id: false
@@ -75,11 +74,11 @@ var SiteModel = new Schema({
 
 // Using 2d instead of 2dsphere based on performance in loadtests
 SiteModel.index({
-    coordinates: "2d",
+    coordinates: '2d',
     'properties.sector': 1
 });
 
-// Add text index to name & id -- could potentially add text index to entire db 
+// Add text index to name & id -- could potentially add text index to entire db
 // (though if we're going to do that, it might be worthwhile using ElasticSearch)
 SiteModel.index({
     name: 'text'
@@ -92,7 +91,7 @@ SiteModel.plugin(rollback, {
 });
 
 SiteModel.plugin(quadtree, {
-    index: true, 
+    index: true,
     threshold: 1000,
     seperation: 0.05,
     compress: true,
@@ -109,7 +108,7 @@ SiteModel.virtual('uuid').get(function() {
 // Create virtual for HREF from ID
 SiteModel.virtual('href').get(function() {
     if (this._id)
-        return conf.site + this._id.toHexString() + ".json";
+        return conf.site + this._id.toHexString() + '.json';
 });
 
 // Configure toObject
@@ -131,15 +130,23 @@ SiteModel.set('toJSON', {
 
         delete obj._id;
         delete obj.__v;
-        delete obj._deleted; //XXX: will need to be shown if asked? maybe? 
+        delete obj._deleted; //XXX: will need to be shown if asked? maybe?
         return obj;
     }
 });
 
-//NOTE: callback model removed in favour of exec model. 
+//NOTE: callback model removed in favour of exec model.
 //Although both seem compatiable ...  its less confusing if not shown imo
 SiteModel.statics.findLimit = function(lim, off, showDeleted) {
-    var deleted = {$or : [{_deleted: {$exists: false}}, {_deleted: false} ] }
+    var deleted = {
+        $or: [{
+            _deleted: {
+                $exists: false
+            }
+        }, {
+            _deleted: false
+        }]
+    };
     if (showDeleted) {
         deleted = null;
     }
@@ -147,7 +154,15 @@ SiteModel.statics.findLimit = function(lim, off, showDeleted) {
 };
 
 SiteModel.statics.findAll = function(showDeleted) {
-    var deleted = {$or : [{_deleted: {$exists: false}}, {_deleted: false} ] }
+    var deleted = {
+        $or: [{
+            _deleted: {
+                $exists: false
+            }
+        }, {
+            _deleted: false
+        }]
+    };
     if (showDeleted) {
         deleted = null;
     }
@@ -159,11 +174,17 @@ SiteModel.statics.findById = function(id, showDeleted) {
         return this.find({
             _id: id
         });
-    }  
+    }
 
     return this.find({
         _id: id,
-        $or : [{_deleted: {$exists: false}}, {_deleted: false} ] 
+        $or: [{
+            _deleted: {
+                $exists: false
+            }
+        }, {
+            _deleted: false
+        }]
     });
 };
 
@@ -180,9 +201,9 @@ SiteModel.statics.findNear = function(lng, lat, rad, earthRad, showDeleted) {
     if (showDeleted) {
 
         return this.find({
-            "coordinates": {
-                "$geoWithin": {
-                    "$centerSphere": [
+            'coordinates': {
+                '$geoWithin': {
+                    '$centerSphere': [
                         [lng, lat], rad / earthRad
                     ]
                 }
@@ -191,15 +212,21 @@ SiteModel.statics.findNear = function(lng, lat, rad, earthRad, showDeleted) {
     }
 
     return this.find({
-        "coordinates": {
-            "$geoWithin": {
-                "$centerSphere": [
+        'coordinates': {
+            '$geoWithin': {
+                '$centerSphere': [
                     [lng, lat], rad / earthRad
                 ]
             }
         },
 
-        $or : [{_deleted: {$exists: false}}, {_deleted: false} ] 
+        $or: [{
+            _deleted: {
+                $exists: false
+            }
+        }, {
+            _deleted: false
+        }]
 
     });
 };
@@ -208,9 +235,9 @@ SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng, showDeleted)
 
     if (showDeleted) {
         return this.find({
-            "coordinates": {
-                "$geoWithin": {
-                    "$box": [
+            'coordinates': {
+                '$geoWithin': {
+                    '$box': [
                         [swlng, swlat],
                         [nelng, nelat]
                     ]
@@ -220,31 +247,39 @@ SiteModel.statics.findWithin = function(swlat, swlng, nelat, nelng, showDeleted)
     }
 
     return this.find({
-        "coordinates": {
-            "$geoWithin": {
-                "$box": [
+        'coordinates': {
+            '$geoWithin': {
+                '$box': [
                     [swlng, swlat],
                     [nelng, nelat]
                 ]
             }
         },
 
-        $or : [{_deleted: {$exists: false}}, {_deleted: false} ] 
+        $or: [{
+            _deleted: {
+                $exists: false
+            }
+        }, {
+            _deleted: false
+        }]
 
     });
 };
 
 /* These two require callbacks to be passed in due to their extra steps */
 SiteModel.statics.updateById = function(id, site, updateDeleted, callback) {
-    this.findOne({'_id': id }, function(err, model) {
+    this.findOne({
+        '_id': id
+    }, function(err, model) {
         if (err) {
             return callback(err, null);
         }
 
         if (model._deleted && !updateDeleted) {
             err = new Error();
-            err.message = "Does not exist";
-            err.name= "Already Deleted";
+            err.message = 'Does not exist';
+            err.name = 'Already Deleted';
             return callback(err, null);
         }
 
@@ -253,21 +288,23 @@ SiteModel.statics.updateById = function(id, site, updateDeleted, callback) {
         });
 
         model.save(callback);
-    
+
     });
 };
 
 SiteModel.statics.deleteById = function(id, callback) {
 
-    this.findOne({'_id': id }, function(err, model) {
+    this.findOne({
+        '_id': id
+    }, function(err, model) {
         if (err) {
             return callback(err, null);
         }
-        
+
         if (model._deleted) {
             err = new Error();
-            err.message = "Does not exist";
-            err.name = "Already Deleted";
+            err.message = 'Does not exist';
+            err.name = 'Already Deleted';
             return callback(err, null);
         }
 
@@ -278,16 +315,33 @@ SiteModel.statics.deleteById = function(id, callback) {
 
 
     //return this.remove({
-    //    "_id": id
+    //    '_id': id
     //}).exec(callback);
 };
 
+
 // Avoid recompilation
-var SiteModel;
 if (mongoose.models.SiteModel) {
     SiteModel = mongoose.model('SiteModel');
 } else {
     SiteModel = mongoose.model('SiteModel', SiteModel, 'facilities');
 }
+
+// if specified in config, build the quadtree index
+if (conf.build_index) {
+    var ts = Date.now();
+    SiteModel.initTree()
+        .then(
+            function() {
+                log.info('Building quadtree index completed in ' + (Date.now() - ts) + 'ms');
+                process.exit(0);
+            },
+            function() {
+                log.error('Error building quadtree index');
+                process.exit(1);
+            });
+
+}
+
 
 module.exports = SiteModel;
