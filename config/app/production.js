@@ -8,7 +8,7 @@
 console.log('LOADING PRODUCTION CONFIG');
 
 var _ = require('lodash-node'),
-	def_config = require('./default_config');
+    def_config = require('./default_config');
 
 var config = {};
 
@@ -17,8 +17,8 @@ config.host = 'revisit.global';
 config.port = '3000';
 
 // serves the site on port 80 via nginx
-config.site = "http://" + config.host;
-config.site += config.prePath + "/" + "facilities/";
+config.site = 'http://' + config.host;
+config.site += config.prePath + '/' + 'facilities/';
 
 config.USE_AUTH = true;
 

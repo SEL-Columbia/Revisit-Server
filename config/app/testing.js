@@ -8,7 +8,7 @@
 console.log('LOADING TESTING CONFIG');
 
 var _ = require('lodash-node'),
-	def_config = require('./default_config');
+    def_config = require('./default_config');
 
 var config = {};
 
@@ -18,8 +18,8 @@ config.port = '1337';
 config.db_loc = config.host + '/test';
 
 // staging serves the site on port 80 via nginx
-config.site = "http://" + config.host;
-config.site += config.prePath + "/" + "facilities/";
+config.site = 'http://' + config.host;
+config.site += config.prePath + '/' + 'facilities/';
 
 config.USE_AUTH = false;
 
