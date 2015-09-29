@@ -92,8 +92,8 @@ SiteModel.plugin(rollback, {
 
 SiteModel.plugin(quadtree, {
     index: true,
-    threshold: 1000,
-    seperation: 0.05,
+    threshold: 2000,
+    seperation: 0.2,
     compress: true,
     collectionName: 'facilities'
 });

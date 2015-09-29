@@ -29,7 +29,7 @@ function isEmpty(sites, hidden_str) {
         transform: true
     }));
 
-    if (a_site === "{}") {
+    if (a_site === '{}') {
         return true;
     }
 
@@ -69,10 +69,10 @@ function getQuery(req, showDeleted) {
         if (latLngBox.length !== 4)
             return null;
 
-        req.params.nlat = latLngBox[0]; 
-        req.params.wlng = latLngBox[1]; 
-        req.params.slat = latLngBox[2]; 
-        req.params.elng = latLngBox[3]; 
+        req.params.nlat = latLngBox[0];
+        req.params.wlng = latLngBox[1];
+        req.params.slat = latLngBox[2];
+        req.params.elng = latLngBox[3];
 
         query = within(req, showDeleted);
     }
@@ -81,8 +81,8 @@ function getQuery(req, showDeleted) {
 }
 
 function near(req, showDeleted) {
-    req.log.info("GET near facility REQUEST", {
-        "req": req.params
+    req.log.info('GET near facility REQUEST', {
+        'req': req.params
     });
 
     var lat = req.params.lat;
@@ -104,13 +104,13 @@ function near(req, showDeleted) {
         return;
     }
 
-    // query obj 
+    // query obj
     return SiteModel.findNear(lng, lat, rad, earthRad, showDeleted);
 }
 
 function within(req, showDeleted) {
-    req.log.info("GET within facility REQUEST", {
-        "req": req.params
+    req.log.info('GET within facility REQUEST', {
+        'req': req.params
     });
 
     var slat = req.params.slat;
@@ -135,22 +135,22 @@ function within(req, showDeleted) {
  **
  */
 function sites(req, res, next) {
-    req.log.info("GET all facilities REQUEST", {
-        "req": req.params
+    req.log.info('GET all facilities REQUEST', {
+        'req': req.params
     });
 
     var showDeleted = typeof req.params.showDeleted === 'string';
     var query = getQuery(req, showDeleted);
 
     if (!query) {
-        responses.apiBadRequest(res, "Please refer to the wiki for a guide on Revisit's API");
+        responses.apiBadRequest(res, 'Please refer to the wiki for a guide on Revisit\'s API');
         return;
     }
 
     // if this is a tree query instead of doing a within
     if  (typeof req.params.compressed === 'string' && typeof req.params.within === 'string') {
-        req.log.info("GET within facilities COMPRESSED REQUEST", {
-            "req": req.params
+        req.log.info('GET within facilities COMPRESSED REQUEST', {
+            'req': req.params
         });
 
         // These fields were filled in by the within query handler
@@ -165,7 +165,7 @@ function sites(req, res, next) {
                 if (err) throw (err);
 
                 var responseBody = {};
-                // Format it similarly to the rest of our api 
+                // Format it similarly to the rest of our api
                 responseBody.count = sites.count;
                 responseBody.facilities = sites;
                 //XXX Note all other query paramters are ignored (fields,=,etc)
@@ -241,8 +241,8 @@ function sites(req, res, next) {
 }
 
 function site(req, res, next) {
-    req.log.info("GET a facility REQUEST", {
-        "req": req.params
+    req.log.info('GET a facility REQUEST', {
+        'req': req.params
     });
 
     var rollback = req.params.rollback;
@@ -280,13 +280,13 @@ function site(req, res, next) {
 
         // rollback
         //} else if (rollback && !isNaN(rollback)) {
-        //    rollback = parseInt(rollback); 
+        //    rollback = parseInt(rollback);
         //    site.rollback(rollback, function(err, history) {
         //        responses.jsonReply(res, site);
         //    });
-        //// revert 
+        //// revert
         //} else if (revert && !isNaN(revert)) {
-        //    revert = parseInt(revert); 
+        //    revert = parseInt(revert);
         //    site.revert(revert, function(err, history) {
         //        responses.jsonReply(res, site);
         //    });
@@ -300,8 +300,8 @@ function site(req, res, next) {
 }
 
 function update(req, res, next) {
-    req.log.info("PUT update facility REQUEST", {
-        "req": req.params
+    req.log.info('PUT update facility REQUEST', {
+        'req': req.params
     });
 
     var updateDeleted = typeof req.params.showDeleted === 'string';
@@ -314,7 +314,7 @@ function update(req, res, next) {
     if (!success && (Object.keys(req.params).length < 2)) {
         // No longer shutdown updates for having a few bad fields
         return responses.apiBadRequest(res,
-            "Refer to API for allowed update fields.");
+            'Refer to API for allowed update fields.');
     }
 
     SiteModel.updateById(id, req.params, updateDeleted, function(err, site) {
@@ -331,16 +331,16 @@ function update(req, res, next) {
 }
 
 function add(req, res, next) {
-    req.log.info("POST add facility REQUEST", {
-        "req": req.params
+    req.log.info('POST add facility REQUEST', {
+        'req': req.params
     });
 
-    // branching on bulk now 
+    // branching on bulk now
     if (typeof req.params.bulk === 'string') {
         // JSON post
         if (req.body && req.body.facilities) {
             bulk(req,res,next);
-        
+
         // File upload
         } else if (req.files)  {
             bulkFile(req, res, next);
@@ -348,7 +348,7 @@ function add(req, res, next) {
         //Trigger happy api user
         } else {
             responses.apiBadRequest(res,
-                "Refer to API for required fields.");
+                'Refer to API for required fields.');
         }
 
         return;
@@ -372,7 +372,7 @@ function add(req, res, next) {
         if (err) {
             req.log.error(err);
             return responses.apiBadRequest(res,
-                "Refer to API for required fields.");
+                'Refer to API for required fields.');
         }
 
         // write to db
@@ -398,9 +398,9 @@ function add(req, res, next) {
 }
 
 function bulk(req, res, next) {
-    req.log.info("POST add MULTIPLE facility REQUEST (from json)", {
-        "req": req.params,
-        "req.body": req.body
+    req.log.info('POST add MULTIPLE facility REQUEST (from json)', {
+        'req': req.params,
+        'req.body': req.body
     });
 
     // body can be undefined ... strange this is the only place where its possible
@@ -473,26 +473,26 @@ function bulk(req, res, next) {
         });
 
         var response = {
-            "received": num_supplied,
-            "inserted": num_inserted,
-            "failed": num_failed
+            'received': num_supplied,
+            'inserted': num_inserted,
+            'failed': num_failed
         };
 
-        if (typeof debug === "string") {
+        if (typeof debug === 'string') {
             response.errors = errors;
         }
 
         // bulkIns crashes if nothing is added to op
         if (result.length === 0) {
             responses.jsonReply(res, response, 200);
-            return next(); 
+            return next();
         }
 
         // At this point a subset of the data will be recorded
         bulkIns.execute(function(err, writeResult) {
             if (err) {
                 // New to mongo 3, the err status gets duplicated here and in write errors
-                if (!(err.errmsg.indexOf("11000") > -1)) 
+                if (!(err.errmsg.indexOf('11000') > -1))
                     return responses.internalErrorReply(res, err);
             }
 
@@ -502,14 +502,14 @@ function bulk(req, res, next) {
                 //TODO: Error parsing is ridiculous, errmsg === message, op === facility?
                 writeErrors.forEach(function(err) {
                     // handle id collisions seperatly, continue with regular
-                    // output but record errors 
+                    // output but record errors
                     if (err.code === 11000) {
                         // Format it to how regular mongoose errors look
-                        if (typeof debug === "string") {
+                        if (typeof debug === 'string') {
                             var Err = new Error();
                             err = err.toJSON();
-                            Err.message = "Duplicate key found";
-                            Err.name = "DuplicateKeyError";
+                            Err.message = 'Duplicate key found';
+                            Err.name = 'DuplicateKeyError';
                             Err.errors = err.errmsg;
                             Err.facility = err.op;
                             response.errors.push(Err);
@@ -520,7 +520,7 @@ function bulk(req, res, next) {
                         return responses.internalErrorReply(res, err);
                     }
                 });
-            } 
+            }
 
             response.inserted += writeResult.nInserted;
             response.failed += writeResult.getWriteErrorCount();
@@ -533,14 +533,14 @@ function bulk(req, res, next) {
 }
 
 function bulkFile(req, res, next) {
-    req.log.info("POST add MULTIPLE facility REQUEST (from file)", {
-        "req": req.files
+    req.log.info('POST add MULTIPLE facility REQUEST (from file)', {
+        'req': req.files
     });
 
     // body can be undefined ... strange this is the only place where its possible
     if (!req.files || typeof req.files.facilities === 'undefined') {
         return responses.apiBadRequest(res);
-    }    
+    }
 
     // read file, validate, pass to bulk insert
     fs.readFile(req.files.facilities.path, 'utf8', function(err, facility_string) {
@@ -562,7 +562,7 @@ function bulkFile(req, res, next) {
 
         } catch (err) {
             // assume that jsonparse failed due to user error
-            return responses.apiBadRequest(res, "JSON is malformed.");
+            return responses.apiBadRequest(res, 'JSON is malformed.');
         }
     });
 
@@ -571,8 +571,8 @@ function bulkFile(req, res, next) {
 }
 
 function del(req, res, next) {
-    req.log.info("DEL delete facility REQUEST", {
-        "req": req.params
+    req.log.info('DEL delete facility REQUEST', {
+        'req': req.params
     });
 
     var id = req.params[0];
@@ -585,8 +585,8 @@ function del(req, res, next) {
         }
 
         responses.jsonReply(res, {
-            "id": id,
-            "message": "Resource deleted"
+            'id': id,
+            'message': 'Resource deleted'
         });
 
     });
@@ -594,21 +594,21 @@ function del(req, res, next) {
     return next();
 }
 
-//TODO: Refactor, does too much work 
+//TODO: Refactor, does too much work
 function uploadPhoto(req, res, next) {
-    req.log.info("POST photo to facility REQUEST", {
-        "req": req.params,
-        "files": req.files
+    req.log.info('POST photo to facility REQUEST', {
+        'req': req.params,
+        'files': req.files
     });
 
     var siteId = req.params.id || null;
     // if no sideId is included in request, error
     if (!siteId) {
-        return next(new restify.MissingParameterError("The required siteId parameter is missing."));
+        return next(new restify.MissingParameterError('The required siteId parameter is missing.'));
     }
 
     if (!req.files || typeof req.files.photo === 'undefined') {
-        return next(new restify.MissingParameterError("The required photo parameter is missing."));
+        return next(new restify.MissingParameterError('The required photo parameter is missing.'));
     }
 
     // make sure the id is associated with a known Site
@@ -628,7 +628,7 @@ function uploadPhoto(req, res, next) {
             }
 
             // excuse the dir hack
-            var rootPath = __dirname + "/../public/sites/photos",
+            var rootPath = __dirname + '/../public/sites/photos',
                 siteDir = siteId,
                 filePath = req.files.photo.name,
                 fullPath = rootPath + '/' + siteDir + '/' + filePath;
@@ -659,7 +659,7 @@ function uploadPhoto(req, res, next) {
 
                         }
 
-                        //log.debug(">>> photo ind:", index, site.properties.photoUrls.indexOf(url));
+                        //log.debug('>>> photo ind:', index, site.properties.photoUrls.indexOf(url));
                         if (index != -1) {
                             site.properties.photoUrls.splice(index, 1, url);
                         } else if (site.properties.photoUrls.indexOf(url) == -1) {
