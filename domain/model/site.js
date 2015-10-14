@@ -35,7 +35,8 @@ var SiteModel = new Schema({
         index: true
     },
     coordinates: {
-        type: [Number]
+        type: [Number],
+        required: true
     },
     identifiers: [{
         agency: {
@@ -68,7 +69,8 @@ var SiteModel = new Schema({
     }},
     // remove the unnecessary 'id' virtual field that mongoose adds
     {
-        id: false
+        id: false,
+        strict: false
     }
 );
 
@@ -82,6 +84,12 @@ SiteModel.index({
 // (though if we're going to do that, it might be worthwhile using ElasticSearch)
 SiteModel.index({
     name: 'text'
+});
+
+// Compound index on createdAt and updatedAt
+SiteModel.index({
+    'createdAt': 1,
+    'updatedAt': 1
 });
 
 //SiteModel.plugin(rollback,  {index: true, collectionName: 'facilities', conn: dbconf.uri });

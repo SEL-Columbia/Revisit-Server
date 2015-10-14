@@ -9,7 +9,7 @@ var exec = require('child_process').exec;
 var server = require('./../server.js').server;
 var sites = require('./fixturez.js');
 var SiteModel = require('../domain/model/site.js');
-var ObjectId = require("mongoose").Types.ObjectId;
+var ObjectId = require('mongoose').Types.ObjectId;
 var UserModel = require('../domain/model/user.js');
 
 describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
@@ -17,11 +17,11 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
     var the_uuid = null;
     var the_visits = null;
     before(function(done) {
-       done(); 
+       done();
     });
 
     beforeEach(function(done) {
-        
+
         // wipe db
         SiteModel.find({}).remove(function(err, result) {
             // load db
@@ -43,7 +43,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                         UserModel.find({}).remove(function(err, result) {
                             if (err) throw err;
 
-                            UserModel.addUser("Vijay", "test", "admin", function(success) {
+                            UserModel.addUser('Vijay', 'test', 'admin', function(success) {
                                 assert(success);
                                 done();
                             });
@@ -57,7 +57,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
     describe('#stats endpoint', function(done) {
         it('should return stats for db', function(done) {
             request(server)
-                .get(conf.prePath + "/facilities/stats.json")
+                .get(conf.prePath + '/facilities/stats.json')
                 .expect(200)
                 .end(function(err, res) {
                     if (err) {
@@ -70,7 +70,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     res.body.visits.should.match(481);
                     res.body.lastUpdate.should.be.ok;
                     ((new Date(res.body.lastUpdate)).toString())
-                        .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
+                        .should.match((new Date('Oct' + 30 + ' ' + 2014)).toString())
                     done();
 
                 });
@@ -83,7 +83,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     if (err) throw err;
 
                     request(server)
-                        .get(conf.prePath + "/facilities/stats.json")
+                        .get(conf.prePath + '/facilities/stats.json')
                         .expect(200)
                         .end(function(err, res) {
                             if (err) {
@@ -102,14 +102,14 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
             })
         });
 
-        it('should return this facility as last updated', 
+        it('should return this facility as last updated',
         function(done) {
-            var new_name = "" + Math.random();
+            var new_name = '' + Math.random();
             request(server)
-                .put(conf.prePath + "/facilities/" + the_uuid + ".json")
-                .send({"name": new_name})
+                .put(conf.prePath + '/facilities/' + the_uuid + '.json')
+                .send({'name': new_name})
                 .expect('Content-Type', /json/)
-                .expect(200) 
+                .expect(200)
                 .end(function(err, res) {
                     if (err) {
                         throw err;
@@ -117,7 +117,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
                     var date_str = (new Date(res.body.updatedAt)).toString();
                     request(server)
-                        .get(conf.prePath + "/facilities/stats.json")
+                        .get(conf.prePath + '/facilities/stats.json')
                         .expect(200)
                         .end(function(err, res) {
                             if (err) {
@@ -138,11 +138,11 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
         });
 
         it('should increase the user count by one', function(done) {
-            UserModel.addUser("Bob", "test", "simple", function(success) {
+            UserModel.addUser('Bob', 'test', 'simple', function(success) {
                 assert(success);
                 // second request
                 request(server)
-                .get(conf.prePath + "/facilities/stats.json")
+                .get(conf.prePath + '/facilities/stats.json')
                 .expect(200)
                 .end(function(err, res) {
                     if (err) {
@@ -155,7 +155,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     res.body.visits.should.match(481);
                     res.body.lastUpdate.should.be.ok;
                     ((new Date(res.body.lastUpdate)).toString())
-                        .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
+                        .should.match((new Date('Oct' + 30 + ' ' + 2014)).toString())
                     done();
 
                 });
@@ -165,7 +165,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
         it('should decrease the user count by one', function(done) {
              UserModel.deleteByName('Vijay', function() {
                 request(server)
-                .get(conf.prePath + "/facilities/stats.json")
+                .get(conf.prePath + '/facilities/stats.json')
                 .expect(200)
                 .end(function(err, res) {
                     if (err) {
@@ -178,7 +178,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     res.body.visits.should.match(481);
                     res.body.lastUpdate.should.be.ok;
                     ((new Date(res.body.lastUpdate)).toString())
-                        .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
+                        .should.match((new Date('Oct' + 30 + ' ' + 2014)).toString())
                     done();
 
                 });
@@ -187,10 +187,10 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should increase the facility count by one', function(done) {
             request(server)
-                .post(conf.prePath + "/facilities.json")
-                .send({"name": "Toronto", "properties": {"sector": "test"}})
+                .post(conf.prePath + '/facilities.json')
+                .send({'name': 'Toronto', 'properties': {'sector': 'test'}, 'coordinates': [0,0]})
                 .expect('Content-Type', /json/)
-                .expect(201) 
+                .expect(201)
                 .end(function(err, res) {
                     if (err) {
                         throw err;
@@ -198,7 +198,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
                     var date_str = (new Date(res.body.updatedAt)).toString();
                     request(server)
-                        .get(conf.prePath + "/facilities/stats.json")
+                        .get(conf.prePath + '/facilities/stats.json')
                         .expect(200)
                         .end(function(err, res) {
                             if (err) {
@@ -220,16 +220,16 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should decrease the facility count by one', function(done) {
             request(server)
-                .del(conf.prePath + "/facilities/" + the_uuid + ".json")
+                .del(conf.prePath + '/facilities/' + the_uuid + '.json')
                 .expect('Content-Type', /json/)
-                .expect(200) 
+                .expect(200)
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
 
                     request(server)
-                        .get(conf.prePath + "/facilities/stats.json")
+                        .get(conf.prePath + '/facilities/stats.json')
                         .expect(200)
                         .end(function(err, res) {
                             if (err) {
@@ -242,7 +242,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                             res.body.visits.should.match(481 - the_visits);
                             res.body.lastUpdate.should.be.ok;
                             ((new Date(res.body.lastUpdate)).toString())
-                                .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
+                                .should.match((new Date('Oct' + 30 + ' ' + 2014)).toString())
                             done();
 
                         });
@@ -251,16 +251,16 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
 
         it('should decrease the facility count by one but still show everything in stats', function(done) {
             request(server)
-                .del(conf.prePath + "/facilities/" + the_uuid + ".json")
+                .del(conf.prePath + '/facilities/' + the_uuid + '.json')
                 .expect('Content-Type', /json/)
-                .expect(200) 
+                .expect(200)
                 .end(function(err, res) {
                     if (err) {
                         throw err;
                     }
 
                     request(server)
-                        .get(conf.prePath + "/facilities/stats.json?showDeleted")
+                        .get(conf.prePath + '/facilities/stats.json?showDeleted')
                         .expect(200)
                         .end(function(err, res) {
                             if (err) {
@@ -273,7 +273,7 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                             res.body.visits.should.match(481);
                             res.body.lastUpdate.should.be.ok;
                             ((new Date(res.body.lastUpdate)).toString())
-                                .should.match((new Date("Oct" + 30 + " " + 2014)).toString())
+                                .should.match((new Date('Oct' + 30 + ' ' + 2014)).toString())
                             done();
 
                         });
