@@ -207,7 +207,8 @@ describe('Authentication Tests', function(done) {
                     "name": "Toronto",
                     "properties": {
                         "sector": "test"
-                    }
+                    },
+                    "coordinates": [0,0]
                 })
                 .expect('Content-Type', /json/)
                 .expect(201)
@@ -232,7 +233,8 @@ describe('Authentication Tests', function(done) {
                     "name": "Toronto",
                     "properties": {
                         "sector": "test"
-                    }
+                    },
+                    "coordinates": [0,0]
                 })
                 .expect('Content-Type', /json/)
                 .expect(401)
@@ -262,7 +264,8 @@ describe('Authentication Tests', function(done) {
                         "name": "Toronto",
                         "properties": {
                             "sector": "test"
-                        }
+                        },
+                        "coordinates": [0,0]
                     })
                     .expect('Content-Type', /json/)
                     .expect(201)
