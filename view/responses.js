@@ -19,6 +19,7 @@ var jsonReply = function(res, body, code) {
 
 // errors
 var internalErrorReply = function(res, err) {
+    console.log(err);
     res.send(new restify.RestError({
         statusCode: 500,
         restCode: "500 Internal Server Error",
