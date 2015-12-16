@@ -10,7 +10,7 @@ mongodump -u #{fetch:db_user} -p #{fetch:db_pass} -o "$FILE"
 tar -zcf "$FILETAR" "$FILE"
 rm -rf $FILE
 
-# remove snapshots older than 30 days
-find *.tar.gz -mtime +30 -exec rm {} \\;
+# remove snapshots older than 7 days
+find *.tar.gz -mtime +7 -exec rm {} \\;
 EOD
 }
