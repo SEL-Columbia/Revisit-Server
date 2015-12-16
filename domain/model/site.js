@@ -8,6 +8,27 @@ var conf = require('./../../config/app/config.js'),
     log = require('../../core/logger').log;
 
 var Schema = mongoose.Schema;
+
+var Properties = new Schema({
+    type: {
+        type: String
+    },
+    sector: {
+        type: String,
+        required: true,
+        index: true
+    },
+    visits: {
+        type: Number,
+        index: true
+    },
+    photoEndpoint: String,
+    photoUrls: [String]
+}, {
+    id: false,
+    strict: false
+});
+
 var SiteModel = new Schema({
     name: {
         type: String,
@@ -51,26 +72,11 @@ var SiteModel = new Schema({
             type: String
         }
     }],
-    properties: {
-        type: {
-            type: String
-        },
-        sector: {
-            type: String,
-            required: true,
-            index: true
-        },
-        visits: {
-            type: Number,
-            index: true
-        },
-        photoEndpoint: String,
-        photoUrls: [String]
-    }},
+    properties: Properties
+},
     // remove the unnecessary 'id' virtual field that mongoose adds
     {
-        id: false,
-        strict: false
+        id: false
     }
 );
 
@@ -136,9 +142,21 @@ SiteModel.set('toJSON', {
             });
         }
 
+        // remove properties _id
+        // delete obj.properties._id;
+
         delete obj._id;
         delete obj.__v;
         delete obj._deleted; //XXX: will need to be shown if asked? maybe?
+        return obj;
+    }
+});
+
+// Configure toJSON output
+Properties.set('toJSON', {
+    transform: function(doc) {
+        var obj = doc.toObject();
+        delete obj._id;
         return obj;
     }
 });

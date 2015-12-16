@@ -942,6 +942,21 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                 });
         });
 
+        it('should fail to create without sector field passed in',
+        function(done) {
+            request(server)
+                .post(conf.prePath + '/facilities.json')
+                .send({'name': 'Toronto'})
+                .expect('Content-Type', /json/)
+                .expect(400)
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.code.should.match('400 Bad Request');
+                    done();
+                });
+        });
 
         it('should fail to create without sector field passed in',
         function(done) {
@@ -973,6 +988,38 @@ describe('Facility ADD/UPDATE/DELETE/GET API routes', function(done) {
                     done();
                 });
 
+        });
+
+        it('should ignore any extra fields that are not in the Site schema', function(done) {
+            request(server)
+                .post(conf.prePath + '/facilities.json')
+                .send({'name': 'Toronto', 'test': 'test', 'properties': {'sector': 'test'},
+                    'coordinates': [0,0]})
+                .expect('Content-Type', /json/)
+                .expect(201)
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.should.not.have.property('test');
+                    done();
+                });
+        });
+
+        it('should allow extra fields on the properties object', function(done) {
+            request(server)
+                .post(conf.prePath + '/facilities.json')
+                .send({'name': 'Toronto', 'properties': {'sector': 'test', 'test': 'test'},
+                    'coordinates': [0,0]})
+                .expect('Content-Type', /json/)
+                .expect(201)
+                .end(function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.properties.should.have.property('test');
+                    done();
+                });
         });
     });
 
