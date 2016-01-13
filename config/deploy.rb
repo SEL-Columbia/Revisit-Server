@@ -342,11 +342,19 @@ before 'deploy', 'setup:servercheck'
 
 before 'deploy', 'node:stop'
 
-# After the app is published, build the index
-after 'deploy:published', 'setup:db:build_index'
+# 2016-01-13 - The quadtree index should NOT need to get rebuilt after every deployment
+# In order to manually rebuild the index, run the capistrano task:
+#
+# e.g.
+# cap staging setup:db:build_index
+#
+# Note that building the quadtree index tasks a long time (≈0.5 hours at the time of this writing).
+#
+# If this architecture is to be used going forward, it may be good to consider performing this process
+# offline or on a different box, then replicating the data back to the primary mongo instance
 
-# After the index is built, restart the app
-after 'setup:db:build_index', 'deploy:restart'
+# After the app is published, restart the node server
+after 'deploy:published', 'deploy:restart'
 
 
 # Before restarting the server, make sure the upstart config is present

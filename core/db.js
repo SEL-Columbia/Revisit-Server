@@ -22,16 +22,20 @@ var connect = function() {
 
 
 // build the quadtree index
-// XXX - This shouldn't actually start an index build, since the index should be built as
-// an independent process via bin/build-quadtree-index.js script.
-var ts = Date.now();
-SiteModel.initTree()
-    .then(
-        function() {
-            log.info('Quadtree index built in ' + (Date.now() - ts) + 'ms');
-        },
-        function() {
-            log.error('Error building quadtree index');
-        });
+// XXX - This shouldn't be run automatically whenever the app starts up, since the index should be built as
+// an independent process via bin/build-quadtree-index.js script. In order to force rebuilding the index,
+// specify so in the db config.
+if (conf.buildQuadtreeIndex) {
+    log.info('-- BUILDING QUADTREE INDEX -- ');
+    var ts = Date.now();
+    SiteModel.initTree()
+        .then(
+            function() {
+                log.info('Quadtree index built in ' + (Date.now() - ts) + 'ms');
+            },
+            function() {
+                log.error('Error building quadtree index');
+            });
+}
 
 exports.connect = connect;
