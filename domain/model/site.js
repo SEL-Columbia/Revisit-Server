@@ -25,7 +25,7 @@ var Properties = new Schema({
     photoEndpoint: String,
     photoUrls: [String]
 }, {
-    id: false,
+    _id: false,
     strict: false
 });
 
@@ -148,15 +148,6 @@ SiteModel.set('toJSON', {
         delete obj._id;
         delete obj.__v;
         delete obj._deleted; //XXX: will need to be shown if asked? maybe?
-        return obj;
-    }
-});
-
-// Configure toJSON output
-Properties.set('toJSON', {
-    transform: function(doc) {
-        var obj = doc.toObject();
-        delete obj._id;
         return obj;
     }
 });
