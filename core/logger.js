@@ -4,7 +4,7 @@ var bunyan = require('bunyan'),
 
 console.log(conf);
 
-// logger 
+// logger
 function init() {
     var log = bunyan.createLogger({
         name: conf.app_name,
@@ -24,6 +24,10 @@ function init() {
             {
                 level: 'debug',
                 stream: process.stdout
+            },
+            {
+                level: 'debug',
+                path: conf.log_root + conf.app_name + '-debug.log'  // log DEBUG and above to a file
             }
         ]
     });
